@@ -1,4 +1,4 @@
-package com.ycngmn.nobook.utils
+package com.ycngmn.nobook.utils.styling
 
 // context : https://stackoverflow.com/a/73960585/11724248
 val fixWebViewVideoPosterScript = """

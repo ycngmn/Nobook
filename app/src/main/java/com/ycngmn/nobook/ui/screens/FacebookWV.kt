@@ -16,9 +16,11 @@ import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
-import com.ycngmn.nobook.utils.fixWebViewVideoPosterScript
-import com.ycngmn.nobook.utils.hideOpenWithAppBannerScript
+import com.ycngmn.nobook.utils.styling.fixWebViewVideoPosterScript
+import com.ycngmn.nobook.utils.styling.hideOpenWithAppBannerScript
 import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
+import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
+import com.ycngmn.nobook.utils.styling.holdEffectScript
 import com.ycngmn.nobook.utils.zoomDisableScript
 
 
@@ -36,7 +38,9 @@ fun FacebookWebView() {
                 hideOpenWithAppBannerScript +
                 zoomDisableScript +
                 fixWebViewVideoPosterScript +
-                sponsoredAdBlockerScript
+                sponsoredAdBlockerScript +
+                holdEffectScript +
+                enhanceLoadingOverlayScript
             )
             isLoading = false
         }
@@ -64,12 +68,17 @@ fun FacebookWebView() {
                 loadWithOverviewMode = false
                 useWideViewPort = false
                 setSupportZoom(false)
+
+                javaScriptCanOpenWindowsAutomatically = true
+                allowFileAccess = true
+                allowContentAccess = true
             }
 
             webView.apply {
                 // Hide scrollbars
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
+
             }
 
             // Save cookies to retain logins.

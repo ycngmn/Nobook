@@ -1,5 +1,6 @@
-package com.ycngmn.nobook.utils
+package com.ycngmn.nobook.utils.styling
 
+// On facebook mobile, there is a sticky banner at the bottom of the screen that asks you to open its app.
 val hideOpenWithAppBannerScript = """
     (function() {
         const style = document.createElement('style');
