@@ -1,17 +1,10 @@
 package com.ycngmn.nobook.utils.styling
 
-// On facebook mobile, there is a sticky banner at the bottom of the screen that asks you to open its app.
-val hideOpenWithAppBannerScript = """
-    (function() {
-        const style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = `
-            div.fixed-container.bottom {
-                display: none !important;
-                visibility: hidden !important;
-                height: 0 !important;
-            }
-        `;
-        document.head.appendChild(style);
-    })();
-""".trimIndent()
+// On facebook mobile, there is a sticky banner at the bottom of the screen.
+const val HIDE_OPEN_WITH_APP_BANNER_SCRIPT = """
+        (function() {
+            const style = document.createElement('style');
+            style.innerHTML = 'div.fixed-container.bottom[style*="height:67px"] { display: none !important; }';
+            document.head.appendChild(style);
+        })();
+        """
