@@ -47,7 +47,7 @@ fun SplashLoading(loadingState: LoadingState) {
                     Text(
                         text = "•",
                         fontSize = 40.sp,
-                        color = if (progress > it*0.20) Color.White else Color.Gray
+                        color = if (progress >= it*0.20) Color.White else Color.Gray
                     )
                 }
             }
