@@ -22,7 +22,7 @@ import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.theme.GoogleDark
 
 @Composable
-fun Loading(loadingState: LoadingState) {
+fun SplashLoading(loadingState: LoadingState) {
 
     Column (
         modifier = Modifier.background(GoogleDark).fillMaxSize(),

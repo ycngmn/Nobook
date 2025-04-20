@@ -1,9 +1,7 @@
 package com.ycngmn.nobook.ui.screens
 
-import android.annotation.SuppressLint
 import android.view.View
 import android.webkit.CookieManager
-import android.webkit.WebSettings
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,11 +10,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
-import com.ycngmn.nobook.utils.styling.fixWebViewVideoPosterScript
+import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
 import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
 import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
@@ -24,13 +23,13 @@ import com.ycngmn.nobook.utils.styling.holdEffectScript
 import com.ycngmn.nobook.utils.styling.removeBottomPaddingScript
 import com.ycngmn.nobook.utils.zoomDisableScript
 
-
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun FacebookWebView() {
 
+    val context = LocalContext.current
     val state = rememberWebViewState("https://m.facebook.com")
-    val navigator = rememberWebViewNavigator()
+    val navigator = rememberWebViewNavigator(
+        requestInterceptor = ExternalRequestInterceptor(context = context))
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(state.loadingState) {
@@ -38,7 +37,6 @@ fun FacebookWebView() {
             navigator.evaluateJavaScript(
                 HIDE_OPEN_WITH_APP_BANNER_SCRIPT +
                 zoomDisableScript +
-                fixWebViewVideoPosterScript +
                 sponsoredAdBlockerScript +
                 holdEffectScript +
                 enhanceLoadingOverlayScript +
@@ -49,50 +47,35 @@ fun FacebookWebView() {
     }
 
     if (isLoading)
-        Loading(state.loadingState)
+        SplashLoading(state.loadingState)
+
+    state.webSettings.apply {
+        isJavaScriptEnabled = true
+        supportZoom = false
+
+        androidWebSettings.apply {
+            hideDefaultVideoPoster = true
+            allowFileAccess = true
+            mediaPlaybackRequiresUserGesture = false
+        }
+    }
 
     WebView(
         modifier = Modifier.fillMaxSize(),
         state = state,
         navigator = navigator,
         onCreated = { webView ->
-            webView.settings.apply {
-
-                javaScriptEnabled = true
-                domStorageEnabled = true
-                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-
-                // to support video auto-play.
-                mediaPlaybackRequiresUserGesture = false
-
-                // Disable zooming
-                builtInZoomControls = false
-                displayZoomControls = false
-                loadWithOverviewMode = false
-                useWideViewPort = false
-                setSupportZoom(false)
-
-                javaScriptCanOpenWindowsAutomatically = true
-                allowFileAccess = true
-                allowContentAccess = true
-
-
-            }
+            // Save cookies to retain logins and stuff.
+            val cookieManager = CookieManager.getInstance()
+            cookieManager.setAcceptCookie(true)
+            cookieManager.setAcceptThirdPartyCookies(webView, true)
 
             webView.apply {
                 // Hide scrollbars
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
                 setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                //isDebugInspectorInfoEnabled = true
             }
-
-            // Save cookies to retain logins.
-            val cookieManager = CookieManager.getInstance()
-            cookieManager.setAcceptCookie(true)
-            cookieManager.setAcceptThirdPartyCookies(webView, true)
-
-
         }
     )
 }

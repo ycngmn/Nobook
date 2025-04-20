@@ -1,8 +1,8 @@
 package com.ycngmn.nobook.utils
 
-val sponsoredAdBlockerScript = """
+const val sponsoredAdBlockerScript =
+    """
     (function() {
-        // list of sponsored text variations
         const sponsoredTexts = [
             "Sponsored", "Gesponsert", "Sponsorlu", "Sponsorowane",
             "Ispoonsara godhameera", "Geborg", "Bersponsor", "Ditaja",
@@ -21,20 +21,19 @@ val sponsoredAdBlockerScript = """
             "ကြော်ငြာ ကြော်ငြာ", "ឧបត្ថម្ភ ឧបត្ថម្ភ ឧបត្ថម្ភ", "광고",
             "贊助", "赞助内容", "広告", "സ്‌പോൺസർ ചെയ്‌തത്"
         ];
-    
-     
+
         const sponsoredRegex = new RegExp(sponsoredTexts.join('|'), 'i');
     
         function blockSponsoredContent(config = {}) {
             const {
-                selector = 'div', // Default selector
-                textSelector = 'div[data-mcomponent="TextArea"] .native-text > span', // Default text selector
-                hideMethod = 'hide', // 'hide' (display: none) or 'reposition' (CSS positioning)
-                validateContainer = () => true // Optional validation function for containers
+                selector = 'div', 
+                textSelector = 'div[data-mcomponent="TextArea"] .native-text > span', 
+                hideMethod = 'hide', 
+                validateContainer = () => true 
             } = config;
     
             const containers = document.querySelectorAll(selector);
-    
+ 
             containers.forEach(container => {
                 const spans = container.querySelectorAll(textSelector);
                 for (const span of spans) {
@@ -75,4 +74,4 @@ val sponsoredAdBlockerScript = """
         const observer = new MutationObserver(blockAllAds);
         observer.observe(document.body, { childList: true, subtree: true });
     })();
-    """.trimIndent()
+    """
