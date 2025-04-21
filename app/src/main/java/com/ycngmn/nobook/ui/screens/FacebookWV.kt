@@ -2,7 +2,6 @@ package com.ycngmn.nobook.ui.screens
 
 import android.view.View
 import android.webkit.CookieManager
-import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +20,7 @@ import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
 import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
 import com.ycngmn.nobook.utils.styling.holdEffectScript
 import com.ycngmn.nobook.utils.styling.removeBottomPaddingScript
+import com.ycngmn.nobook.utils.styling.stickyTopNavbarScript
 import com.ycngmn.nobook.utils.zoomDisableScript
 
 
@@ -33,8 +33,7 @@ fun FacebookWebView() {
         requestInterceptor = ExternalRequestInterceptor(context = context))
 
     val isLoading = remember { mutableStateOf(true) }
-    val isError = state.errorsForCurrentRequest.isNotEmpty()
-    val hasShownErrorToast = remember { mutableStateOf(false) }
+    val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
     LaunchedEffect(state.loadingState) {
         if (state.loadingState is LoadingState.Finished && !isError) {
@@ -44,7 +43,8 @@ fun FacebookWebView() {
                 sponsoredAdBlockerScript +
                 holdEffectScript +
                 enhanceLoadingOverlayScript +
-                removeBottomPaddingScript
+                removeBottomPaddingScript +
+                stickyTopNavbarScript
             )
             isLoading.value = false
         }
@@ -61,15 +61,9 @@ fun FacebookWebView() {
         }
     }
 
-    if (isError) {
-        if (isLoading.value) {
-            NetworkErrorDialog(context)
-            return
-        } else if (!hasShownErrorToast.value) {
-            Toast.makeText(context, "Connection error", Toast.LENGTH_LONG).show()
-            hasShownErrorToast.value = true
-        }
-
+    if (isError && isLoading.value) {
+        NetworkErrorDialog(context)
+        return
     }
 
     if (isLoading.value)
@@ -86,11 +80,12 @@ fun FacebookWebView() {
             cookieManager.setAcceptThirdPartyCookies(webView, true)
 
             webView.apply {
+                //isDebugInspectorInfoEnabled = true
+
                 // Hide scrollbars
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
             }
         }
     )
