@@ -9,12 +9,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
+import com.ycngmn.nobook.utils.getPlatformWebViewParams
 import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
 import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
 import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
@@ -28,9 +30,11 @@ import com.ycngmn.nobook.utils.zoomDisableScript
 fun FacebookWebView() {
 
     val context = LocalContext.current
+
     val state = rememberWebViewState("https://m.facebook.com")
     val navigator = rememberWebViewNavigator(
-        requestInterceptor = ExternalRequestInterceptor(context = context))
+        requestInterceptor = ExternalRequestInterceptor(context = context)
+        )
 
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
@@ -73,6 +77,7 @@ fun FacebookWebView() {
         modifier = Modifier.fillMaxSize(),
         state = state,
         navigator = navigator,
+        platformWebViewParams = getPlatformWebViewParams(),
         onCreated = { webView ->
             // Save cookies to retain logins and stuff.
             val cookieManager = CookieManager.getInstance()
@@ -80,7 +85,7 @@ fun FacebookWebView() {
             cookieManager.setAcceptThirdPartyCookies(webView, true)
 
             webView.apply {
-                //isDebugInspectorInfoEnabled = true
+                isDebugInspectorInfoEnabled = true
 
                 // Hide scrollbars
                 overScrollMode = View.OVER_SCROLL_NEVER

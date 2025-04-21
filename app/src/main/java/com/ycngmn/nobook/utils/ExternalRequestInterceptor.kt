@@ -17,6 +17,10 @@ class ExternalRequestInterceptor(
         navigator: WebViewNavigator
     ): WebRequestInterceptResult {
 
+        if (request.isRedirect) {
+            return WebRequestInterceptResult.Reject
+        }
+
         val internalLinkRegex = Regex("https?://(www\\.)?facebook\\.com/.*")
 
         return if (internalLinkRegex.containsMatchIn(request.url)) {
