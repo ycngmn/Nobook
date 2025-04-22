@@ -7,7 +7,7 @@ val stickyTopNavbarScript = """
         const tabbar = document.querySelector('div[role="tablist"][data-tti-phase="-1"][data-type="container"][data-mcomponent="MContainer"].m');
         const scroller = document.querySelector('div[data-type="vscroller"][data-is-pull-to-refresh-allowed="true"]');
 
-        const hasLogo = navbar?.querySelector('div[aria-label="Logo Facebook"]');
+        const hasLogo = navbar?.querySelector('div[aria-label*="Facebook"]');
         const hasFeed = tabbar?.querySelector('div[aria-label*="feed"]');
 
         if (hasLogo) Object.assign(navbar.style, {
