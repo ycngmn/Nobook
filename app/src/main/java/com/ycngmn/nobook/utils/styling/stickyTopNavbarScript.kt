@@ -32,7 +32,9 @@ val stickyTopNavbarScript = """
             const offset = (hasLogo ? 43 : 0) + (hasFeed ? 50 : 0);
             const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
             scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
-
+            
+            if (!window.location.href.includes("facebook.com/story.php")) scroller.style.paddingBottom = '0';
+            
             const spinnerContainer = scroller.querySelector('.pull-to-refresh-spinner-container');
             if (spinnerContainer) Object.assign(spinnerContainer.style, {
                 position: 'absolute',

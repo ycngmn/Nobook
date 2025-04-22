@@ -21,7 +21,6 @@ import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
 import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
 import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
 import com.ycngmn.nobook.utils.styling.holdEffectScript
-import com.ycngmn.nobook.utils.styling.removeBottomPaddingScript
 import com.ycngmn.nobook.utils.styling.stickyTopNavbarScript
 import com.ycngmn.nobook.utils.zoomDisableScript
 
@@ -47,7 +46,6 @@ fun FacebookWebView() {
                 sponsoredAdBlockerScript +
                 holdEffectScript +
                 enhanceLoadingOverlayScript +
-                removeBottomPaddingScript +
                 stickyTopNavbarScript
             )
             isLoading.value = false
