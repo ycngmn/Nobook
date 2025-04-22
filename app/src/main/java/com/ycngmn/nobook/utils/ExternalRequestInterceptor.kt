@@ -2,7 +2,6 @@ package com.ycngmn.nobook.utils
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.net.toUri
 import com.multiplatform.webview.request.RequestInterceptor
 import com.multiplatform.webview.request.WebRequest
 import com.multiplatform.webview.request.WebRequestInterceptResult
@@ -17,13 +16,9 @@ class ExternalRequestInterceptor(
         navigator: WebViewNavigator
     ): WebRequestInterceptResult {
 
-        if (request.isRedirect) {
-            return WebRequestInterceptResult.Reject
-        }
-
         val internalLinkRegex = Regex("https?://(www\\.)?facebook\\.com/.*")
 
-        return if (internalLinkRegex.containsMatchIn(request.url)) {
+        return if (internalLinkRegex.containsMatchIn(request.url) && request.isForMainFrame) {
             WebRequestInterceptResult.Allow
         } else {
             openInBrowser(request.url)
@@ -32,7 +27,9 @@ class ExternalRequestInterceptor(
     }
 
     private fun openInBrowser(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-        context.startActivity(intent)
+        try {
+            val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+            context.startActivity(intent)
+        } catch (_: Exception) { }
     }
 }
