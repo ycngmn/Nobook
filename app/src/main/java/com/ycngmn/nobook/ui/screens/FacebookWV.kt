@@ -1,5 +1,6 @@
 package com.ycngmn.nobook.ui.screens
 
+import android.app.Activity
 import android.view.View
 import android.webkit.CookieManager
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,19 +17,21 @@ import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
+import com.ycngmn.nobook.utils.ThemeChangeInterface
 import com.ycngmn.nobook.utils.getPlatformWebViewParams
 import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
 import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
+import com.ycngmn.nobook.utils.styling.colorExtractionScript
 import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
 import com.ycngmn.nobook.utils.styling.holdEffectScript
 import com.ycngmn.nobook.utils.styling.stickyTopNavbarScript
 import com.ycngmn.nobook.utils.zoomDisableScript
 
-
 @Composable
 fun FacebookWebView() {
 
     val context = LocalContext.current
+    val window = (context as Activity).window
 
     val state = rememberWebViewState("https://m.facebook.com")
     val navigator = rememberWebViewNavigator(
@@ -46,19 +49,21 @@ fun FacebookWebView() {
                 sponsoredAdBlockerScript +
                 holdEffectScript +
                 enhanceLoadingOverlayScript +
-                stickyTopNavbarScript
+                stickyTopNavbarScript + colorExtractionScript
             )
+
             isLoading.value = false
         }
     }
 
     state.webSettings.apply {
+
         isJavaScriptEnabled = true
         supportZoom = false
 
         androidWebSettings.apply {
+            domStorageEnabled = true
             hideDefaultVideoPoster = true
-            allowFileAccess = true
             mediaPlaybackRequiresUserGesture = false
         }
     }
@@ -84,7 +89,7 @@ fun FacebookWebView() {
 
             webView.apply {
                 isDebugInspectorInfoEnabled = true
-
+                addJavascriptInterface(ThemeChangeInterface(window), "ThemeBridge")
                 // Hide scrollbars
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isVerticalScrollBarEnabled = false
@@ -92,5 +97,7 @@ fun FacebookWebView() {
             }
         }
     )
-
 }
+
+
+
