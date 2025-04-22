@@ -9,13 +9,14 @@ val zoomDisableScript = """
                 viewport.name = "viewport";
                 document.head.appendChild(viewport);
             }
-            viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+            // allow zooming on photos.
+            if (!window.location.href.includes("facebook.com/photo.php"))
+                viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
         }
-
-        // Initial call
+        
+        
         applyViewportLock();
-
-        // Reapply on mutations (e.g., navigation, SPA behavior)
+       
         const observer = new MutationObserver(() => {
             applyViewportLock();
         });
