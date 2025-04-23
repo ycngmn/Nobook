@@ -28,20 +28,23 @@ import com.ycngmn.nobook.utils.styling.stickyTopNavbarScript
 import com.ycngmn.nobook.utils.zoomDisableScript
 
 @Composable
-fun FacebookWebView() {
+fun FacebookWebView(onOpenMessenger: () -> Unit) {
 
     val context = LocalContext.current
     val window = (context as Activity).window
 
     val state = rememberWebViewState("https://m.facebook.com")
     val navigator = rememberWebViewNavigator(
-        requestInterceptor = ExternalRequestInterceptor(context = context)
-        )
+        requestInterceptor = ExternalRequestInterceptor(context = context) {
+            onOpenMessenger()
+        }
+    )
 
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
     LaunchedEffect(state.loadingState) {
+
         if (state.loadingState is LoadingState.Finished && !isError) {
             navigator.evaluateJavaScript(
                 HIDE_OPEN_WITH_APP_BANNER_SCRIPT +
@@ -49,9 +52,9 @@ fun FacebookWebView() {
                 sponsoredAdBlockerScript +
                 holdEffectScript +
                 enhanceLoadingOverlayScript +
-                stickyTopNavbarScript + colorExtractionScript
+                stickyTopNavbarScript +
+                colorExtractionScript
             )
-
             isLoading.value = false
         }
     }
