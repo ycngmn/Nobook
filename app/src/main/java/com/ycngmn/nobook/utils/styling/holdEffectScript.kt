@@ -41,6 +41,7 @@ val holdEffectScript  = """
         isScrolling = false;
         removeEffects();
         heldElement = e.target;
+        console.log(heldElement);
         holdTimer = setTimeout(() => {
             if (!isScrolling) heldElement.classList.add('fb-hold-effect');
         }, HOLD_DELAY);

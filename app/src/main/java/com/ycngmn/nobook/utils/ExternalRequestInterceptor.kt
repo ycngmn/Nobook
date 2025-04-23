@@ -2,7 +2,6 @@ package com.ycngmn.nobook.utils
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log.wtf
 import android.widget.Toast
 import com.multiplatform.webview.request.RequestInterceptor
 import com.multiplatform.webview.request.WebRequest
@@ -18,9 +17,8 @@ class ExternalRequestInterceptor(
         request: WebRequest,
         navigator: WebViewNavigator
     ): WebRequestInterceptResult {
-        wtf("wtf", "onInterceptUrlRequest: ${request.url}" )
 
-        val internalLinkRegex = Regex("https?://([a-zA-Z0-9-]+\\.)?facebook\\.com/.*")
+        val internalLinkRegex = Regex("https?://(www\\.|m\\.)facebook\\.com/.*")
 
         return if (internalLinkRegex.containsMatchIn(request.url) && request.isForMainFrame) {
             WebRequestInterceptResult.Allow

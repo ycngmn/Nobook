@@ -1,9 +1,11 @@
 package com.ycngmn.nobook.ui.screens
 
+import android.app.Activity
 import android.view.View
 import android.webkit.CookieManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -16,12 +18,14 @@ import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.PopLoadingAnimation
-import com.ycngmn.nobook.utils.getPlatformWebViewParams
+import com.ycngmn.nobook.utils.ThemeChangeInterface
+import com.ycngmn.nobook.utils.fileChooserWebViewParams
 
 @Composable
 fun MessengerWebView() {
 
     val context = LocalContext.current
+    val window = (context as Activity).window
 
     val state = rememberWebViewState("https://facebook.com/messages")
     val navigator = rememberWebViewNavigator()
@@ -60,10 +64,10 @@ fun MessengerWebView() {
     Box {
 
         WebView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().imePadding(),
             state = state,
             navigator = navigator,
-            platformWebViewParams = getPlatformWebViewParams(),
+            platformWebViewParams = fileChooserWebViewParams(), // to select media from storage.
             onCreated = { webView ->
                 // Save cookies to retain logins and stuff.
                 val cookieManager = CookieManager.getInstance()
@@ -71,6 +75,7 @@ fun MessengerWebView() {
                 cookieManager.setAcceptThirdPartyCookies(webView, true)
 
                 webView.apply {
+                    addJavascriptInterface(ThemeChangeInterface(window), "ThemeBridge")
                     // Hide scrollbars
                     overScrollMode = View.OVER_SCROLL_NEVER
                     isVerticalScrollBarEnabled = false

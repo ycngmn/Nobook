@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -19,6 +18,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ycngmn.nobook.R
+import com.ycngmn.nobook.ui.theme.GoogleDark
 
 @Composable
 fun PopLoadingAnimation(size: Int = 100) {
@@ -39,7 +39,7 @@ fun PopLoadingAnimation(size: Int = 100) {
     }
 
     Box (
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        modifier = Modifier.fillMaxSize().background(GoogleDark),
         contentAlignment = Alignment.Center
     ) {
         Image(

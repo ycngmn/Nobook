@@ -4,13 +4,13 @@ import android.app.Activity
 import android.view.View
 import android.webkit.CookieManager
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
@@ -18,7 +18,7 @@ import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.ThemeChangeInterface
-import com.ycngmn.nobook.utils.getPlatformWebViewParams
+import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
 import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
 import com.ycngmn.nobook.utils.styling.colorExtractionScript
@@ -80,10 +80,10 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
         SplashLoading(state.loadingState)
 
     WebView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding(),
         state = state,
         navigator = navigator,
-        platformWebViewParams = getPlatformWebViewParams(),
+        platformWebViewParams = fileChooserWebViewParams(),
         onCreated = { webView ->
             // Save cookies to retain logins and stuff.
             val cookieManager = CookieManager.getInstance()
@@ -91,7 +91,8 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
             cookieManager.setAcceptThirdPartyCookies(webView, true)
 
             webView.apply {
-                isDebugInspectorInfoEnabled = true
+                // To debug, connect the device to the computer and go to chrome://inspect
+                //isDebugInspectorInfoEnabled = true
                 addJavascriptInterface(ThemeChangeInterface(window), "ThemeBridge")
                 // Hide scrollbars
                 overScrollMode = View.OVER_SCROLL_NEVER
