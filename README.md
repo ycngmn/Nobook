@@ -1,6 +1,5 @@
 ##TODO :
-- Loading screen
-- Detect theme by evaluating js ( for status bars and eventually other custom elements)
-- Code Sticky top-bar composable.
-- Improve third party page navigation.
-- More ad blocking.
+- Add auto update feature
+- No hardcoded scripts. host on a github file.
+- More customization options.
+- Prevent webview/Nobook detection or so.
