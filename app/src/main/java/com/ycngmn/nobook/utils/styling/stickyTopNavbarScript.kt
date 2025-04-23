@@ -10,6 +10,9 @@ val stickyTopNavbarScript = """
         const hasLogo = navbar?.querySelector('div[aria-label*="Facebook"]');
         const hasFeed = tabbar?.querySelector('div[aria-label*="feed"]');
 
+        const navbarHeight = navbar ? parseFloat(getComputedStyle(navbar).height) || parseFloat(navbar.style.height) || 0 : 0;
+        const tabbarHeight = tabbar ? parseFloat(getComputedStyle(tabbar).height) || parseFloat(tabbar.style.height) || 0 : 0;
+
         if (hasLogo) Object.assign(navbar.style, {
             position: 'fixed',
             top: '0',
@@ -21,7 +24,7 @@ val stickyTopNavbarScript = """
 
         if (hasFeed) Object.assign(tabbar.style, {
             position: 'fixed',
-            top: hasLogo ? '43px' : '',
+            top: hasLogo ? navbarHeight + 'px' : '',
             left: '0',
             width: '100%',
             zIndex: '999',
@@ -29,7 +32,7 @@ val stickyTopNavbarScript = """
         });
 
         if (scroller) {
-            const offset = (hasLogo ? 43 : 0) + (hasFeed ? 50 : 0);
+            const offset = (hasLogo ? navbarHeight : 0) + (hasFeed ? tabbarHeight : 0);
             const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
             scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
             
@@ -37,14 +40,7 @@ val stickyTopNavbarScript = """
             
             const spinnerContainer = scroller.querySelector('.pull-to-refresh-spinner-container');
             if (spinnerContainer) Object.assign(spinnerContainer.style, {
-                position: 'absolute',
-                top: '0',
-                left: '0',
-                right: '0',
                 zIndex: '1001',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
             });
 
             const spinner = scroller.querySelector('.pull-to-refresh-spinner');
