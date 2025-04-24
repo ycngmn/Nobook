@@ -3,7 +3,7 @@ package com.ycngmn.nobook.utils.styling
 // This script adds a grey overlay on elements when they are held down or clicked.
 // while preventing any overlay when scrolling.
 // Generated using : Claude and Grok
-val holdEffectScript  = """
+val holdEffectScript = """
   (function() {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -41,10 +41,11 @@ val holdEffectScript  = """
         isScrolling = false;
         removeEffects();
         heldElement = e.target;
-        console.log(heldElement);
-        holdTimer = setTimeout(() => {
-            if (!isScrolling) heldElement.classList.add('fb-hold-effect');
-        }, HOLD_DELAY);
+        if (heldElement.tagName.toLowerCase() !== 'body') {
+            holdTimer = setTimeout(() => {
+                if (!isScrolling) heldElement.classList.add('fb-hold-effect');
+            }, HOLD_DELAY);
+        }
     }, true);
 
     document.addEventListener('touchmove', e => {
@@ -57,8 +58,10 @@ val holdEffectScript  = """
     document.addEventListener('click', e => {
         if (isScrolling) return;
         const target = e.target;
-        target.classList.add('fb-hold-effect');
-        setTimeout(() => target.classList.remove('fb-hold-effect'), 100);
+        if (target.tagName.toLowerCase() !== 'body') {
+            target.classList.add('fb-hold-effect');
+            setTimeout(() => target.classList.remove('fb-hold-effect'), 100);
+        }
     }, true);
 
     ['touchend', 'touchcancel'].forEach(event => 
@@ -69,4 +72,4 @@ val holdEffectScript  = """
         if (!document.head.contains(style)) document.head.appendChild(style);
     }).observe(document.body, { childList: true, subtree: true });
   })();
-    """.trimIndent()
+""".trimIndent()
