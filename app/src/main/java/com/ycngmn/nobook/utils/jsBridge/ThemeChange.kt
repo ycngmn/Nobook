@@ -5,7 +5,7 @@ import android.os.Looper
 import android.view.Window
 import android.webkit.JavascriptInterface
 import androidx.core.graphics.toColorInt
-import com.ycngmn.nobook.utils.styling.setStatusBarColor
+import com.ycngmn.nobook.utils.setStatusBarColor
 
 class ThemeChange(
     private val window: Window

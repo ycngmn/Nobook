@@ -1,4 +1,4 @@
-package com.ycngmn.nobook.utils.styling
+package com.ycngmn.nobook.utils
 
 import android.os.Build
 import android.view.Window
