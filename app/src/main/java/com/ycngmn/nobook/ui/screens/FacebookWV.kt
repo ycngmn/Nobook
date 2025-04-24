@@ -35,8 +35,6 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
         }
     )
 
-    navigator.canGoBack
-
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
