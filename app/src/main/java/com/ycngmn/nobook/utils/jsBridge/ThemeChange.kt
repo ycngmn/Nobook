@@ -1,4 +1,4 @@
-package com.ycngmn.nobook.utils
+package com.ycngmn.nobook.utils.jsBridge
 
 import android.os.Handler
 import android.os.Looper
@@ -7,7 +7,7 @@ import android.webkit.JavascriptInterface
 import androidx.core.graphics.toColorInt
 import com.ycngmn.nobook.utils.styling.setStatusBarColor
 
-class ThemeChangeInterface(
+class ThemeChange(
     private val window: Window
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())

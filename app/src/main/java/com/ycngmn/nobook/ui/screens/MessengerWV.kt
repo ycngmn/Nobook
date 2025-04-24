@@ -18,8 +18,9 @@ import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.PopLoadingAnimation
-import com.ycngmn.nobook.utils.ThemeChangeInterface
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
+import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
+import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 
 @Composable
 fun MessengerWebView() {
@@ -75,7 +76,8 @@ fun MessengerWebView() {
                 cookieManager.setAcceptThirdPartyCookies(webView, true)
 
                 webView.apply {
-                    addJavascriptInterface(ThemeChangeInterface(window), "ThemeBridge")
+                    addJavascriptInterface(ThemeChange(window), "ThemeBridge")
+                    addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
                     // Hide scrollbars
                     overScrollMode = View.OVER_SCROLL_NEVER
                     isVerticalScrollBarEnabled = false
