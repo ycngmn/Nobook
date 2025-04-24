@@ -89,6 +89,7 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
             cookieManager.setAcceptThirdPartyCookies(webView, true)
+            CookieManager.getInstance().flush()
 
             webView.apply {
                 // To debug, connect the device to the computer and go to chrome://inspect
