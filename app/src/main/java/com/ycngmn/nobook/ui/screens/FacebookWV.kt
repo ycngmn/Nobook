@@ -12,24 +12,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
+import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
-import com.ycngmn.nobook.utils.fileDownloadScript
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
-import com.ycngmn.nobook.utils.sponsoredAdBlockerScript
-import com.ycngmn.nobook.utils.styling.HIDE_OPEN_WITH_APP_BANNER_SCRIPT
-import com.ycngmn.nobook.utils.styling.colorExtractionScript
-import com.ycngmn.nobook.utils.styling.enhanceLoadingOverlayScript
-import com.ycngmn.nobook.utils.styling.holdEffectScript
-import com.ycngmn.nobook.utils.styling.stickyTopNavbarScript
-import com.ycngmn.nobook.utils.zoomDisableScript
 
 @Composable
 fun FacebookWebView(onOpenMessenger: () -> Unit) {
@@ -43,20 +35,16 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
         }
     )
 
+    navigator.canGoBack
+
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
     LaunchedEffect(state.loadingState) {
         if (state.loadingState is LoadingState.Finished && !isError) {
+            val script = context.resources.openRawResource(R.raw.scripts)
             navigator.evaluateJavaScript(
-                        HIDE_OPEN_WITH_APP_BANNER_SCRIPT +
-                        fileDownloadScript +
-                        zoomDisableScript +
-                        sponsoredAdBlockerScript +
-                        holdEffectScript +
-                        enhanceLoadingOverlayScript +
-                        stickyTopNavbarScript +
-                        colorExtractionScript
+                script.bufferedReader().use { it.readText() }
             )
             isLoading.value = false
         }
@@ -97,7 +85,7 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
             cookieManager.flush()
 
             webView.apply {
-                isDebugInspectorInfoEnabled = true
+
                 addJavascriptInterface(ThemeChange(window), "ThemeBridge")
                 addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
                 overScrollMode = View.OVER_SCROLL_NEVER

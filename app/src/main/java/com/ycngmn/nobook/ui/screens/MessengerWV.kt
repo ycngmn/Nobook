@@ -17,7 +17,6 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
-import com.ycngmn.nobook.ui.components.PopLoadingAnimation
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
@@ -60,7 +59,7 @@ fun MessengerWebView() {
     }
 
     if (isLoading.value)
-        PopLoadingAnimation()
+        SplashLoading(state.loadingState)
 
     Box {
 

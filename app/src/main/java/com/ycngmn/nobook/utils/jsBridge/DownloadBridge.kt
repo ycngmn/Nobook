@@ -46,7 +46,7 @@ class DownloadBridge(private val context: Context) {
                     contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                     resolver.update(uri, contentValues, null, null)
 
-                    Toast.makeText(context, "Saved to Downloads: $fileName", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Saved to Downloads", Toast.LENGTH_SHORT).show()
                 } ?: run {
                     Toast.makeText(context, "Failed to save file: Storage error", Toast.LENGTH_LONG).show()
                 }
