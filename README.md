@@ -1,4 +1,4 @@
-# Nobook - A Facebook Web View App
+# Nobook
 <p align="center">
   <img src='images/nobook_github_cover.png' height='200' alt="pa_icon">
 </p>

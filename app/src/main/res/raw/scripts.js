@@ -21,68 +21,29 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
+(function () {
+  try {
+    // Locate the original search button using its aria-label
+    const searchButton = document.querySelector('[aria-label="Rechercher sur Facebook"]');
 
+    if (searchButton) {
+      // Clone the search button
+      const clonedSearchButton = searchButton.cloneNode(true);
 
-/*
-  Script Catalog
-  ==============
-  This file contains multiple scripts for enhancing and modifying the Facebook mobile experience.
-  Each script is wrapped in an IIFE to prevent variable conflicts and is described below.
+      // Optionally modify the clone's aria-label or add custom styles/classes
+      clonedSearchButton.setAttribute('aria-label', 'Cloned Search Button');
 
-  * Sponsored Ad Blocker Script
-     - Purpose: Blocks sponsored content on the page.
-     - Functions:
-       - blockSponsoredContent(config): Identifies and hides elements containing sponsored text based on provided configuration.
-       - blockAllAds(): Applies ad blocking using predefined configurations for different content types.
-       - Uses MutationObserver to continuously monitor and block new sponsored content.
+      // Insert the cloned button right after the original
+      searchButton.parentElement.insertBefore(clonedSearchButton, searchButton.nextSibling);
 
-  * File Download Script
-     - Purpose: Intercepts file downloads and converts blobs to base64 for custom download handling.
-     - Functions:
-       - Overrides URL.createObjectURL to read blobs as base64 and trigger DownloadBridge.downloadBase64File.
-       - Prevents reinitialization using a window._downloadBridgeInitialized flag.
-
-  * Zoom Disable Script
-     - Purpose: Disables zooming on the page except for photo pages.
-     - Functions:
-       - applyViewportLock(): Sets viewport meta tag to disable zooming unless on facebook.com/photo.php.
-       - Uses MutationObserver to reapply viewport settings if the head element changes.
-
-   * Color Extraction Script
-     - Purpose: Extracts and monitors theme color changes from meta tags.
-     - Functions:
-       - notify(): Sends theme color to ThemeBridge.onThemeColorChanged if available.
-       - Uses MutationObserver to detect changes in the theme-color meta tag.
-
-  * Enhance Loading Overlay Script
-     - Purpose: Increases transparency of loading overlays.
-     - Functions:
-       - applyOverlayStyle(): Sets loading overlay background to rgba(0, 0, 0, 0.1).
-       - Uses MutationObserver to apply styles to newly added overlays.
-
-  * Hide Open With App Banner Script
-     - Purpose: Hides the "Open with App" banner at the bottom of the mobile page.
-     - Functions:
-       - Creates a style element to set display: none for the banner (div.fixed-container.bottom[style*="height:67px"]).
-
-  * Hold Effect Script
-     - Purpose: Adds a grey overlay effect on elements when held or clicked, excluding during scrolling.
-     - Functions:
-       - removeEffects(): Clears hold effect and timers.
-       - Event listeners for touchstart, touchmove, click, touchend, touchcancel to manage the effect.
-       - Uses MutationObserver to ensure the style element persists.
-
-  * Sticky Top Navbar Script
-     - Purpose: Makes the top navbar and tab-bar sticky and adjusts content positioning.
-     - Functions:
-       - applyStyles(): Sets fixed positioning for navbar and tabbar, adjusts scroller padding/margins, and styles pull-to-refresh elements.
-       - Uses MutationObserver and a timeout to reapply styles on page changes.
-
-  Notes:
-  - All scripts use MutationObservers for dynamic content handling.
-  - Scripts are designed for the Facebook mobile site.
-  - No external dependencies are required.
- */
+      console.log('Search button cloned successfully.');
+    } else {
+      console.warn('Original search button not found.');
+    }
+  } catch (error) {
+    console.error('Error while cloning the search button:', error);
+  }
+})();
 
 
 // Sponsored Ad Blocker Script
@@ -159,6 +120,39 @@
     observer.observe(document.body, { childList: true, subtree: true });
 })();
 
+// Hide suggested posts from feed
+/*
+(function() {
+    // Apply only in Facebook feed
+    const feedUrlPattern = /^https:\/\/(m\.facebook\.com\/|www\.facebook\.com\/?)$/;
+    if (!feedUrlPattern.test(window.location.href)) return;
+
+    function hideSuggestedPosts() {
+        const postTextContainers = document.querySelectorAll(
+            'div[data-mcomponent="TextArea"][data-type="text"][data-tti-phase="-1"] .native-text > span'
+        );
+
+        postTextContainers.forEach(textSpan => {
+            if (textSpan.textContent.trim() === '•') {
+                const suggestedPostContainer = textSpan.closest('div[data-tracking-duration-id]');
+                if (suggestedPostContainer) {
+                    // Hide the suggested post
+                    suggestedPostContainer.style.display = 'none';
+
+                    // Hide the previous sibling (gap between posts)
+                    const postGap = suggestedPostContainer.previousElementSibling;
+                    if (postGap) {
+                        postGap.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
+    hideSuggestedPosts();
+    const feedObserver = new MutationObserver(hideSuggestedPosts);
+    feedObserver.observe(document.body, { childList: true, subtree: true });
+})();
+*/
 
 // Zoom Disable Script
 (function() {
