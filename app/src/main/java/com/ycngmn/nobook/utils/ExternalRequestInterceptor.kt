@@ -3,6 +3,7 @@ package com.ycngmn.nobook.utils
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import androidx.core.net.toUri
 import com.multiplatform.webview.request.RequestInterceptor
 import com.multiplatform.webview.request.WebRequest
 import com.multiplatform.webview.request.WebRequestInterceptResult
@@ -19,11 +20,15 @@ class ExternalRequestInterceptor(
     ): WebRequestInterceptResult {
 
         val internalLinkRegex = Regex("https?://(www\\.|m\\.)facebook\\.com/.*")
+        val url = request.url
 
-        return if (internalLinkRegex.containsMatchIn(request.url) && request.isForMainFrame) {
+        return if (internalLinkRegex.containsMatchIn(url) && request.isForMainFrame) {
             WebRequestInterceptResult.Allow
         } else {
-            openInBrowser(request.url)
+            val sanitizedUrl = if (url.contains("l.facebook.com"))
+                url.toUri().query?.substringAfter("u=")?.substringBeforeLast("?fbclid=")
+                    ?.substringBeforeLast("&h=") ?: url else url
+            openInBrowser(sanitizedUrl)
             WebRequestInterceptResult.Reject
         }
     }
