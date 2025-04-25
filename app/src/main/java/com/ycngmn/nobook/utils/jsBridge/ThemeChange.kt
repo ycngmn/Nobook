@@ -2,25 +2,19 @@ package com.ycngmn.nobook.utils.jsBridge
 
 import android.os.Handler
 import android.os.Looper
-import android.view.Window
 import android.webkit.JavascriptInterface
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.ycngmn.nobook.utils.setStatusBarColor
 
 class ThemeChange(
-    private val window: Window
+    private val themeColor: MutableState<Color>
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @JavascriptInterface
     fun onThemeColorChanged(newColor: String?) {
         if (newColor.isNullOrBlank()) return
-
-        try {
-            val colorInt = newColor.toColorInt()
-            mainHandler.post {
-                setStatusBarColor(window, colorInt)
-            }
-        } catch (_: Exception) {}
+        themeColor.value = Color(newColor.toColorInt())
     }
 }
