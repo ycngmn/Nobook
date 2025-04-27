@@ -1,7 +1,9 @@
 package com.ycngmn.nobook.ui.screens
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.view.View
 import android.webkit.CookieManager
 import android.widget.Toast
@@ -34,6 +36,7 @@ import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BaseWebView(
     url: String,
@@ -44,16 +47,17 @@ fun BaseWebView(
     val context = LocalContext.current
     val window = (context as Activity).window
 
+    // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
+    context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
     val state = rememberWebViewState(url)
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
-
 
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
     val colorState = remember { mutableStateOf(Color.Transparent) }
     val settingsToggle = remember { mutableStateOf(false) }
-
 
     LaunchedEffect(colorState.value) {
         // Set status bar items color based on the brightness of its background
@@ -79,21 +83,6 @@ fun BaseWebView(
         SplashLoading(state.loadingState)
     }
 
-    // Configure WebView
-
-    state.webSettings.apply {
-        customUserAgentString = userAgent
-        isJavaScriptEnabled = true
-        supportZoom = false
-
-        androidWebSettings.apply {
-            domStorageEnabled = true
-            hideDefaultVideoPoster = true
-            mediaPlaybackRequiresUserGesture = false
-            allowFileAccess = true
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -117,6 +106,20 @@ fun BaseWebView(
                 cookieManager.setAcceptCookie(true)
                 cookieManager.setAcceptThirdPartyCookies(webView, true)
                 cookieManager.flush()
+
+                // Configure WebView
+                state.webSettings.apply {
+                    customUserAgentString = userAgent
+                    isJavaScriptEnabled = true
+                    supportZoom = false
+
+                    androidWebSettings.apply {
+                        domStorageEnabled = true
+                        hideDefaultVideoPoster = true
+                        mediaPlaybackRequiresUserGesture = false
+                        allowFileAccess = true
+                    }
+                }
 
                 webView.apply {
                     addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
