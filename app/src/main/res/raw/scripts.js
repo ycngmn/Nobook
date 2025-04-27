@@ -38,7 +38,7 @@
     fontWeight: 'bold',
     border: 'none',
     borderRadius: '50%',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.12)',
     zIndex: '999999',
     cursor: 'pointer',
     display: 'flex',
@@ -61,11 +61,14 @@
       document.body.appendChild(btn);
     });
   }
-  // Feed identifier. To not show anywhere else than the feed.
-  function checkAndToggleButton() {
-    const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-    btn.style.display = exists ? 'flex' : 'none';
-  }
+
+ // Feed identifier. To not show anywhere else than the feed.
+ function checkAndToggleButton() {
+   const isHomepage = window.location.pathname === '/';
+   const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+   btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
+ }
+
 
   const observer = new MutationObserver(checkAndToggleButton);
 
@@ -237,10 +240,11 @@
 
 // Hide Open With App Banner Script
 (function() {
-    const style = document.createElement('style');
-    style.innerHTML = 'div.fixed-container.bottom[style*="height:67px"] { display: none !important; }';
-    document.head.appendChild(style);
+  const style = document.createElement('style');
+  style.textContent = '[data-comp-id="22222"]:not([data-shift-on-keyboard-shown="true"]) { display: none !important; }';
+  document.head.appendChild(style);
 })();
+
 
 // Hold Effect Script
 (function() {
@@ -347,8 +351,11 @@
             const offset = (hasLogo ? navbarHeight : 0) + (hasFeed ? tabbarHeight : 0);
             const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
             scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
+
+            const isHomepage = window.location.pathname === '/';
+            const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
             
-            if (!window.location.href.includes("facebook.com/story.php")) scroller.style.paddingBottom = '0';
+            if (isHomepage && exists) scroller.style.paddingBottom = '0';
             
             const spinnerContainer = scroller.querySelector('.pull-to-refresh-spinner-container');
             if (spinnerContainer) Object.assign(spinnerContainer.style, {

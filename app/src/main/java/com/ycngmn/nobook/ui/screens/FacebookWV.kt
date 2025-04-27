@@ -7,7 +7,7 @@ import com.ycngmn.nobook.R
 @Composable
 fun FacebookWebView(onOpenMessenger: () -> Unit) {
     BaseWebView(
-        url = "https://m.facebook.com",
+        url = "https://m.facebook.com/",
         onInterceptAction = onOpenMessenger ,
         onPostLoad = { navigator, context ->
             val script = context.resources.openRawResource(R.raw.scripts)
