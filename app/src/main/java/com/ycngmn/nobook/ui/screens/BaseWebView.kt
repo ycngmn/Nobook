@@ -26,7 +26,7 @@ import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
-import com.ycngmn.nobook.ui.components.NobookSheet
+import com.ycngmn.nobook.ui.components.sheet.NobookSheet
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
