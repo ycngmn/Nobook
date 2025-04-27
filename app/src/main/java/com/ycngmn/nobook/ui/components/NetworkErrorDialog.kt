@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,11 +31,12 @@ fun NetworkErrorDialog(context: Context) {
         onDismissRequest = {}
     ) {
         Column (
-            modifier = Modifier.background(Color.DarkGray).padding(16.dp)
+            modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(16.dp)
         ) {
             Text(
                 "Connect to a network",
                 fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -42,7 +44,7 @@ fun NetworkErrorDialog(context: Context) {
                 "To use Nobook, turn on mobile data or connect to Wi-Fi.",
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 20.dp),
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.secondary
             )
 
             Button(
