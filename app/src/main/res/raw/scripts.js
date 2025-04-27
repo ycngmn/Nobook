@@ -21,28 +21,57 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-(function () {
-  try {
-    // Locate the original search button using its aria-label
-    const searchButton = document.querySelector('[aria-label="Rechercher sur Facebook"]');
 
-    if (searchButton) {
-      // Clone the search button
-      const clonedSearchButton = searchButton.cloneNode(true);
+// Nobook settings : floating button
+(function() {
+  const btn = document.createElement('button');
+  btn.innerHTML = '⭐';
+  Object.assign(btn.style, {
+    position: 'fixed',
+    top: '4px',
+    right: '97px',
+    width: '36px',
+    height: '36px',
+    backgroundColor: 'transparent',
+    color: 'white',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    border: 'none',
+    borderRadius: '50%',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    zIndex: '999999',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: '1',
+    display: 'none'
+  });
 
-      // Optionally modify the clone's aria-label or add custom styles/classes
-      clonedSearchButton.setAttribute('aria-label', 'Cloned Search Button');
-
-      // Insert the cloned button right after the original
-      searchButton.parentElement.insertBefore(clonedSearchButton, searchButton.nextSibling);
-
-      console.log('Search button cloned successfully.');
-    } else {
-      console.warn('Original search button not found.');
+  btn.onclick = () => {
+    if (typeof SettingsBridge !== 'undefined' && SettingsBridge.onSettingsToggle) {
+      SettingsBridge.onSettingsToggle();
     }
-  } catch (error) {
-    console.error('Error while cloning the search button:', error);
+  };
+
+  if (document.body) {
+    document.body.appendChild(btn);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.appendChild(btn);
+    });
   }
+  // Feed identifier. To not show anywhere else than the feed.
+  function checkAndToggleButton() {
+    const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+    btn.style.display = exists ? 'flex' : 'none';
+  }
+
+  const observer = new MutationObserver(checkAndToggleButton);
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  checkAndToggleButton();
 })();
 
 

@@ -26,9 +26,11 @@ import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
+import com.ycngmn.nobook.ui.components.NobookSheet
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
+import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 
 
@@ -50,6 +52,7 @@ fun BaseWebView(
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
     val colorState = remember { mutableStateOf(Color.Transparent) }
+    val settingsToggle = remember { mutableStateOf(false) }
 
 
     LaunchedEffect(colorState.value) {
@@ -96,6 +99,11 @@ fun BaseWebView(
             .fillMaxSize()
             .background(colorState.value)
     ) {
+
+        if (settingsToggle.value) {
+            NobookSheet(settingsToggle)
+        }
+
         WebView(
             modifier = Modifier
                 .imePadding()
@@ -110,9 +118,8 @@ fun BaseWebView(
                 cookieManager.setAcceptThirdPartyCookies(webView, true)
                 cookieManager.flush()
 
-
-
                 webView.apply {
+                    addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
                     addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
                     addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
 
