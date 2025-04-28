@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 @Composable()
 fun SheetItem(
@@ -32,7 +33,6 @@ fun SheetItem(
             .padding(horizontal = 4.dp, vertical = 4.dp)
             .fillMaxWidth()
             .clickable { onClick() },
-
         ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -43,8 +43,11 @@ fun SheetItem(
             Image(
                 painter = painterResource(icon),
                 contentDescription = null,
-                modifier = Modifier.size(38.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                modifier = Modifier.size(35.dp),
+                colorFilter =
+                    if (isActive)
+                        ColorFilter.tint(FacebookBlue)
+                    else ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
 
             Column(
