@@ -50,7 +50,7 @@ fun BaseWebView(
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
     context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    val state = rememberWebViewState(url)
+    val state = rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
