@@ -69,7 +69,6 @@
    btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
  }
 
-
   const observer = new MutationObserver(checkAndToggleButton);
 
   observer.observe(document.body, { childList: true, subtree: true });
@@ -100,6 +99,14 @@
         childList: true,
         subtree: true
     });
+})();
+
+// Hide facebook download button at login page.
+(function() {
+    const element = document.querySelector('div[data-bloks-name="bk.components.Flexbox"].wbloks_1[style*="flex-grow: 1; justify-content: inherit; flex-direction: column;"]');
+    if (element) {
+        element.remove();
+    }
 })();
 
 // Hide Open With App Banner Script
