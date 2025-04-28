@@ -105,7 +105,7 @@
 // Hide Open With App Banner Script
 (function() {
   const style = document.createElement('style');
-  style.textContent = '[data-comp-id="22222"]:not([data-shift-on-keyboard-shown="true"]) { display: none !important; }';
+  style.textContent = '.bottom[data-actual-height="67"] { display: none !important; }';
   document.head.appendChild(style);
 })();
 
