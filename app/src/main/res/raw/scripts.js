@@ -38,7 +38,6 @@
     fontWeight: 'bold',
     border: 'none',
     borderRadius: '50%',
-    boxShadow: '0 1px 1px rgba(0, 0, 0, 0.10)',
     zIndex: '999999',
     cursor: 'pointer',
     display: 'flex',
