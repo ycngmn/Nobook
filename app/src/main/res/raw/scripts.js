@@ -25,20 +25,20 @@
 // Nobook settings : floating button
 (function() {
   const btn = document.createElement('button');
-  btn.innerHTML = '⭐';
+  btn.innerHTML = '⚙️';
   Object.assign(btn.style, {
     position: 'fixed',
     top: '4px',
-    right: '97px',
+    right: '98px',
     width: '36px',
     height: '36px',
     backgroundColor: 'transparent',
     color: 'white',
-    fontSize: '18px',
+    fontSize: '23px',
     fontWeight: 'bold',
     border: 'none',
     borderRadius: '50%',
-    boxShadow: '0 1px 1px rgba(0, 0, 0, 0.12)',
+    boxShadow: '0 1px 1px rgba(0, 0, 0, 0.10)',
     zIndex: '999999',
     cursor: 'pointer',
     display: 'flex',
