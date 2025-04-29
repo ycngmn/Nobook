@@ -2,7 +2,6 @@ package com.ycngmn.nobook.ui.screens
 
 import androidx.compose.runtime.Composable
 
-//Displays a WebView for the Facebook mobile site
 @Composable
 fun MessengerWebView() {
     BaseWebView(

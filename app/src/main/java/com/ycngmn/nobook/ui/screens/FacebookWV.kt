@@ -6,7 +6,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
 
-//Displays a WebView for the Facebook mobile site
 @Composable
 fun FacebookWebView(onOpenMessenger: () -> Unit) {
 
