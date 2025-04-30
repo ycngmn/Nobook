@@ -27,6 +27,7 @@ jobs:
 
       - name: Build APK
         run: |
+          chmod +x gradlew
           ./gradlew assembleRelease || { echo "Gradle build failed"; exit 1; }
 
       - name: Set up Keystore
