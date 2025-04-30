@@ -1,0 +1,55 @@
+name: 💡 Feature Request
+description: Suggest a new feature or improvement for Nobook
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      description: |
+        Please make sure you've completed the following before submitting:
+      options:
+        - label: I have checked the README and existing issues for similar suggestions.
+          required: true
+        - label: This is not a bug report.
+          required: true
+        - label: I understand that not all requests may be implemented.
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      placeholder: |
+        Briefly summarize your feature request or enhancement idea.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Use Case / Motivation
+      placeholder: |
+        What problem does this solve or improve for Nobook users?
+        Describe the context.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Implementation
+      placeholder: |
+        Share how this feature could be implemented, if you have any ideas.
+        
+        Code snippets or UI suggestions are welcome.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      placeholder: |
+        Any other details, screenshots, or references you'd like to include.
+    validations:
+      required: false
