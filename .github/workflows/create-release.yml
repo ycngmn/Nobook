@@ -25,10 +25,18 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Build APK
+      - name: Make gradlew Executable
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease || { echo "Gradle build failed"; exit 1; }
+          if [ ! -x gradlew ]; then
+            echo "Failed to make gradlew executable"
+            exit 1
+          fi
+
+      - name: Build APK
+        run: |
+          ./gradlew assembleRelease --stacktrace || { echo "Gradle build failed"; exit 1; }
+          ls -R app/build/outputs/apk || echo "No APK directory found"
 
       - name: Set up Keystore
         run: |
@@ -51,13 +59,17 @@ jobs:
             echo "apksigner not found at $APKSIGNER"
             exit 1
           fi
+          if [ ! -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            echo "APK not found at app/build/outputs/apk/release/app-release-unsigned.apk"
+            exit 1
+          fi
           $APKSIGNER sign \
             --ks $RUNNER_TEMP/keystores/keystore.jks \
             --ks-key-alias ${{ secrets.KEY_ALIAS }} \
             --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
             --key-pass pass:${{ secrets.KEY_PASSWORD }} \
             --out app-release.apk \
-            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Clean Up Keystore
         if: always()
@@ -77,12 +89,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout Changelog
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            CHANGE.md
-          sparse-checkout-cone-mode: false
+
+      - name: Create Tag for Manual Trigger
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git tag ${{ github.event.inputs.release_tag }}
+          git push origin ${{ github.event.inputs.release_tag }}
 
       - name: Download APK Artifact
         uses: actions/download-artifact@v4
