@@ -25,16 +25,9 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Make gradlew Executable
-        run: |
-          chmod +x gradlew
-          if [ ! -x gradlew ]; then
-            echo "Failed to make gradlew executable"
-            exit 1
-          fi
-
       - name: Build APK
         run: |
+          chmod +x gradlew
           ./gradlew assembleRelease --stacktrace || { echo "Gradle build failed"; exit 1; }
           ls -R app/build/outputs/apk || echo "No APK directory found"
 
