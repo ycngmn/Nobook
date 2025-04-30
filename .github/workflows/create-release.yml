@@ -106,9 +106,8 @@ jobs:
       - name: Rename APK for Release
         run: |
           TAG_NAME="${{ github.event.inputs.release_tag || github.ref_name }}"
-          SAFE_TAG_NAME=$(echo "$TAG_NAME" | tr -c '[:alnum:].-' '_')
-          mv app-release.apk "Nobook_${SAFE_TAG_NAME}.apk"
-          if [ ! -f "Nobook_${SAFE_TAG_NAME}.apk" ]; then
+          mv app-release.apk "Nobook_${TAG_NAME}.apk"
+          if [ ! -f "Nobook_${TAG_NAME}.apk" ]; then
             echo "Failed to rename APK"
             exit 1
           fi
