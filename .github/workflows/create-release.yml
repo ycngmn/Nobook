@@ -1,0 +1,122 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'vx.y.z'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace || { echo "Gradle build failed"; exit 1; }
+          ls -R app/build/outputs/apk || echo "No APK directory found"
+
+      - name: Set up Keystore
+        run: |
+          mkdir -p $RUNNER_TEMP/keystores
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > $RUNNER_TEMP/keystores/keystore.jks
+          if [ ! -f $RUNNER_TEMP/keystores/keystore.jks ]; then
+            echo "Failed to decode keystore file"
+            exit 1
+          fi
+
+      - name: Sign APK
+        run: |
+          BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -n 1)
+          if [ -z "$BUILD_TOOLS_DIR" ]; then
+            echo "No build-tools found in $ANDROID_HOME/build-tools"
+            exit 1
+          fi
+          APKSIGNER="${BUILD_TOOLS_DIR}apksigner"
+          if [ ! -f "$APKSIGNER" ]; then
+            echo "apksigner not found at $APKSIGNER"
+            exit 1
+          fi
+          if [ ! -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            echo "APK not found at app/build/outputs/apk/release/app-release-unsigned.apk"
+            exit 1
+          fi
+          $APKSIGNER sign \
+            --ks $RUNNER_TEMP/keystores/keystore.jks \
+            --ks-key-alias ${{ secrets.KEY_ALIAS }} \
+            --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
+            --key-pass pass:${{ secrets.KEY_PASSWORD }} \
+            --out app-release.apk \
+            app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Clean Up Keystore
+        if: always()
+        run: |
+          rm -f $RUNNER_TEMP/keystores/keystore.jks
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-artifact
+          path: app-release.apk
+          compression-level: 5
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Tag for Manual Trigger
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git tag ${{ github.event.inputs.release_tag }}
+          git push origin ${{ github.event.inputs.release_tag }}
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: apk-artifact
+
+      - name: Rename APK for Release
+        run: |
+          TAG_NAME="${{ github.event.inputs.release_tag || github.ref_name }}"
+          mv app-release.apk "Nobook_${TAG_NAME}.apk"
+          if [ ! -f "Nobook_${TAG_NAME}.apk" ]; then
+            echo "Failed to rename APK"
+            exit 1
+          fi
+
+      - name: Prepare Changelog
+        run: |
+          if [ ! -f CHANGE.md ]; then
+            echo "CHANGE.md not found, using default changelog"
+            echo "Release ${{ github.ref_name || github.event.inputs.release_tag }}" > CHANGE.txt
+          else
+            cp CHANGE.md CHANGE.txt
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          files: Nobook_${{ github.event.inputs.release_tag || github.ref_name }}.apk
+          body_path: CHANGE.txt

@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 Ask a Question
+    url: https://github.com/ycngmn/Nobook/discussions
+    about: Ask general questions or get help with Nobook

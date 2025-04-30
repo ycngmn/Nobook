@@ -1,0 +1,73 @@
+name: 🐞 Bug Report
+description: Report an issue or unexpected behavior in Nobook
+labels: ["bug"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Before You Begin
+      description: |
+        Please complete the following before submitting a bug report:
+      options:
+        - label: I am using the latest version of Nobook.
+          required: true
+        - label: I have searched for existing issues related to this bug.
+          required: true
+        - label: This is not a feature request or enhancement suggestion.
+          required: true
+          
+  - type: input
+    id: device_info
+    attributes:
+      label: Device Info
+      placeholder: e.g. Samsung Galaxy A52, Android 13
+    validations:
+      required: true
+
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      placeholder: |
+        Clearly describe the issue. What’s going wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Tap on '...'
+        3. Scroll down to '...'
+        4. See the error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: |
+        Describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots
+      placeholder: |
+        If applicable, attach screenshots
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      placeholder: |
+        Any other information that might help us understand the issue.
+    validations:
+      required: false
