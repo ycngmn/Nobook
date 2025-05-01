@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -22,14 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
-import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 @Composable
 fun SheetContent(context: Activity, onClose: () -> Unit) {
@@ -114,34 +115,53 @@ fun SheetContent(context: Activity, onClose: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
-                Text(
-                    text = "Apply Immediately?",
-                    fontSize = 16.sp,
-                    color = FacebookBlue,
-                    fontWeight = FontWeight.Bold,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier
-                        .clickable {
-                            // restart app
-                            val intent = context.intent
-                            context.finish()
-                            context.startActivity(intent)
-                        }
-                )
+                Card  (
+                    shape = RoundedCornerShape(6.dp),
+                    elevation = CardDefaults.cardElevation(10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                ) {
+                    Text(
+                        text = "Apply Immediately?",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .clickable {
+                                // restart app
+                                val intent = context.intent
+                                context.finish()
+                                context.startActivity(intent)
+                            }
+                    )
+                }
 
-                VerticalDivider(Modifier.height(20.dp),
-                    color = Color.Gray, thickness = 1.5.dp)
 
-                Text(
-                    text = "Close Menu",
-                    fontSize = 16.sp,
-                    color = FacebookBlue,
-                    fontWeight = FontWeight.Bold,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier
-                        .clickable { onClose() }
-                )
+
+                VerticalDivider(Modifier.height(30.dp),
+                    color = Color.Gray, thickness = 2.dp)
+
+                Card  (
+                    shape = RoundedCornerShape(6.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                ) {
+
+                    Text(
+                        text = "Close Menu",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .clickable { onClose() }
+                    )
+                }
             }
+
 
         }
     }
