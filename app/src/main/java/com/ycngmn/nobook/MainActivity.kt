@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            NobookTheme { MainNavigation() }
+            NobookTheme { MainNavigation(intent?.data) }
         }
     }
 }

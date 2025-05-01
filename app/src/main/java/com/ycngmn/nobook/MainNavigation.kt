@@ -1,5 +1,6 @@
 package com.ycngmn.nobook
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -10,14 +11,15 @@ import com.ycngmn.nobook.ui.screens.MessengerWebView
 
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(data: Uri?) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "facebook") {
         // Adding column , fixes early initial load.. Idk why.
         composable("facebook") {
             Column {
-                FacebookWebView { navController.navigate("messenger") }
+                FacebookWebView(data?.toString() ?: "https://m.facebook.com/")
+                { navController.navigate("messenger") }
             }
         }
         composable("messenger") { Column { MessengerWebView() } }

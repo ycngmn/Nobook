@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 @Composable()
@@ -26,6 +25,7 @@ fun SheetItem(
     icon: Int,
     title: String,
     subtitle: String,
+    iconColor: Color? = null,
     isActive: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -46,7 +46,7 @@ fun SheetItem(
                 contentDescription = null,
                 modifier = Modifier.size(35.dp),
                 colorFilter =
-                    if (icon == R.drawable.star_shine_24px) ColorFilter.tint(Color(0XFFE6B800 ))
+                    if (iconColor != null) ColorFilter.tint(iconColor)
                     else if (isActive)
                         ColorFilter.tint(FacebookBlue)
                     else ColorFilter.tint(MaterialTheme.colorScheme.secondary)

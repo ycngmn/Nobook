@@ -2,13 +2,19 @@ package com.ycngmn.nobook.ui.components.sheet
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -26,7 +32,7 @@ import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 @Composable
-fun SheetContent(context : Activity) {
+fun SheetContent(context: Activity, onClose: () -> Unit) {
 
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     val removeAds = viewModel.removeAds.collectAsState()
@@ -70,9 +76,24 @@ fun SheetContent(context : Activity) {
             }
 
             SheetItem(
+                icon = R.drawable.open_in_browser_24px,
+                title = "Open in Nobook",
+                subtitle = "Open facebook urls from other apps.",
+                iconColor = Color(0xFF77E5B6)
+            ) {
+                // Open open by default settings
+                val packageName = "package:${context.packageName}".toUri()
+                val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, packageName)
+                else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageName)
+                context.startActivity(intent)
+            }
+
+            SheetItem(
                 icon = R.drawable.star_shine_24px,
                 title = "Star at Github",
                 subtitle = "Updates, bugs & contributions.",
+                iconColor = Color(0XFFE6B800)
             ) {
                 val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
                 context.startActivity(intent)
@@ -87,21 +108,41 @@ fun SheetContent(context : Activity) {
                     .padding(top = 16.dp)
             )
 
-            Text(
-                text = "Apply Immediately?",
-                fontSize = 16.sp,
-                color = FacebookBlue,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                textDecoration = TextDecoration.Underline,
+            Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding(top = 5.dp, bottom = 16.dp).clickable {
-                        // restart app
-                        val intent = context.intent
-                        context.finish()
-                        context.startActivity(intent)
-                    }
-            )
+                    .padding(top = 8.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
+                Text(
+                    text = "Apply Immediately?",
+                    fontSize = 16.sp,
+                    color = FacebookBlue,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier
+                        .clickable {
+                            // restart app
+                            val intent = context.intent
+                            context.finish()
+                            context.startActivity(intent)
+                        }
+                )
+
+                VerticalDivider(Modifier.height(20.dp),
+                    color = Color.Gray, thickness = 1.5.dp)
+
+                Text(
+                    text = "Close Menu",
+                    fontSize = 16.sp,
+                    color = FacebookBlue,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier
+                        .clickable { onClose() }
+                )
+            }
+
         }
     }
 
