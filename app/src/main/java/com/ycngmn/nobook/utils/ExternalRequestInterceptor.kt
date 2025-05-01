@@ -29,8 +29,11 @@ class ExternalRequestInterceptor(
     }
 
     private fun openInBrowser(url: String) {
+
+        val cleanUrl = fbRedirectSanitizer(url)
+
         try {
-            val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+            val intent = Intent.parseUri(cleanUrl, Intent.URI_INTENT_SCHEME)
             context.startActivity(intent)
         } catch (_: Exception) {
             // if fails to open in messenger app
