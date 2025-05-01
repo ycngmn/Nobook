@@ -17,6 +17,7 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
 
     BaseWebView(
         url = "https://m.facebook.com/",
+        userAgent = "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Mobile Safari/537.36",
         onInterceptAction = onOpenMessenger,
         onPostLoad = { navigator, context ->
             val generalScript = context.resources.openRawResource(R.raw.scripts)
