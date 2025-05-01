@@ -1,7 +1,9 @@
 package com.ycngmn.nobook.ui.components.sheet
 
+import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -12,22 +14,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
+import com.ycngmn.nobook.ui.theme.FacebookBlue
 
-@Preview(showBackground = true)
 @Composable
-fun SheetContent() {
+fun SheetContent(context : Activity) {
 
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
-    val context = LocalContext.current
     val removeAds = viewModel.removeAds.collectAsState()
     val hideSuggested = viewModel.hideSuggested.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
@@ -83,7 +84,23 @@ fun SheetContent() {
                 color = Color.Red,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding(vertical = 16.dp)
+                    .padding(top = 16.dp)
+            )
+
+            Text(
+                text = "Apply Immediately?",
+                fontSize = 16.sp,
+                color = FacebookBlue,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+                    .padding(top = 5.dp, bottom = 16.dp).clickable {
+                        // restart app
+                        val intent = context.intent
+                        context.finish()
+                        context.startActivity(intent)
+                    }
             )
         }
     }

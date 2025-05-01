@@ -90,7 +90,8 @@ fun BaseWebView(
     ) {
 
         if (settingsToggle.value) {
-            NobookSheet(settingsToggle)
+            context.intent
+            NobookSheet(settingsToggle, context)
         }
 
         WebView(
@@ -111,7 +112,6 @@ fun BaseWebView(
                 state.webSettings.apply {
                     customUserAgentString = userAgent
                     isJavaScriptEnabled = true
-                    supportZoom = false
 
                     androidWebSettings.apply {
                         domStorageEnabled = true
@@ -130,6 +130,7 @@ fun BaseWebView(
                     overScrollMode = View.OVER_SCROLL_NEVER
                     isVerticalScrollBarEnabled = false
                     isHorizontalScrollBarEnabled = false
+
 
                     // Support downloads
                     setDownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->

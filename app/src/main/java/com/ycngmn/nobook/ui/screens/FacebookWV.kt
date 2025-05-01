@@ -1,7 +1,6 @@
 package com.ycngmn.nobook.ui.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
@@ -11,9 +10,9 @@ fun FacebookWebView(onOpenMessenger: () -> Unit) {
 
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     // Nobook settings values.
-    val removeAds = viewModel.removeAds.collectAsState()
-    val hideSuggested = viewModel.hideSuggested.collectAsState()
-    val pinchToZoom = viewModel.pinchToZoom.collectAsState()
+    val removeAds = viewModel.removeAds
+    val hideSuggested = viewModel.hideSuggested
+    val pinchToZoom = viewModel.pinchToZoom
 
     BaseWebView(
         url = "https://m.facebook.com/",
