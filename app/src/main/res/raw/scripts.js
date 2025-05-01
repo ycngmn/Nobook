@@ -22,59 +22,6 @@
     SOFTWARE.
 */
 
-// Nobook settings : floating button
-(function() {
-  const btn = document.createElement('button');
-  btn.innerHTML = '⚙️';
-  Object.assign(btn.style, {
-    position: 'fixed',
-    top: '4px',
-    right: '98px',
-    width: '36px',
-    height: '36px',
-    backgroundColor: 'transparent',
-    color: 'white',
-    fontSize: '23px',
-    fontWeight: 'bold',
-    border: 'none',
-    borderRadius: '50%',
-    zIndex: '999999',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    opacity: '1',
-    display: 'none'
-  });
-
-  btn.onclick = () => {
-    if (typeof SettingsBridge !== 'undefined' && SettingsBridge.onSettingsToggle) {
-      SettingsBridge.onSettingsToggle();
-    }
-  };
-
-  if (document.body) {
-    document.body.appendChild(btn);
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.appendChild(btn);
-    });
-  }
-
- // Feed identifier. To not show anywhere else than the feed.
- function checkAndToggleButton() {
-   const isHomepage = window.location.pathname === '/';
-   const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-   btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
- }
-
-  const observer = new MutationObserver(checkAndToggleButton);
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  checkAndToggleButton();
-})();
-
 // Enhance Loading Overlay Script
 (function() {
     // Function to apply the background color
@@ -114,6 +61,19 @@
   style.textContent = '.bottom[data-actual-height="67"] { display: none !important; }';
   document.head.appendChild(style);
 })();
+
+// Remove black overlay on search page
+(() => {
+  const obs = new MutationObserver(() => {
+    const el = document.querySelector('.m.bg-s2.vscroller');
+    if (el) {
+      el.setAttribute('style', '');
+      obs.disconnect();
+    }
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+})();
+
 
 
 // Hold Effect Script
@@ -250,6 +210,59 @@
 })();
 
 /* The below scripts are specific to com.ycngmn.Nobook application. */
+
+// Nobook settings : floating button
+(function() {
+  const btn = document.createElement('button');
+  btn.innerHTML = '⚙️';
+  Object.assign(btn.style, {
+    position: 'fixed',
+    top: '4px',
+    right: '98px',
+    width: '36px',
+    height: '36px',
+    backgroundColor: 'transparent',
+    color: 'white',
+    fontSize: '23px',
+    fontWeight: 'bold',
+    border: 'none',
+    borderRadius: '50%',
+    zIndex: '999999',
+    cursor: 'pointer',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: '1',
+    display: 'none'
+  });
+
+  btn.onclick = () => {
+    if (typeof SettingsBridge !== 'undefined' && SettingsBridge.onSettingsToggle) {
+      SettingsBridge.onSettingsToggle();
+    }
+  };
+
+  if (document.body) {
+    document.body.appendChild(btn);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.appendChild(btn);
+    });
+  }
+
+ // Feed identifier. To not show anywhere else than the feed.
+ function checkAndToggleButton() {
+   const isHomepage = window.location.pathname === '/';
+   const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+   btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
+ }
+
+  const observer = new MutationObserver(checkAndToggleButton);
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  checkAndToggleButton();
+})();
+
 
 // Color Extraction Script
 (function() {
