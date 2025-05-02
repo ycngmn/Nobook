@@ -117,7 +117,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
 
                 Card  (
                     shape = RoundedCornerShape(6.dp),
-                    elevation = CardDefaults.cardElevation(10.dp),
+                    elevation = CardDefaults.cardElevation(7.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.background
                     )

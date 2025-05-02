@@ -94,7 +94,6 @@ fun BaseWebView(
     ) {
 
         if (settingsToggle.value) {
-            context.intent
             NobookSheet(settingsToggle, context, onRestart)
         }
 

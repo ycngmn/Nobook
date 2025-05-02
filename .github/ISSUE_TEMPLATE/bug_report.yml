@@ -1,5 +1,5 @@
 name: 🐞 Bug Report
-description: Report an issue or unexpected behavior in Nobook
+description: Report an issue or unexpected behavior
 labels: ["bug"]
 body:
   - type: checkboxes

@@ -1,5 +1,5 @@
 name: 💡 Feature Request
-description: Suggest a new feature or improvement for Nobook
+description: Suggest a new feature or improvement
 labels: ["enhancement"]
 body:
   - type: checkboxes
