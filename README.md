@@ -38,6 +38,3 @@ Contributions to the project are welcome. Please follow these guidelines:
 - Add auto update feature.
 - More customization options.
 - Less hardcoded js scripts.
-
-## Known Bugs 🐞
-- Pinch to Zoom gets locked for the session when used "**Apply immediately?**".

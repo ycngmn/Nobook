@@ -119,6 +119,7 @@ fun BaseWebView(
 
                     androidWebSettings.apply {
                         //isDebugInspectorInfoEnabled = true
+                        useWideViewPort = true
                         domStorageEnabled = true
                         hideDefaultVideoPoster = true
                         mediaPlaybackRequiresUserGesture = false
@@ -135,6 +136,12 @@ fun BaseWebView(
                     overScrollMode = View.OVER_SCROLL_NEVER
                     isVerticalScrollBarEnabled = false
                     isHorizontalScrollBarEnabled = false
+
+                    settings.setSupportZoom(true)
+                    settings.builtInZoomControls = true
+                    settings.displayZoomControls = false
+
+                    settings.loadWithOverviewMode = true
 
                     // Show toast when download starts
                     setDownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->
