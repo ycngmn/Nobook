@@ -68,7 +68,6 @@
     const el = document.querySelector('.m.bg-s2.vscroller');
     if (el) {
       el.setAttribute('style', '');
-      obs.disconnect();
     }
   });
   obs.observe(document.documentElement, { childList: true, subtree: true });
