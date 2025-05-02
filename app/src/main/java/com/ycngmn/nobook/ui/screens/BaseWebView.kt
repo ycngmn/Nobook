@@ -54,6 +54,9 @@ fun BaseWebView(
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
+    if (state.lastLoadedUrl?.contains("facebook.com/messages/blocked") == true)
+        onInterceptAction()
+
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
     val colorState = remember { mutableStateOf(Color.Transparent) }
@@ -130,7 +133,6 @@ fun BaseWebView(
                     overScrollMode = View.OVER_SCROLL_NEVER
                     isVerticalScrollBarEnabled = false
                     isHorizontalScrollBarEnabled = false
-
 
                     // Support downloads
                     setDownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->

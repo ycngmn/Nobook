@@ -10,7 +10,6 @@ fun FacebookWebView(
     url: String,
     onOpenMessenger: () -> Unit
 ) {
-
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     // Nobook settings values.
     val removeAds = viewModel.removeAds
@@ -19,7 +18,6 @@ fun FacebookWebView(
 
     BaseWebView(
         url = url,
-        userAgent = "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Mobile Safari/537.36",
         onInterceptAction = onOpenMessenger,
         onPostLoad = { navigator, context ->
             val generalScript = context.resources.openRawResource(R.raw.scripts)
