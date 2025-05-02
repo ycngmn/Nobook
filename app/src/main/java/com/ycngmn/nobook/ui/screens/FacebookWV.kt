@@ -8,6 +8,7 @@ import com.ycngmn.nobook.ui.NobookViewModel
 @Composable
 fun FacebookWebView(
     url: String,
+    onRestart: () -> Unit,
     onOpenMessenger: () -> Unit
 ) {
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
@@ -45,7 +46,8 @@ fun FacebookWebView(
                     pinchToZoomScript.bufferedReader().use { it.readText() }
                 )
             }
-        }
+        },
+        onRestart = onRestart
     )
 }
 

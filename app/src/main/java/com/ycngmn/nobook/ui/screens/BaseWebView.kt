@@ -42,7 +42,8 @@ fun BaseWebView(
     url: String,
     userAgent: String? = null,
     onInterceptAction: (() -> Unit) = {},
-    onPostLoad: (WebViewNavigator, Context) -> Unit = { _, _ -> }
+    onPostLoad: (WebViewNavigator, Context) -> Unit = { _, _ -> },
+    onRestart: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val window = (context as Activity).window
@@ -94,7 +95,7 @@ fun BaseWebView(
 
         if (settingsToggle.value) {
             context.intent
-            NobookSheet(settingsToggle, context)
+            NobookSheet(settingsToggle, context, onRestart)
         }
 
         WebView(
@@ -117,6 +118,7 @@ fun BaseWebView(
                     isJavaScriptEnabled = true
 
                     androidWebSettings.apply {
+                        //isDebugInspectorInfoEnabled = true
                         domStorageEnabled = true
                         hideDefaultVideoPoster = true
                         mediaPlaybackRequiresUserGesture = false
@@ -134,7 +136,7 @@ fun BaseWebView(
                     isVerticalScrollBarEnabled = false
                     isHorizontalScrollBarEnabled = false
 
-                    // Support downloads
+                    // Show toast when download starts
                     setDownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->
                         Toast.makeText(context, "Processing blob download...", Toast.LENGTH_SHORT).show()
                     }

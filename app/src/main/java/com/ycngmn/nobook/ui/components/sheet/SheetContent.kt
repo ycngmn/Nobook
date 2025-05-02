@@ -33,7 +33,7 @@ import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
 
 @Composable
-fun SheetContent(context: Activity, onClose: () -> Unit) {
+fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) {
 
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     val removeAds = viewModel.removeAds.collectAsState()
@@ -130,15 +130,10 @@ fun SheetContent(context: Activity, onClose: () -> Unit) {
                         modifier = Modifier
                             .padding(5.dp)
                             .clickable {
-                                // restart app
-                                val intent = context.intent
-                                context.finish()
-                                context.startActivity(intent)
+                                onRestart()
                             }
                     )
                 }
-
-
 
                 VerticalDivider(Modifier.height(30.dp),
                     color = Color.Gray, thickness = 2.dp)

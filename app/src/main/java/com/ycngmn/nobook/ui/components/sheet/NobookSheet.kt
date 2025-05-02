@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NobookSheet(openBottomSheet: MutableState<Boolean>, context: Activity) {
+fun NobookSheet(openBottomSheet: MutableState<Boolean>, context: Activity, onRestart: () -> Unit) {
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -33,7 +33,7 @@ fun NobookSheet(openBottomSheet: MutableState<Boolean>, context: Activity) {
             onDismissRequest = { openBottomSheet.value = false },
             sheetState = bottomSheetState,
         ) {
-            SheetContent(context) { closeSheet() }
+            SheetContent(context, onRestart) { closeSheet() }
         }
     }
 }
