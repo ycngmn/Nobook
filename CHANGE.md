@@ -1,17 +1,17 @@
-## Nobook - v0.0.3
+## Nobook - v0.0.4
 
-Update with some fixes, some features and some bugs..
+Updated with lots of fixes, new features (and a few bugs)...
 
 <ins>**Changelog:**</ins>
 
-* Changed app logo ! 0639463c28850ac92ea1228b57ba62d7bcd29d50
-* Fixed UI Bug on **video** page when `Hide suggested posts` is active. fc36f07e86a93637105ff20791750a7652b05a21
-* Improved Nobook menu button style. Should now be easier to locate. 2a896cebbf83badbd414873598f11161bd8e2e4b
-* Fixed bottom overlay at search page. 5de559b1eeb0e97ce60ad143760da24c6583026a
-* [Experimental] Added a button to reload the app and apply Nobook settings. 94b9fb72bb0270c349510fc701f5545c5252e15a
-* **Feature:** Facebook URLs opened from other apps will now launch inside Nobook. 0aab2170d4be9616cfabee35f361edcf9457941a
-* Minor fixes..
-
-[!IMPORTANT]
-Starting with this update, the release APK will be built using GitHub workflows —
-from scratch, using the source code in the repository.
+* Added 3 new annoyance-blocking options! 87dcd9c084ac1ca8af1564bea95ff70714be155f
+  - Hide Reels
+  - Hide Stories
+  - Hide "People You May Know"
+* Added text selection via press and hold. 933f27fdb7477baac69578d95d81e77196aabd1b
+* Fixed Messenger page not triggering on some devices #5 (hopefully). dbc6721000bc1ec6dfc8354d5d29771a93211116
+* Fixed issue with "Pinch to Zoom" locking on recompositions. 39718db94b2e2150c7db41d59df588dd4448c911
+* Fixed bottom overlay reappearing on the search page. fd8bc12789ddd8b9289be638d5029739fd6060c6
+* Improved "Reload to apply settings" mechanism. 343330acf28a1f9eab86ac879a8cf6deb3030809
+* Enhanced press-and-hold effect. ec4abec778b70eecd0631354b1008f00af28073e
+* Various other fixes and improvements.
