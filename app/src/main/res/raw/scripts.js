@@ -22,6 +22,11 @@
     SOFTWARE.
 */
 
+// Make elements selectable on long press
+(function() {
+  document.documentElement.classList.remove('unselectable');
+})();
+
 // Enhance Loading Overlay Script
 (function() {
     // Function to apply the background color
