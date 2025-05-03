@@ -20,6 +20,15 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _hideSuggested = MutableStateFlow(false)
     val hideSuggested = _hideSuggested.asStateFlow()
 
+    private val _hideReels = MutableStateFlow(false)
+    val hideReels = _hideReels.asStateFlow()
+
+    private val _hideStories = MutableStateFlow(false)
+    val hideStories = _hideStories.asStateFlow()
+
+    private val _hidePeopleYouMayKnow = MutableStateFlow(false)
+    val hidePeopleYouMayKnow = _hidePeopleYouMayKnow.asStateFlow()
+
     private val _pinchToZoom = MutableStateFlow(false)
     val pinchToZoom = _pinchToZoom.asStateFlow()
 
@@ -28,6 +37,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _removeAds.value = dataStore.removeAds.first()
             _hideSuggested.value = dataStore.hideSuggested.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
+            _hideReels.value = dataStore.hideReels.first()
+            _hideStories.value = dataStore.hideStories.first()
+            _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
         }
     }
 
@@ -43,6 +55,27 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setHideSuggested(hideSuggested)
         }
         _hideSuggested.value = hideSuggested
+    }
+
+    fun setHideReels(hideReels: Boolean) {
+        viewModelScope.launch {
+            dataStore.setHideReels(hideReels)
+        }
+        _hideReels.value = hideReels
+    }
+
+    fun setHideStories(hideStories: Boolean) {
+        viewModelScope.launch {
+            dataStore.setHideStories(hideStories)
+        }
+        _hideStories.value = hideStories
+    }
+
+    fun setHidePeopleYouMayKnow(hidePeopleYouMayKnow: Boolean) {
+        viewModelScope.launch {
+            dataStore.setHidePeopleYouMayKnow(hidePeopleYouMayKnow)
+        }
+        _hidePeopleYouMayKnow.value = hidePeopleYouMayKnow
     }
 
     fun setPinchToZoom(pinchToZoom: Boolean) {

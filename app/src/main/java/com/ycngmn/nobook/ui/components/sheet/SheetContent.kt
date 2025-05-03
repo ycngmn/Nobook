@@ -41,6 +41,9 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
     val removeAds = viewModel.removeAds.collectAsState()
     val hideSuggested = viewModel.hideSuggested.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
+    val hideReels = viewModel.hideReels.collectAsState()
+    val hideStories = viewModel.hideStories.collectAsState()
+    val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
 
     Box(
         modifier = Modifier
@@ -63,7 +66,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             SheetItem(
                 icon = R.drawable.public_off_24px,
                 title = "Hide suggested posts",
-                subtitle = "Hide posts from accounts you don't follow. May cause frequent loadings.",
+                subtitle = "May cause frequent loadings. Use \"Feeds\" from Menu instead.",
                 isActive = hideSuggested.value
 
             ) {
@@ -74,22 +77,28 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 icon = R.drawable.movie_off_24px,
                 title = "Hide reels",
                 subtitle = "Hide reels from feed and videos.",
-                isActive = false
-            ) { }
+                isActive = hideReels.value
+            ) {
+                viewModel.setHideReels(!hideReels.value)
+            }
 
             SheetItem(
                 icon = R.drawable.landscape_2_off_24px,
                 title = "Hide stories",
                 subtitle = "Hide stories section from feed.",
-                isActive = false
-            ) { }
+                isActive = hideStories.value
+            ) {
+                viewModel.setHideStories(!hideStories.value)
+            }
 
             SheetItem(
                 icon = R.drawable.frame_person_off_24px,
                 title = "Hide people you may know",
                 subtitle = "Hides the section on search page.",
-                isActive = false
-            ) { }
+                isActive = hidePeopleYouMayKnow.value
+            ) {
+                viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
+            }
 
             SheetItem(
                 icon = R.drawable.pinch_zoom_out_24px,

@@ -15,36 +15,36 @@ fun FacebookWebView(
     // Nobook settings values.
     val removeAds = viewModel.removeAds
     val hideSuggested = viewModel.hideSuggested
+    val hideReels = viewModel.hideReels
+    val hideStories = viewModel.hideStories
+    val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow
     val pinchToZoom = viewModel.pinchToZoom
 
     BaseWebView(
         url = url,
         onInterceptAction = onOpenMessenger,
         onPostLoad = { navigator, context ->
-            val generalScript = context.resources.openRawResource(R.raw.scripts)
-            val adblockScript = context.resources.openRawResource(R.raw.adblock)
-            val hideSuggestedScript = context.resources.openRawResource(R.raw.hide_suggested)
-            val pinchToZoomScript = context.resources.openRawResource(R.raw.pinch_to_zoom)
-            navigator.evaluateJavaScript(
-                generalScript.bufferedReader().use { it.readText() }
+
+            data class Script(
+                val condition: Boolean,
+                val scriptRes: Int
             )
 
-            if (removeAds.value) {
-                navigator.evaluateJavaScript(
-                    adblockScript.bufferedReader().use { it.readText() }
-                )
-            }
+            val scripts = listOf(
+                Script(true, R.raw.scripts), // always apply
+                Script(removeAds.value, R.raw.adblock),
+                Script(hideSuggested.value, R.raw.hide_suggested),
+                Script(hideReels.value, R.raw.hide_reels),
+                Script(hideStories.value, R.raw.hide_stories),
+                Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk),
+                Script(!pinchToZoom.value, R.raw.pinch_to_zoom)
+            )
 
-            if (hideSuggested.value) {
-                navigator.evaluateJavaScript(
-                    hideSuggestedScript.bufferedReader().use { it.readText() }
-                )
-            }
-
-            if (!pinchToZoom.value) {
-                navigator.evaluateJavaScript(
-                    pinchToZoomScript.bufferedReader().use { it.readText() }
-                )
+            scripts.filter { it.condition }.forEach { script ->
+                val scriptText =
+                    context.resources.openRawResource(script.scriptRes)
+                    .bufferedReader().use { it.readText() }
+                navigator.evaluateJavaScript(scriptText)
             }
         },
         onRestart = onRestart
