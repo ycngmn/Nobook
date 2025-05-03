@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
     Box(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.background)
+            .verticalScroll(state = rememberScrollState())
     ) {
         Column(
             modifier = Modifier
@@ -66,6 +69,27 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             ) {
                 viewModel.setHideSuggested(!hideSuggested.value)
             }
+
+            SheetItem(
+                icon = R.drawable.movie_off_24px,
+                title = "Hide reels",
+                subtitle = "Hide reels from feed and videos.",
+                isActive = false
+            ) { }
+
+            SheetItem(
+                icon = R.drawable.landscape_2_off_24px,
+                title = "Hide stories",
+                subtitle = "Hide stories section from feed.",
+                isActive = false
+            ) { }
+
+            SheetItem(
+                icon = R.drawable.frame_person_off_24px,
+                title = "Hide people you may know",
+                subtitle = "Hides the section on search page.",
+                isActive = false
+            ) { }
 
             SheetItem(
                 icon = R.drawable.pinch_zoom_out_24px,
