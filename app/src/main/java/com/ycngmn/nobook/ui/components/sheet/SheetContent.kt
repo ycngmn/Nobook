@@ -65,6 +65,15 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             }
 
             SheetItem(
+                icon = R.drawable.download_24px,
+                title = "Download content",
+                subtitle = "Add buttons to download stories, photos, reels and videos.",
+                isActive = enableDownloadContent.value
+            ) {
+                viewModel.setEnableDownloadContent(!enableDownloadContent.value)
+            }
+
+            SheetItem(
                 icon = R.drawable.public_off_24px,
                 title = "Hide suggested posts",
                 subtitle = "May cause frequent loadings. Use \"Feeds\" from Menu instead.",
@@ -108,15 +117,6 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
-            }
-            
-            SheetItem(
-                icon = R.drawable.download_24px,
-                title = "Download content",
-                subtitle = "Add buttons to download stories, posts and reels.",
-                isActive = enableDownloadContent.value
-            ) {
-                viewModel.setEnableDownloadContent(!enableDownloadContent.value)
             }
 
             SheetItem(
