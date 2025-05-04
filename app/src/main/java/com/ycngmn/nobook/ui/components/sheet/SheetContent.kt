@@ -44,6 +44,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
     val hideReels = viewModel.hideReels.collectAsState()
     val hideStories = viewModel.hideStories.collectAsState()
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
+    val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
 
     Box(
         modifier = Modifier
@@ -107,6 +108,15 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
+            }
+            
+            SheetItem(
+                icon = R.drawable.download_24px,
+                title = "Download content",
+                subtitle = "Add buttons to download stories, posts and reels.",
+                isActive = enableDownloadContent.value
+            ) {
+                viewModel.setEnableDownloadContent(!enableDownloadContent.value)
             }
 
             SheetItem(
