@@ -32,6 +32,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _pinchToZoom = MutableStateFlow(false)
     val pinchToZoom = _pinchToZoom.asStateFlow()
 
+    private val _enableDownloadContent = MutableStateFlow(true)
+    val enableDownloadContent = _enableDownloadContent.asStateFlow()
+
     init {
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
@@ -40,6 +43,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _hideReels.value = dataStore.hideReels.first()
             _hideStories.value = dataStore.hideStories.first()
             _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
+            _enableDownloadContent.value = dataStore.enableDownloadContent.first()
         }
     }
 
@@ -83,5 +87,12 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setPinchToZoom(pinchToZoom)
         }
         _pinchToZoom.value = pinchToZoom
+    }
+
+    fun setEnableDownloadContent(enableDownloadContent: Boolean) {
+        viewModelScope.launch {
+            dataStore.setEnableDownloadContent(enableDownloadContent)
+        }
+        _enableDownloadContent.value = enableDownloadContent
     }
 }

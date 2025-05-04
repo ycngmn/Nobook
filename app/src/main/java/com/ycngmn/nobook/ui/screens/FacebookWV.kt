@@ -19,6 +19,7 @@ fun FacebookWebView(
     val hideStories = viewModel.hideStories
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow
     val pinchToZoom = viewModel.pinchToZoom
+    val enableDownloadContent = viewModel.enableDownloadContent
 
     BaseWebView(
         url = url,
@@ -37,7 +38,8 @@ fun FacebookWebView(
                 Script(hideReels.value, R.raw.hide_reels),
                 Script(hideStories.value, R.raw.hide_stories),
                 Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk),
-                Script(!pinchToZoom.value, R.raw.pinch_to_zoom)
+                Script(!pinchToZoom.value, R.raw.pinch_to_zoom),
+                Script(enableDownloadContent.value, R.raw.download_content)
             )
 
             scripts.filter { it.condition }.forEach { script ->

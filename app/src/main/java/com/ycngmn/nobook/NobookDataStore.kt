@@ -18,6 +18,7 @@ class NobookDataStore(private val context: Context) {
         val HIDE_STORIES = booleanPreferencesKey("hide_stories")
         val HIDE_PEOPLE_YOU_MAY_KNOW = booleanPreferencesKey("hide_people_you_may_know")
         val PINCH_TO_ZOOM = booleanPreferencesKey("pinch_to_zoom")
+        val ENABLE_DOWNLOAD_CONTENT = booleanPreferencesKey("enable_download_content")
     }
 
     val removeAds = context.dataStore.data.map { it[REMOVE_ADS] != false }
@@ -48,5 +49,10 @@ class NobookDataStore(private val context: Context) {
     val pinchToZoom = context.dataStore.data.map { it[PINCH_TO_ZOOM] == true }
     suspend fun setPinchToZoom(pinchToZoom: Boolean) {
         context.dataStore.edit { it[PINCH_TO_ZOOM] = pinchToZoom }
+    }
+    
+    val enableDownloadContent = context.dataStore.data.map { it[ENABLE_DOWNLOAD_CONTENT] != false }
+    suspend fun setEnableDownloadContent(enableDownloadContent: Boolean) {
+        context.dataStore.edit { it[ENABLE_DOWNLOAD_CONTENT] = enableDownloadContent }
     }
 }
