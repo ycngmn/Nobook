@@ -1,17 +1,23 @@
-## Nobook - v0.0.4
+## Nobook - v0.0.5
 
-Updated with lots of fixes, new features (and a few bugs)...
+A small update with a big feature!
 
 <ins>**Changelog:**</ins>
 
-* Added 3 new annoyance-blocking options! 87dcd9c084ac1ca8af1564bea95ff70714be155f
-  - Hide Reels
-  - Hide Stories
-  - Hide "People You May Know"
-* Added text selection via press and hold. 933f27fdb7477baac69578d95d81e77196aabd1b
-* Fixed Messenger page not triggering on some devices #5 (hopefully). dbc6721000bc1ec6dfc8354d5d29771a93211116
-* Fixed issue with "Pinch to Zoom" locking on recompositions. 39718db94b2e2150c7db41d59df588dd4448c911
-* Fixed bottom overlay reappearing on the search page. fd8bc12789ddd8b9289be638d5029739fd6060c6
-* Improved "Reload to apply settings" mechanism. 343330acf28a1f9eab86ac879a8cf6deb3030809
-* Enhanced press-and-hold effect. ec4abec778b70eecd0631354b1008f00af28073e
-* Various other fixes and improvements.
+* **Download content** feature by @YeiversonYurgaky! (#25)
+  - Download photos, videos, stories, and reels.
+* Fixed #23: "People you may know" section was not hidden in the feed. 689d1854380b59875bd800b4b764b41fe5b8c150
+* Factorized hiding options for a more minimalistic UX. 982575203853618e36753f088fae5fff6bc1e0f1
+
+> [!note]
+> **To download a content :** <br><br>
+> First ensure that 'Download content' is enabled in the Nobook settings.<br>
+> Then, click on the element you wish to download.<br>
+> A download button should appear on the upper right corner of the screen.<br>
+> Click it to start the download — the file will be saved to your Downloads folder.
+
+> [!important]
+> @YeiversonYurgaky made the very first contribution to Nobook — and it's a big one! <br>
+> If you enjoyed the download feature, don’t forget to thank him. ❤️
+
+
