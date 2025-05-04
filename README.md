@@ -8,7 +8,8 @@ Nobook is a lightweight Android application to browse facebook. Built with Jetpa
 ## Features
 
 *  Blocks sponsored ads.
-*  Blocks suggested posts.
+*  Blocks suggested posts. 
+*  Downloads media.
 *  Facebook lite interface.
 *  Size < 2MB.
 
@@ -36,5 +37,4 @@ Contributions to the project are welcome. Please follow these guidelines:
 
 ## Plans :
 - Add auto update feature.
-- More customization options.
 - Less hardcoded js scripts.
