@@ -356,7 +356,7 @@
       url.includes("/stories/") ||
       url.includes("/reel/") ||
       url.includes("/videos/") ||
-      url.includes("/watch/") ||
+      url.includes("/watch/?") ||
       url.includes("/photo") ||
       url.includes("/photos/") ||
       url.includes("/highlights/")
@@ -485,6 +485,7 @@
     const btn = document.getElementById(GLOBAL_DOWNLOAD_BTN_ID);
     if (btn) {
       btn.classList.remove("visible");
+      btn.style.display = "none";
     }
   };
 
