@@ -22,13 +22,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
@@ -37,13 +41,11 @@ import com.ycngmn.nobook.ui.NobookViewModel
 @Composable
 fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) {
 
+    val isOpenDialog = remember { mutableStateOf(false) }
+
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     val removeAds = viewModel.removeAds.collectAsState()
-    val hideSuggested = viewModel.hideSuggested.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
-    val hideReels = viewModel.hideReels.collectAsState()
-    val hideStories = viewModel.hideStories.collectAsState()
-    val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
 
     Box(
@@ -57,8 +59,8 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
         ) {
             SheetItem(
                 icon = R.drawable.ad_off_24px,
-                title = "Remove ads",
-                subtitle = "Remove sponsored ads from feeds, videos and reels.",
+                title = stringResource(R.string.remove_ads_title),
+                subtitle = stringResource(R.string.remove_ads_subtitle),
                 isActive = removeAds.value
             ) {
                 viewModel.setRemoveAds(!removeAds.value)
@@ -66,63 +68,40 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
 
             SheetItem(
                 icon = R.drawable.download_24px,
-                title = "Download content",
-                subtitle = "Add buttons to download stories, photos, reels and videos.",
+                title = stringResource(R.string.download_content_title),
+                subtitle = stringResource(R.string.download_content_subtitle),
                 isActive = enableDownloadContent.value
             ) {
                 viewModel.setEnableDownloadContent(!enableDownloadContent.value)
             }
 
             SheetItem(
-                icon = R.drawable.public_off_24px,
-                title = "Hide suggested posts",
-                subtitle = "May cause frequent loadings. Use \"Feeds\" from Menu instead.",
-                isActive = hideSuggested.value
-
-            ) {
-                viewModel.setHideSuggested(!hideSuggested.value)
-            }
-
-            SheetItem(
-                icon = R.drawable.movie_off_24px,
-                title = "Hide reels",
-                subtitle = "Hide reels from feed and videos.",
-                isActive = hideReels.value
-            ) {
-                viewModel.setHideReels(!hideReels.value)
-            }
-
-            SheetItem(
-                icon = R.drawable.landscape_2_off_24px,
-                title = "Hide stories",
-                subtitle = "Hide stories section from feed.",
-                isActive = hideStories.value
-            ) {
-                viewModel.setHideStories(!hideStories.value)
-            }
-
-            SheetItem(
-                icon = R.drawable.frame_person_off_24px,
-                title = "Hide people you may know",
-                subtitle = "Hides the section on search page.",
-                isActive = hidePeopleYouMayKnow.value
-            ) {
-                viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
-            }
-
-            SheetItem(
                 icon = R.drawable.pinch_zoom_out_24px,
-                title = "Pinch to zoom",
-                subtitle = "Activate zoom in and out gestures.",
+                title = stringResource(R.string.pinch_to_zoom_title),
+                subtitle = stringResource(R.string.pinch_to_zoom_subtitle),
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
             }
 
             SheetItem(
+                icon = R.drawable.widget_width_24px,
+                title = stringResource(R.string.customize_feed_title),
+                subtitle = stringResource(R.string.customize_feed_subtitle),
+                iconColor = Color(0xFFD8A7B1)
+
+            ) {
+                isOpenDialog.value = true
+            }
+
+            if (isOpenDialog.value) HideOptionsDialog(viewModel) {
+                isOpenDialog.value = false
+            }
+
+            SheetItem(
                 icon = R.drawable.open_in_browser_24px,
-                title = "Open in Nobook",
-                subtitle = "Open facebook urls from other apps.",
+                title = stringResource(R.string.open_in_nobook_title),
+                subtitle = stringResource(R.string.open_in_nobook_subtitle),
                 iconColor = Color(0xFF77E5B6)
             ) {
                 // Open open by default settings
@@ -135,8 +114,8 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
 
             SheetItem(
                 icon = R.drawable.star_shine_24px,
-                title = "Star at Github",
-                subtitle = "Updates, bugs & contributions.",
+                title = stringResource(R.string.star_at_github_title),
+                subtitle = stringResource(R.string.star_at_github_subtitle),
                 iconColor = Color(0XFFE6B800)
             ) {
                 val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
@@ -144,7 +123,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             }
 
             Text(
-                text = "Changes will apply on your next session!",
+                text = stringResource(R.string.changes_apply_next_session),
                 fontSize = 16.sp,
                 color = Color.Red,
                 textAlign = TextAlign.Center,
@@ -160,13 +139,13 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
 
                 Card  (
                     shape = RoundedCornerShape(6.dp),
-                    elevation = CardDefaults.cardElevation(7.dp),
+                    elevation = CardDefaults.cardElevation(2.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
                     Text(
-                        text = "Apply Immediately?",
+                        text = stringResource(R.string.apply_immediately),
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
@@ -189,7 +168,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 ) {
 
                     Text(
-                        text = "Close Menu",
+                        text = stringResource(R.string.close_menu),
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
@@ -199,9 +178,60 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                     )
                 }
             }
-
-
         }
     }
+}
 
+@Composable
+private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
+
+    val hideSuggested = viewModel.hideSuggested.collectAsState()
+    val hideReels = viewModel.hideReels.collectAsState()
+    val hideStories = viewModel.hideStories.collectAsState()
+    val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
+
+    Dialog(
+        onDismissRequest = { onClose() }
+    ) {
+        Card(
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            SheetItem(
+                icon = R.drawable.public_off_24px,
+                title = stringResource(R.string.hide_suggested_title),
+                subtitle = stringResource(R.string.hide_reels_subtitle),
+                isActive = hideSuggested.value
+
+            ) {
+                viewModel.setHideSuggested(!hideSuggested.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.movie_off_24px,
+                title = stringResource(R.string.hide_reels_title),
+                subtitle = stringResource(R.string.hide_reels_subtitle),
+                isActive = hideReels.value
+            ) {
+                viewModel.setHideReels(!hideReels.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.landscape_2_off_24px,
+                title = stringResource(R.string.hide_stories_title),
+                subtitle = stringResource(R.string.hide_stories_subtitle),
+                isActive = hideStories.value
+            ) {
+                viewModel.setHideStories(!hideStories.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.frame_person_off_24px,
+                title = stringResource(R.string.hide_people_you_may_know_title),
+                subtitle = stringResource(R.string.hide_people_you_may_know_subtitle),
+                isActive = hidePeopleYouMayKnow.value
+            ) {
+                viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
+            }
+        }
+    }
 }
