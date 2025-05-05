@@ -1,7 +1,9 @@
 package com.ycngmn.nobook.ui.components.sheet
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -98,18 +100,21 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 isOpenDialog.value = false
             }
 
-            SheetItem(
-                icon = R.drawable.open_in_browser_24px,
-                title = stringResource(R.string.open_in_nobook_title),
-                subtitle = stringResource(R.string.open_in_nobook_subtitle),
-                iconColor = Color(0xFF77E5B6)
-            ) {
-                // Open open by default settings
-                val packageName = "package:${context.packageName}".toUri()
-                val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                    Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, packageName)
-                else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageName)
-                context.startActivity(intent)
+            if (!canOpenByDefault(context)) {
+
+                SheetItem(
+                    icon = R.drawable.open_in_browser_24px,
+                    title = stringResource(R.string.open_in_nobook_title),
+                    subtitle = stringResource(R.string.open_in_nobook_subtitle),
+                    iconColor = Color(0xFF77E5B6)
+                ) {
+                    // Open open by default settings
+                    val packageName = "package:${context.packageName}".toUri()
+                    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, packageName)
+                    else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageName)
+                    context.startActivity(intent)
+                }
             }
 
             SheetItem(
@@ -199,7 +204,7 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             SheetItem(
                 icon = R.drawable.public_off_24px,
                 title = stringResource(R.string.hide_suggested_title),
-                subtitle = stringResource(R.string.hide_reels_subtitle),
+                subtitle = stringResource(R.string.hide_suggested_subtitle),
                 isActive = hideSuggested.value
 
             ) {
@@ -235,3 +240,26 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
         }
     }
 }
+
+private fun canOpenByDefault(context: Context): Boolean {
+    val urls = listOf(
+        "https://www.facebook.com",
+        "https://m.facebook.com",
+        "https://fb.watch",
+        "https://facebook.com"
+    )
+
+    val pm = context.packageManager
+    val packageName = context.packageName
+
+    for (url in urls) {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+        val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        if (resolveInfo?.activityInfo?.packageName != packageName) {
+            return false
+        }
+    }
+
+    return true
+}
+

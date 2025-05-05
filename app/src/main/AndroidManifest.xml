@@ -42,6 +42,8 @@
                 <data android:scheme="https" />
                 <data android:host="m.facebook.com" />
                 <data android:scheme="https" />
+                <data android:host="fb.watch" />
+                <data android:scheme="https" />
                 <data android:host="facebook.com" />
             </intent-filter>
 
