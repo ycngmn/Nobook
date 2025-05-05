@@ -366,8 +366,6 @@
 
     // Element selectors check
     const selectors = [
-      // Dialog with large media
-      'div[role="dialog"] video:not([hidden]), div[role="dialog"] img[src*="fbcdn"]:not([width="16"]):not([hidden])',
       // Story selectors
       'div[data-sigil="story-viewer"]',
       'div[data-sigil="story-popup-header"]',
@@ -390,56 +388,6 @@
         return true;
       }
     }
-
-    return false;
-  };
-
-  // Check if we're in search mode
-  const isInSearchMode = () => {
-    if (window.location.href.includes("/search/")) {
-      return true;
-    }
-
-    const searchSelectors = [
-      'input[type="search"]:focus',
-      'div[role="dialog"][aria-label*="Search"]',
-      'form[action="/search/"]',
-      'div[aria-label="Search results"]',
-      'input[placeholder*="Search"]',
-    ];
-
-    for (const selector of searchSelectors) {
-      if (document.querySelector(selector)) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-
-  // Detect if we're on the main feed
-  const isMainFeed = () => {
-    if (
-      window.location.href.match(/facebook\.com\/?$/) ||
-      window.location.href.match(/facebook\.com\/home(\.php)?\/?$/)
-    ) {
-      return true;
-    }
-
-    const feedSelectors = [
-      'div[aria-label="Create Story"]',
-      'div[data-pagelet="Stories"]',
-      'div[aria-label="Create Post"]',
-      'div[role="main"] form',
-      'div[role="tablist"][aria-label="News Feed"]',
-    ];
-
-    for (const selector of feedSelectors) {
-      if (document.querySelector(selector)) {
-        return true;
-      }
-    }
-
     return false;
   };
 
@@ -491,13 +439,6 @@
 
   // Update button visibility based on content
   const updateButtonVisibility = () => {
-    // Don't show in search mode or main feed
-    if (isInSearchMode() || isMainFeed()) {
-      hideDownloadButton();
-      inFeaturedStory = false;
-      currentContentContainer = null;
-      return;
-    }
 
     // Check if we're in a relevant view
     if (isInStoryOrReelView()) {
@@ -548,28 +489,6 @@
   const init = () => {
     injectStyles();
 
-    // Set up video playback monitoring
-    document.addEventListener(
-      "play",
-      (e) => {
-        if (e.target.tagName.toLowerCase() === "video") {
-          const videoElement = e.target;
-          const rect = videoElement.getBoundingClientRect();
-
-          if (
-            rect.width > 150 &&
-            rect.height > 150 &&
-            isElementVisible(videoElement)
-          ) {
-            inFeaturedStory = true;
-            findAndSetContentContainer(videoElement);
-            showDownloadButton();
-          }
-        }
-      },
-      true
-    );
-
     // Reset state
     inFeaturedStory = false;
     currentContentContainer = null;
@@ -600,32 +519,6 @@
       attributeFilter: ["src", "style", "class"],
     });
 
-    // Check periodically
-    setInterval(processPage, config.checkInterval);
-
-    // Check when URL changes
-    let lastUrl = window.location.href;
-    setInterval(() => {
-      if (lastUrl !== window.location.href) {
-        lastUrl = window.location.href;
-
-        // Reset state and check again
-        inFeaturedStory = false;
-        currentContentContainer = null;
-        lastDownloadedUrl = null;
-        setTimeout(processPage, 500);
-      }
-    }, 1000);
-
-    // Check on scroll (with debounce)
-    window.addEventListener(
-      "scroll",
-      () => {
-        clearTimeout(window.scrollTimer);
-        window.scrollTimer = setTimeout(processPage, 300);
-      },
-      { passive: true }
-    );
   };
 
   // Start when the document is ready
