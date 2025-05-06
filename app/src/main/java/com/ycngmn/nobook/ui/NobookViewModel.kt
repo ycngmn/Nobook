@@ -17,6 +17,12 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _removeAds = MutableStateFlow(true)
     val removeAds = _removeAds.asStateFlow()
 
+    private val _enableDownloadContent = MutableStateFlow(true)
+    val enableDownloadContent = _enableDownloadContent.asStateFlow()
+
+    private val _pinchToZoom = MutableStateFlow(false)
+    val pinchToZoom = _pinchToZoom.asStateFlow()
+
     private val _hideSuggested = MutableStateFlow(false)
     val hideSuggested = _hideSuggested.asStateFlow()
 
@@ -29,21 +35,19 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _hidePeopleYouMayKnow = MutableStateFlow(false)
     val hidePeopleYouMayKnow = _hidePeopleYouMayKnow.asStateFlow()
 
-    private val _pinchToZoom = MutableStateFlow(false)
-    val pinchToZoom = _pinchToZoom.asStateFlow()
-
-    private val _enableDownloadContent = MutableStateFlow(true)
-    val enableDownloadContent = _enableDownloadContent.asStateFlow()
+    private val _hideGroups = MutableStateFlow(false)
+    val hideGroups = _hideGroups.asStateFlow()
 
     init {
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
-            _hideSuggested.value = dataStore.hideSuggested.first()
+            _enableDownloadContent.value = dataStore.enableDownloadContent.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
+            _hideSuggested.value = dataStore.hideSuggested.first()
             _hideReels.value = dataStore.hideReels.first()
             _hideStories.value = dataStore.hideStories.first()
             _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
-            _enableDownloadContent.value = dataStore.enableDownloadContent.first()
+            _hideGroups.value = dataStore.hideGroups.first()
         }
     }
 
@@ -52,6 +56,20 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setRemoveAds(removeAds)
         }
         _removeAds.value = removeAds
+    }
+
+    fun setEnableDownloadContent(enableDownloadContent: Boolean) {
+        viewModelScope.launch {
+            dataStore.setEnableDownloadContent(enableDownloadContent)
+        }
+        _enableDownloadContent.value = enableDownloadContent
+    }
+
+    fun setPinchToZoom(pinchToZoom: Boolean) {
+        viewModelScope.launch {
+            dataStore.setPinchToZoom(pinchToZoom)
+        }
+        _pinchToZoom.value = pinchToZoom
     }
 
     fun setHideSuggested(hideSuggested: Boolean) {
@@ -82,17 +100,10 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
         _hidePeopleYouMayKnow.value = hidePeopleYouMayKnow
     }
 
-    fun setPinchToZoom(pinchToZoom: Boolean) {
+    fun setHideGroups(hideGroups: Boolean) {
         viewModelScope.launch {
-            dataStore.setPinchToZoom(pinchToZoom)
+            dataStore.setHideGroups(hideGroups)
         }
-        _pinchToZoom.value = pinchToZoom
-    }
-
-    fun setEnableDownloadContent(enableDownloadContent: Boolean) {
-        viewModelScope.launch {
-            dataStore.setEnableDownloadContent(enableDownloadContent)
-        }
-        _enableDownloadContent.value = enableDownloadContent
+        _hideGroups.value = hideGroups
     }
 }

@@ -194,6 +194,7 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
     val hideReels = viewModel.hideReels.collectAsState()
     val hideStories = viewModel.hideStories.collectAsState()
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
+    val hideGroups = viewModel.hideGroups.collectAsState()
 
     Dialog(
         onDismissRequest = { onClose() }
@@ -236,6 +237,15 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
                 isActive = hidePeopleYouMayKnow.value
             ) {
                 viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.group_off_24px,
+                title = stringResource(R.string.hide_groups_title),
+                subtitle = stringResource(R.string.hide_groups_subtitle),
+                isActive = hideGroups.value
+            ) {
+                viewModel.setHideGroups(!hideGroups.value)
             }
         }
     }

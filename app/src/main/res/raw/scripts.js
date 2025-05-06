@@ -64,7 +64,7 @@
     }
 })();
 
-// Hide Open With App Banner Script
+// Hide bottom banners
 const observer = new MutationObserver(() => {
   const element = document.querySelector('.bottom.fixed-container');
   if (element && !element.hasAttribute('data-shift-on-keyboard-shown')) {
@@ -75,14 +75,18 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 // Remove black overlay on search page
 (() => {
-  const obs = new MutationObserver(() => {
-    const el = document.querySelector('.m.bg-s2.vscroller');
-    if (el) {
-      el.setAttribute('style', '');
+  const overrideStyles = `
+    .m.bg-s2.vscroller {
+      all: unset !important;
+      overflow: auto !important;
     }
-  });
-  obs.observe(document.documentElement, { childList: true, subtree: true });
+  `;
+
+  const styleTag = document.createElement('style');
+  styleTag.textContent = overrideStyles;
+  document.head.appendChild(styleTag);
 })();
+
 
 // Hold Effect Script
 (function() {

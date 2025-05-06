@@ -14,12 +14,13 @@ fun FacebookWebView(
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     // Nobook settings values.
     val removeAds = viewModel.removeAds
+    val enableDownloadContent = viewModel.enableDownloadContent
+    val pinchToZoom = viewModel.pinchToZoom
     val hideSuggested = viewModel.hideSuggested
     val hideReels = viewModel.hideReels
     val hideStories = viewModel.hideStories
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow
-    val pinchToZoom = viewModel.pinchToZoom
-    val enableDownloadContent = viewModel.enableDownloadContent
+    val hideGroups = viewModel.hideGroups
 
     BaseWebView(
         url = url,
@@ -34,12 +35,14 @@ fun FacebookWebView(
             val scripts = listOf(
                 Script(true, R.raw.scripts), // always apply
                 Script(removeAds.value, R.raw.adblock),
+                Script(!pinchToZoom.value, R.raw.pinch_to_zoom),
+                Script(enableDownloadContent.value, R.raw.download_content),
                 Script(hideSuggested.value, R.raw.hide_suggested),
                 Script(hideReels.value, R.raw.hide_reels),
                 Script(hideStories.value, R.raw.hide_stories),
                 Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk),
-                Script(!pinchToZoom.value, R.raw.pinch_to_zoom),
-                Script(enableDownloadContent.value, R.raw.download_content)
+                Script(hideGroups.value, R.raw.hide_groups)
+
             )
 
             scripts.filter { it.condition }.forEach { script ->
