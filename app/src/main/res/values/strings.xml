@@ -28,10 +28,13 @@
     <string name="hide_reels_subtitle">Hide reels on feed and videos.</string>
 
     <string name="hide_stories_title">Hide stories</string>
-    <string name="hide_stories_subtitle">Hide stories section from feed.</string>
+    <string name="hide_stories_subtitle">Hide stories section on feed.</string>
 
     <string name="hide_people_you_may_know_title">Hide people you may know</string>
-    <string name="hide_people_you_may_know_subtitle">Hides the section on feed.</string>
+    <string name="hide_people_you_may_know_subtitle">Hides on feed &amp; search.</string>
+
+    <string name="hide_groups_title">Hide group suggestions</string>
+    <string name="hide_groups_subtitle">Hides on feed &amp; search.</string>
 
     <!-- Bottom Text and Buttons -->
     <string name="changes_apply_next_session">Changes will apply on your next session!</string>
