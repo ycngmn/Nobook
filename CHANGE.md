@@ -1,23 +1,12 @@
-## Nobook - v0.0.5
-
-A small update with a big feature!
+## Nobook - v0.0.6
 
 <ins>**Changelog:**</ins>
 
-* **Download content** feature by @YeiversonYurgaky! (#25)
-  - Download photos, videos, stories, and reels.
-* Fixed #23: "People you may know" section was not hidden in the feed. 689d1854380b59875bd800b4b764b41fe5b8c150
-* Factorized hiding options for a more minimalistic UX. 982575203853618e36753f088fae5fff6bc1e0f1
-
-> [!note]
-> **To download a content :** <br><br>
-> First ensure that 'Download content' is enabled in the Nobook settings.<br>
-> Then, click on the element you wish to download.<br>
-> A download button should appear on the upper right corner of the screen.<br>
-> Click it to start the download — the file will be saved to your Downloads folder.
-
-> [!important]
-> @YeiversonYurgaky made the very first contribution to Nobook — and it's a big one! <br>
-> If you enjoyed the download feature, don’t forget to thank him. ❤️
+* **Improved Messenger UI** . 44c57cc661213afd9ee45f2514ef13d7d299fa8b
+* New: Added "Hide group suggestions" option. 8e07cd2d4bd59d299befa6edebb9f9a6a0cb329a
+* Feature: Auto hide "Open in Nobook" button if all urls validated. 19f2c0e8dcc5b6cd10dc16dd9b7a46828c26b489
+* Removed sticky bottom banners #24. 93d09fee791e27cc9e80069c460ec61203f54442
+* Improved text selection. 59f62b4aaa359599c59c6d86f6fa1ac8b772c393
+* Minor fixes.
 
 
