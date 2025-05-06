@@ -65,11 +65,13 @@
 })();
 
 // Hide Open With App Banner Script
-(function() {
-  const style = document.createElement('style');
-  style.textContent = '.bottom[data-actual-height="67"] { display: none !important; }';
-  document.head.appendChild(style);
-})();
+const observer = new MutationObserver(() => {
+  const element = document.querySelector('.bottom.fixed-container');
+  if (element && !element.hasAttribute('data-shift-on-keyboard-shown')) {
+    element.style.display = 'none';
+  }
+});
+observer.observe(document.body, { childList: true, subtree: true });
 
 // Remove black overlay on search page
 (() => {
