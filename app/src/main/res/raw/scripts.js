@@ -64,14 +64,27 @@
     }
 })();
 
-// Hide bottom banners
+// Hide annoying bottom banners
 const observer = new MutationObserver(() => {
+  const pathname = location.pathname;
+  const allowedPaths = ['/', '/friends/', '/watch/', '/marketplace/', '/notifications/'];
+
+  if (!allowedPaths.includes(pathname)) return;
+
   const element = document.querySelector('.bottom.fixed-container');
-  if (element && !element.hasAttribute('data-shift-on-keyboard-shown')) {
-    element.style.display = 'none';
+  if (
+    element &&
+    !element.hasAttribute('data-shift-on-keyboard-shown')
+  ) {
+    const heightAttr = element.getAttribute('data-actual-height');
+    if (heightAttr && parseInt(heightAttr, 10) < 80) {
+      element.style.display = 'none';
+    }
   }
 });
+
 observer.observe(document.body, { childList: true, subtree: true });
+
 
 // Remove black overlay on search page
 (() => {
