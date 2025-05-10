@@ -3,38 +3,38 @@
 
     <!-- Sheet Items -->
     <string name="remove_ads_title">Remove ads</string>
-    <string name="remove_ads_subtitle">Remove sponsored ads from feeds, videos and reels.</string>
+    <string name="remove_ads_subtitle">Block sponsored ads everywhere.</string>
 
     <string name="download_content_title">Download content</string>
-    <string name="download_content_subtitle">Add buttons to download stories, photos, reels and videos.</string>
+    <string name="download_content_subtitle">Add download button to contents.</string>
 
     <string name="pinch_to_zoom_title">Pinch to zoom</string>
-    <string name="pinch_to_zoom_subtitle">Activate zoom in and out gestures.</string>
+    <string name="pinch_to_zoom_subtitle">Activate zoom in/out gestures.</string>
 
     <string name="customize_feed_title">Customize feed</string>
     <string name="customize_feed_subtitle">Show or hide content.</string>
 
     <string name="open_in_nobook_title">Open in Nobook</string>
-    <string name="open_in_nobook_subtitle">Open facebook urls from other apps.</string>
+    <string name="open_in_nobook_subtitle">Open fb urls from other apps.</string>
 
     <string name="star_at_github_title">Star at Github</string>
-    <string name="star_at_github_subtitle">Updates, bugs &amp; contributions.</string>
+    <string name="star_at_github_subtitle">Updates and contributions.</string>
 
     <!-- Dialog Items -->
     <string name="hide_suggested_title">Hide suggested posts</string>
     <string name="hide_suggested_subtitle">May cause frequent loadings. Use "Feeds" from Menu instead.</string>
 
     <string name="hide_reels_title">Hide reels</string>
-    <string name="hide_reels_subtitle">Hide reels on feed and videos.</string>
+    <string name="hide_reels_subtitle" />
 
     <string name="hide_stories_title">Hide stories</string>
-    <string name="hide_stories_subtitle">Hide stories section on feed.</string>
+    <string name="hide_stories_subtitle" />
 
     <string name="hide_people_you_may_know_title">Hide people you may know</string>
-    <string name="hide_people_you_may_know_subtitle">Hides on feed &amp; search.</string>
+    <string name="hide_people_you_may_know_subtitle" />
 
     <string name="hide_groups_title">Hide group suggestions</string>
-    <string name="hide_groups_subtitle">Hides on feed &amp; search.</string>
+    <string name="hide_groups_subtitle" />
 
     <!-- Bottom Text and Buttons -->
     <string name="changes_apply_next_session">Changes will apply on your next session!</string>

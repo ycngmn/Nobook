@@ -57,7 +57,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
     ) {
         Column(
             modifier = Modifier
-                .padding(vertical = 16.dp)
+                .padding(vertical = 12.dp)
         ) {
             SheetItem(
                 icon = R.drawable.ad_off_24px,

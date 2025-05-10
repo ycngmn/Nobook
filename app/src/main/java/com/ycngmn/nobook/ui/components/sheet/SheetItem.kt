@@ -31,7 +31,7 @@ fun SheetItem(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 4.dp, vertical = 4.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .clickable { onClick() },
         ) {
@@ -39,7 +39,7 @@ fun SheetItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Image(
                 painter = painterResource(icon),
@@ -62,11 +62,13 @@ fun SheetItem(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
 
-                Text(
-                    text = subtitle,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 15.sp
-                )
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8F),
+                        fontSize = 15.sp
+                    )
+                }
             }
         }
     }
