@@ -32,6 +32,7 @@ import com.ycngmn.nobook.ui.components.sheet.NobookSheet
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
+import com.ycngmn.nobook.utils.jsBridge.NavigateFB
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 
@@ -43,7 +44,7 @@ fun BaseWebView(
     userAgent: String? = null,
     onInterceptAction: (() -> Unit) = {},
     onPostLoad: (WebViewNavigator, Context) -> Unit = { _, _ -> },
-    onRestart: () -> Unit = {}
+    onRestart: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val window = (context as Activity).window
@@ -57,6 +58,10 @@ fun BaseWebView(
 
     if (state.lastLoadedUrl?.contains("facebook.com/messages/blocked") == true)
         onInterceptAction()
+
+    // To navigate away from messenger
+    val navTrigger = remember { mutableStateOf(false) }
+    if (navTrigger.value) onInterceptAction()
 
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
@@ -86,6 +91,7 @@ fun BaseWebView(
     if (isLoading.value) {
         SplashLoading(state.loadingState)
     }
+
 
     Box(
         modifier = Modifier
@@ -130,6 +136,7 @@ fun BaseWebView(
                     addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
                     addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
                     addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
+                    addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
 
                     // Hide scrollbars
                     overScrollMode = View.OVER_SCROLL_NEVER

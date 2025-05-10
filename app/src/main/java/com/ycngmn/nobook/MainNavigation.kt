@@ -31,7 +31,13 @@ fun MainNavigation(data: Uri?) {
                 }
             }
         }
-        composable("messenger") { Column { MessengerWebView() } }
+        composable("messenger") {
+            Column {
+                MessengerWebView(
+                    onNavigateFB = { navController.popBackStack() }
+                )
+            }
+        }
     }
 }
 

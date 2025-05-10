@@ -25,6 +25,7 @@ fun FacebookWebView(
     BaseWebView(
         url = url,
         onInterceptAction = onOpenMessenger,
+        onRestart = onRestart,
         onPostLoad = { navigator, context ->
 
             data class Script(
@@ -42,7 +43,6 @@ fun FacebookWebView(
                 Script(hideStories.value, R.raw.hide_stories),
                 Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk),
                 Script(hideGroups.value, R.raw.hide_groups)
-
             )
 
             scripts.filter { it.condition }.forEach { script ->
@@ -51,8 +51,7 @@ fun FacebookWebView(
                     .bufferedReader().use { it.readText() }
                 navigator.evaluateJavaScript(scriptText)
             }
-        },
-        onRestart = onRestart
+        }
     )
 }
 
