@@ -143,6 +143,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             ) {
 
                 Card  (
+                    modifier = Modifier.clickable { onRestart() },
                     shape = RoundedCornerShape(6.dp),
                     elevation = CardDefaults.cardElevation(2.dp),
                     colors = CardDefaults.cardColors(
@@ -156,9 +157,6 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .padding(5.dp)
-                            .clickable {
-                                onRestart()
-                            }
                     )
                 }
 

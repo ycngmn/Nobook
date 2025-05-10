@@ -213,9 +213,15 @@ observer.observe(document.body, { childList: true, subtree: true });
 
  // Feed identifier. To not show anywhere else than the feed.
  function checkAndToggleButton() {
-   const isHomepage = window.location.pathname === '/';
-   const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-   btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
+     const hostname = window.location.hostname;
+     const pathname = window.location.pathname;
+
+     const isHomepage =
+       (hostname === 'www.facebook.com'
+       || hostname === 'm.facebook.com') &&
+       (pathname === '/' || pathname === '');
+     const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+     btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
  }
 
   const observer = new MutationObserver(checkAndToggleButton);
