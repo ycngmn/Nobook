@@ -56,8 +56,10 @@ fun BaseWebView(
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
-    if (state.lastLoadedUrl?.contains("facebook.com/messages/blocked") == true)
+    if (state.lastLoadedUrl?.contains("facebook.com/messages/blocked") == true) {
+        Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
         onInterceptAction()
+    }
 
     // To navigate away from messenger
     val navTrigger = remember { mutableStateOf(false) }

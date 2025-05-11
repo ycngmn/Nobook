@@ -39,7 +39,7 @@ class ExternalRequestInterceptor(
         } catch (_: Exception) {
             // if fails to open in messenger app
             if (url.contains("fb-messenger://threads")) {
-                Toast.makeText(context, "Opening Messenger...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
                 toggleMessenger()
             }
         }
