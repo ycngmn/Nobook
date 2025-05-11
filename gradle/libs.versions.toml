@@ -1,7 +1,7 @@
 [versions]
 agp = "8.10.0"
 composeWebviewMultiplatform = "1.9.40"
-datastorePreferences = "1.1.6"
+datastorePreferences = "1.1.4"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
