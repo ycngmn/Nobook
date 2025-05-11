@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.10.0"
 composeWebviewMultiplatform = "1.9.40"
 datastorePreferences = "1.1.6"
 kotlin = "2.0.21"
