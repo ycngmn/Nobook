@@ -1,7 +1,8 @@
 
-// Make elements selectable on long press
+// Enable press and hold caption selection.
 (function () {
   const applySelectableStyle = (el) => {
+    if (el.closest('div[role="button"]')) return;
     el.style.setProperty('user-select', 'text', 'important');
     el.style.setProperty('-webkit-user-select', 'text', 'important');
     el.style.setProperty('-moz-user-select', 'text', 'important');
@@ -30,6 +31,7 @@
     subtree: true
   });
 })();
+
 
 // Enhance Loading Overlay Script
 (function() {
