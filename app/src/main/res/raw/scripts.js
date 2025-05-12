@@ -88,21 +88,6 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, { childList: true, subtree: true });
 
 
-// Remove black overlay on search page
-(() => {
-  const overrideStyles = `
-    .m.bg-s2.vscroller {
-      all: unset !important;
-      overflow: auto !important;
-    }
-  `;
-
-  const styleTag = document.createElement('style');
-  styleTag.textContent = overrideStyles;
-  document.head.appendChild(styleTag);
-})();
-
-
 // Hold Effect Script
 (function() {
   const style = document.createElement('style');
