@@ -61,17 +61,14 @@
 // Hide facebook download button at login page.
 (function() {
     const element = document.querySelector('div[data-bloks-name="bk.components.Flexbox"].wbloks_1');
-    if (element) {
-        element.remove();
-    }
+    if (element) element.remove();
 })();
 
 // Hide annoying bottom banners
 const observer = new MutationObserver(() => {
-  const pathname = location.pathname;
-  const allowedPaths = ['/', '/friends/', '/watch/', '/marketplace/', '/notifications/'];
 
-  if (!allowedPaths.includes(pathname)) return;
+  if (location.pathname === '/'
+  && document.querySelector('div[role="button"][aria-label*="Facebook"]') === null) return;
 
   const element = document.querySelector('.bottom.fixed-container');
   if (
@@ -133,9 +130,9 @@ observer.observe(document.body, { childList: true, subtree: true });
 
             const isHomepage = window.location.pathname === '/';
             const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-            
+
             if (isHomepage && exists) scroller.style.paddingBottom = '0';
-            
+
             const spinnerContainer = scroller.querySelector('.pull-to-refresh-spinner-container');
             if (spinnerContainer) Object.assign(spinnerContainer.style, {
                 zIndex: '1001',
