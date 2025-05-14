@@ -1,35 +1,20 @@
 
 // Enable press and hold caption selection.
-(function () {
-  const applySelectableStyle = (el) => {
+(() => {
+  const makeSelectable = (el) => {
     if (el.closest('div[role="button"]')) return;
-    el.style.setProperty('user-select', 'text', 'important');
-    el.style.setProperty('-webkit-user-select', 'text', 'important');
-    el.style.setProperty('-moz-user-select', 'text', 'important');
-    el.style.setProperty('-ms-user-select', 'text', 'important');
-    el.style.setProperty('pointer-events', 'auto', 'important');
-    el.style.setProperty('touch-action', 'manipulation', 'important');
+    el.style.userSelect = 'text';
+    el.style.pointerEvents = 'auto';
   };
 
-  document.querySelectorAll('.native-text').forEach(applySelectableStyle);
+  const updateText = () => {
+    document.querySelectorAll('.native-text').forEach(makeSelectable);
+  };
 
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType === 1) {
-          if (node.classList.contains('native-text')) {
-            applySelectableStyle(node);
-          }
-          node.querySelectorAll?.('.native-text').forEach(applySelectableStyle);
-        }
-      });
-    }
-  });
+  updateText();
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  new MutationObserver(updateText).observe(document.body,
+  { childList: true, subtree: true });
 })();
 
 
@@ -46,9 +31,8 @@
 
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length) {
+            if (mutation.addedNodes.length)
                 applyOverlayStyle();
-            }
         });
     });
 
@@ -158,59 +142,47 @@ observer.observe(document.body, { childList: true, subtree: true });
 /* The below scripts are specific to com.ycngmn.Nobook application. */
 
 // Nobook settings : floating button
-(function() {
-  const btn = document.createElement('button');
-  btn.innerHTML = '⚙️';
-  Object.assign(btn.style, {
-    position: 'fixed',
-    top: '4px',
-    right: '98px',
-    width: '36px',
-    height: '36px',
-    backgroundColor: 'transparent',
-    color: 'white',
-    fontSize: '23px',
-    fontWeight: 'bold',
-    border: 'none',
-    borderRadius: '50%',
-    zIndex: '999999',
-    cursor: 'pointer',
-    alignItems: 'center',
-    justifyContent: 'center',
-    opacity: '1',
-    display: 'none'
+(() => {
+  const btn = Object.assign(document.createElement('button'), {
+    innerHTML: '⚙️',
+    style: `
+      position: fixed;
+      top: 4px;
+      right: 98px;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      color: white;
+      font-size: 23px;
+      font-weight: bold;
+      border: none;
+      border-radius: 50%;
+      z-index: 999999;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    `
   });
 
-  btn.onclick = () => {
-    if (typeof SettingsBridge !== 'undefined' && SettingsBridge.onSettingsToggle) {
-      SettingsBridge.onSettingsToggle();
-    }
+  btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
+
+  document.body
+    ? document.body.appendChild(btn)
+    : document.addEventListener('DOMContentLoaded', () => document.body.appendChild(btn));
+
+  const checkAndToggleButton = () => {
+    const { hostname, pathname } = window.location;
+    const isHomepage =
+      hostname.includes('facebook.com') && (pathname === '/' || pathname === '');
+    const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]');
+    btn.style.display = exists && isHomepage ? 'flex' : 'none';
   };
 
-  if (document.body) {
-    document.body.appendChild(btn);
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.appendChild(btn);
-    });
-  }
-
- // Feed identifier. To not show anywhere else than the feed.
- function checkAndToggleButton() {
-     const hostname = window.location.hostname;
-     const pathname = window.location.pathname;
-
-     const isHomepage =
-       (hostname === 'www.facebook.com'
-       || hostname === 'm.facebook.com') &&
-       (pathname === '/' || pathname === '');
-     const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-     btn.style.display = (exists && isHomepage) ? 'flex' : 'none';
- }
-
-  const observer = new MutationObserver(checkAndToggleButton);
-
-  observer.observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(checkAndToggleButton).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 
   checkAndToggleButton();
 })();
@@ -235,9 +207,8 @@ observer.observe(document.body, { childList: true, subtree: true });
     URL.createObjectURL = function(blob) {
         const reader = new FileReader();
         reader.onloadend = function() {
-            if (reader.result) {
+            if (reader.result)
                 DownloadBridge.downloadBase64File(reader.result, blob.type);
-            }
         };
         reader.readAsDataURL(blob);
         return originalCreateObjectURL(blob);
