@@ -16,6 +16,7 @@ fun FacebookWebView(
     val removeAds = viewModel.removeAds
     val enableDownloadContent = viewModel.enableDownloadContent
     val pinchToZoom = viewModel.pinchToZoom
+    val amoledBlack = viewModel.amoledBlack
     val hideSuggested = viewModel.hideSuggested
     val hideReels = viewModel.hideReels
     val hideStories = viewModel.hideStories
@@ -36,8 +37,9 @@ fun FacebookWebView(
             val scripts = listOf(
                 Script(true, R.raw.scripts), // always apply
                 Script(removeAds.value, R.raw.adblock),
-                Script(!pinchToZoom.value, R.raw.pinch_to_zoom),
                 Script(enableDownloadContent.value, R.raw.download_content),
+                Script(!pinchToZoom.value, R.raw.pinch_to_zoom),
+                Script(amoledBlack.value, R.raw.amoled_black),
                 Script(hideSuggested.value, R.raw.hide_suggested),
                 Script(hideReels.value, R.raw.hide_reels),
                 Script(hideStories.value, R.raw.hide_stories),

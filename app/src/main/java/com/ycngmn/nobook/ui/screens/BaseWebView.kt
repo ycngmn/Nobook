@@ -140,6 +140,8 @@ fun BaseWebView(
                     addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
                     addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
 
+                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
                     // Hide scrollbars
                     overScrollMode = View.OVER_SCROLL_NEVER
                     isVerticalScrollBarEnabled = false

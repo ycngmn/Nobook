@@ -15,6 +15,7 @@ class NobookDataStore(private val context: Context) {
         val REMOVE_ADS = booleanPreferencesKey("remove_ads")
         val ENABLE_DOWNLOAD_CONTENT = booleanPreferencesKey("enable_download_content")
         val PINCH_TO_ZOOM = booleanPreferencesKey("pinch_to_zoom")
+        val AMOLED_BLACK = booleanPreferencesKey("amoled_black")
         val HIDE_SUGGESTED = booleanPreferencesKey("hide_suggestion")
         val HIDE_REELS = booleanPreferencesKey("hide_reels")
         val HIDE_STORIES = booleanPreferencesKey("hide_stories")
@@ -35,6 +36,11 @@ class NobookDataStore(private val context: Context) {
     val pinchToZoom = context.dataStore.data.map { it[PINCH_TO_ZOOM] == true }
     suspend fun setPinchToZoom(pinchToZoom: Boolean) {
         context.dataStore.edit { it[PINCH_TO_ZOOM] = pinchToZoom }
+    }
+
+    val amoledBlack = context.dataStore.data.map { it[AMOLED_BLACK] == true }
+    suspend fun setAmoledBlack(amoledBlack: Boolean) {
+        context.dataStore.edit { it[AMOLED_BLACK] = amoledBlack }
     }
 
     val hideSuggested = context.dataStore.data.map { it[HIDE_SUGGESTED] == true }

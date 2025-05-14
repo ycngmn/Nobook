@@ -20,53 +20,38 @@
 
     const sponsoredRegex = new RegExp(sponsoredTexts.join('|'), 'i');
 
-    function blockSponsoredContent(config = {}) {
-        const {
-            selector = 'div',
-            textSelector = 'div[data-mcomponent="TextArea"] .native-text > span',
-            hideMethod = 'hide',
-            validateContainer = () => true
-        } = config;
-
+    function hideSponsoredContent(config) {
+        const { selector, textSelector } = config;
         const containers = document.querySelectorAll(selector);
 
         containers.forEach(container => {
             const spans = container.querySelectorAll(textSelector);
             for (const span of spans) {
-                if (sponsoredRegex.test(span.textContent) && validateContainer(container)) {
-                    if (hideMethod === 'reposition') {
-                        container.style.position = 'absolute';
-                        container.style.left = '-3000px';
-                    } else {
-                        container.style.display = 'none';
-                    }
+                if (sponsoredRegex.test(span.textContent)) {
+                    container.style.display = 'none';
                     break;
                 }
             }
         });
     }
 
-    const filterConfig = {
-        selector: 'div[data-type="vscroller"] div[data-tracking-duration-id]:has(> div[data-focusable="true"] div[data-mcomponent*="TextArea"] .native-text > span)',
-        textSelector: '.native-text > span',
-        hideMethod: 'reposition',
-        validateContainer: () => true
-    };
+    const configs = [
+        {
+            selector: 'div[data-type="vscroller"] div[data-tracking-duration-id]:has(> div[data-focusable="true"] div[data-mcomponent*="TextArea"] .native-text > span)',
+            textSelector: '.native-text > span'
+        },
+        {
+            selector: 'div[data-status-bar-color] > div[data-mcomponent="MContainer"] > div[data-mcomponent="MContainer"]',
+            textSelector: 'div[data-mcomponent="TextArea"] .native-text > span'
+        }
+    ];
 
-    const scriptConfig = {
-        selector: 'div[data-status-bar-color] > div[data-mcomponent="MContainer"] > div[data-mcomponent="MContainer"]',
-        textSelector: 'div[data-mcomponent="TextArea"] .native-text > span',
-        hideMethod: 'hide',
-        validateContainer: (container) => !container.querySelector('[data-tracking-duration-id]')
-    };
-
-    function blockAllAds() {
-        blockSponsoredContent(filterConfig);
-        blockSponsoredContent(scriptConfig);
+    function hideAllAds() {
+        configs.forEach(hideSponsoredContent);
     }
 
-    blockAllAds();
+    hideAllAds();
 
-    const observer = new MutationObserver(blockAllAds);
+    const observer = new MutationObserver(hideAllAds);
     observer.observe(document.body, { childList: true, subtree: true });
 })();

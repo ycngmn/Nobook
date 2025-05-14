@@ -23,6 +23,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _pinchToZoom = MutableStateFlow(false)
     val pinchToZoom = _pinchToZoom.asStateFlow()
 
+    private val _amoledBlack = MutableStateFlow(false)
+    val amoledBlack = _amoledBlack.asStateFlow()
+
     private val _hideSuggested = MutableStateFlow(false)
     val hideSuggested = _hideSuggested.asStateFlow()
 
@@ -43,6 +46,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _removeAds.value = dataStore.removeAds.first()
             _enableDownloadContent.value = dataStore.enableDownloadContent.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
+            _amoledBlack.value = dataStore.amoledBlack.first()
             _hideSuggested.value = dataStore.hideSuggested.first()
             _hideReels.value = dataStore.hideReels.first()
             _hideStories.value = dataStore.hideStories.first()
@@ -70,6 +74,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setPinchToZoom(pinchToZoom)
         }
         _pinchToZoom.value = pinchToZoom
+    }
+
+    fun setAmoledBlack(amoledBlack: Boolean) {
+        viewModelScope.launch {
+            dataStore.setAmoledBlack(amoledBlack)
+        }
+        _amoledBlack.value = amoledBlack
     }
 
     fun setHideSuggested(hideSuggested: Boolean) {

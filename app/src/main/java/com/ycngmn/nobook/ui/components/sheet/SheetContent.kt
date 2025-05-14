@@ -47,8 +47,10 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
 
     val viewModel: NobookViewModel = viewModel(key = "Nobook")
     val removeAds = viewModel.removeAds.collectAsState()
-    val pinchToZoom = viewModel.pinchToZoom.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
+    val pinchToZoom = viewModel.pinchToZoom.collectAsState()
+    val amoledBlack = viewModel.amoledBlack.collectAsState()
+
 
     Box(
         modifier = Modifier
@@ -84,6 +86,15 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.dark_mode_24px,
+                title = stringResource(R.string.amoled_black_title),
+                subtitle = stringResource(R.string.amoled_black_subtitle),
+                isActive = amoledBlack.value
+            ) {
+                viewModel.setAmoledBlack(!amoledBlack.value)
             }
 
             SheetItem(
@@ -141,7 +152,6 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                     .padding(top = 8.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
                 Card  (
                     modifier = Modifier.clickable { onRestart() },
                     shape = RoundedCornerShape(6.dp),

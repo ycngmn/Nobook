@@ -11,6 +11,9 @@
     <string name="pinch_to_zoom_title">Pinch to zoom</string>
     <string name="pinch_to_zoom_subtitle">Activate zoom in/out gestures.</string>
 
+    <string name="amoled_black_title">AMOLED Black</string>
+    <string name="amoled_black_subtitle">Only works with dark mode enabled.</string>
+
     <string name="customize_feed_title">Customize feed</string>
     <string name="customize_feed_subtitle">Show or hide content.</string>
 
@@ -40,5 +43,6 @@
     <string name="changes_apply_next_session">Changes will apply on your next session!</string>
     <string name="apply_immediately">Apply Immediately?</string>
     <string name="close_menu">Close Menu</string>
+
 
 </resources>
