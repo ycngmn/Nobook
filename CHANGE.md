@@ -1,10 +1,9 @@
-## Nobook - v0.0.7
+## Nobook - v0.0.8
 
 <ins>**Changelog:**</ins>
 
-* Adaptive app icons. 8df06a9f4d14c51f7d8e33ecc1806bf8aa3188ab
-* Reverted to the old but improved messages interface. b3f72f18c45335a20b4007dc667624b28a22ce92
-* Fix: Open "Accounts Center" and similar in-app links. f8914db8c75cca4b91edc6a4286a12198d7b970a
-* Fixed display issues with some buttons and menus. 42be2dc212a4bdc7f0a3ab5a4f260fa900259a6c
-* Polished Nobook menu UI. 528a6c8edbee17d7d8393980e7aed12c1cc498fb
-* Minor bug fixes and improvements.
+* AMOLED dark mode. 9f16a7a144b59649aa89c8a26e199e1d69c4ecc9
+* Added 🇫🇷 french translation for Nobook menu. 604ca8e8e917df681a6199313fc636b295443cbb
+* Fixed #36: Download button not appearing on some devices. b96cb76ae2126cada7ee38797335f20ba9574b70
+* Fixed #55: Comments sorting menu's visibility. 35e9dd49b5882755ffdbf098c84ef3ba2c8b2c9e
+* Minor bug fixes and optimizations.
