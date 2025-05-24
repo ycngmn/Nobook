@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Nobook</string>
+
+    <!-- Sheet Items -->
+    <string name="remove_ads_title">إزالة الإعلانات</string>
+    <string name="remove_ads_subtitle">يقوم بإزالة الإعلانات و المنشورات المروجة</string>
+
+    <string name="download_content_title">تنزيل المحتوى</string>
+    <string name="download_content_subtitle">يضيف زرّا لتحميل المحتوى عند عرضه</string>
+
+    <string name="pinch_to_zoom_title">التصغير/التكبير</string>
+    <string name="pinch_to_zoom_subtitle">يفعل ميزة تكبير/تصغير المحتوى</string>
+
+    <string name="amoled_black_title">وضع الأموليد</string>
+    <string name="amoled_black_subtitle">يعمل فقط في الوضع المظلم</string>
+
+    <string name="customize_feed_title">تخصيص المحتوى المعروض</string>
+    <string name="customize_feed_subtitle">قم بإخفاء/عرض المحتوى</string>
+
+    <string name="open_in_nobook_title">فتح روابط فيسبوك في nobook</string>
+    <string name="open_in_nobook_subtitle">هذه الميزة تسمح لك بعرض محتوى روابط فيسبوك في nobook</string>
+
+    <string name="star_at_github_title">أعطنا نجمة على GitHub!</string>
+    <string name="star_at_github_subtitle">التحديثات و المساهمات</string>
+
+    <!-- Dialog Items -->
+    <string name="hide_suggested_title">إخفاء المنشورات المقترحة</string>
+    <string name="hide_suggested_subtitle">قد يتسبب في تحميل متكرر للصفحة. استخدم feeds من القائمة</string>
+
+    <string name="hide_reels_title">إخفاء الريلز</string>
+    <string name="hide_reels_subtitle" />
+
+    <string name="hide_stories_title">إخفاء القصص</string>
+    <string name="hide_stories_subtitle" />
+
+    <string name="hide_people_you_may_know_title">إخفاء "أشخاص قد تعرفهم"</string>
+    <string name="hide_people_you_may_know_subtitle" />
+
+    <string name="hide_groups_title">إخفاء "اقتراحات المجموعات"</string>
+    <string name="hide_groups_subtitle" />
+
+    <!-- Bottom Text and Buttons -->
+    <string name="changes_apply_next_session">سيتم تطبيق التغييرات في المرة القادمة التي تفتح فيها التطبيق</string>
+    <string name="apply_immediately">تطبيق التغييرات الأن!</string>
+    <string name="close_menu">إغلاق القائمة</string>
+
+
+</resources>
