@@ -2,7 +2,6 @@ package com.ycngmn.nobook.utils
 
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import com.multiplatform.webview.request.RequestInterceptor
 import com.multiplatform.webview.request.WebRequest
 import com.multiplatform.webview.request.WebRequestInterceptResult
@@ -38,10 +37,8 @@ class ExternalRequestInterceptor(
             context.startActivity(intent)
         } catch (_: Exception) {
             // if fails to open in messenger app
-            if (url.contains("fb-messenger://threads")) {
-                Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
+            if (url.contains("fb-messenger://threads"))
                 toggleMessenger()
-            }
         }
     }
 }

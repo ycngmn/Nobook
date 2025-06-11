@@ -6,12 +6,10 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.View
 import android.webkit.CookieManager
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -56,10 +54,8 @@ fun BaseWebView(
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
-    if (state.lastLoadedUrl?.contains("facebook.com/messages/blocked") == true) {
-        Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
-        onInterceptAction()
-    }
+    if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
+
 
     // To navigate away from messenger
     val navTrigger = remember { mutableStateOf(false) }
@@ -94,18 +90,13 @@ fun BaseWebView(
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(colorState.value)
+            .fillMaxSize().background(colorState.value)
     ) {
 
-        if (settingsToggle.value) {
-            NobookSheet(settingsToggle, context, onRestart)
-        }
+        if (settingsToggle.value) NobookSheet(settingsToggle, context, onRestart)
 
         WebView(
-            modifier = Modifier
-                .imePadding()
-                .systemBarsPadding(),
+            modifier = Modifier.safeDrawingPadding(),
             state = state,
             navigator = navigator,
             platformWebViewParams = fileChooserWebViewParams(),
@@ -123,11 +114,9 @@ fun BaseWebView(
 
                     androidWebSettings.apply {
                         //isDebugInspectorInfoEnabled = true
-                        useWideViewPort = true
                         domStorageEnabled = true
                         hideDefaultVideoPoster = true
                         mediaPlaybackRequiresUserGesture = false
-                        allowFileAccess = true
                     }
                 }
 
@@ -147,8 +136,6 @@ fun BaseWebView(
                     settings.setSupportZoom(true)
                     settings.builtInZoomControls = true
                     settings.displayZoomControls = false
-
-                    settings.loadWithOverviewMode = true
                 }
             }
         )
