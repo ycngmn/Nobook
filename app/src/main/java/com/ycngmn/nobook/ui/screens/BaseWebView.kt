@@ -90,10 +90,7 @@ fun BaseWebView(
         return
     }
 
-    if (isLoading.value) {
-        SplashLoading(state.loadingState)
-    }
-
+    if (isLoading.value) SplashLoading(state.loadingState)
 
     Box(
         modifier = Modifier
@@ -152,11 +149,6 @@ fun BaseWebView(
                     settings.displayZoomControls = false
 
                     settings.loadWithOverviewMode = true
-
-                    // Show toast when download starts
-                    setDownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->
-                        Toast.makeText(context, "Processing blob download...", Toast.LENGTH_SHORT).show()
-                    }
                 }
             }
         )

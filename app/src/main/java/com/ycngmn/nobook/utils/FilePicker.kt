@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.ValueCallback
 import android.webkit.WebView
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,31 +27,19 @@ fun fileChooserWebViewParams(): PlatformWebViewParams? {
     var fileChooserIntent by remember { mutableStateOf<Intent?>(null) }
 
     val webViewChromeClient =
-        remember {
-            FileChoosableWebChromeClient(onShowFilePicker = { fileChooserIntent = it })
-        }
+        remember { FileChoosableWebChromeClient { fileChooserIntent = it } }
 
     val launcher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
         ) { result: ActivityResult ->
             if (result.resultCode != Activity.RESULT_OK) {
-//                Toast.makeText(
-//                    webViewChromeClient.context,
-//                    "resultCode is not RESULT_OK (value: ${result.resultCode})",
-//                    Toast.LENGTH_SHORT,
-//                ).show()
                 webViewChromeClient.cancelFileChooser()
                 return@rememberLauncherForActivityResult
             }
 
             val intent = result.data
             if (intent == null) {
-//                Toast.makeText(
-//                    webViewChromeClient.context,
-//                    "result intent is null",
-//                    Toast.LENGTH_SHORT,
-//                ).show()
                 webViewChromeClient.cancelFileChooser()
                 return@rememberLauncherForActivityResult
             }
@@ -64,11 +51,6 @@ fun fileChooserWebViewParams(): PlatformWebViewParams? {
                 singleFile != null -> webViewChromeClient.onReceiveFiles(arrayOf(singleFile))
                 multiFiles != null -> webViewChromeClient.onReceiveFiles(multiFiles.toTypedArray())
                 else -> {
-                    Toast.makeText(
-                        webViewChromeClient.context,
-                        "data and clipData is null",
-                        Toast.LENGTH_SHORT,
-                    ).show()
                     webViewChromeClient.cancelFileChooser()
                 }
             }
@@ -105,11 +87,9 @@ private class FileChoosableWebChromeClient(
         this.filePathCallback = filePathCallback
         val filePickerIntent = fileChooserParams?.createIntent()
 
-        if (filePickerIntent == null) {
-            cancelFileChooser()
-        } else {
-            onShowFilePicker(filePickerIntent)
-        }
+        if (filePickerIntent == null) cancelFileChooser()
+        else onShowFilePicker(filePickerIntent)
+
         return true
     }
 
