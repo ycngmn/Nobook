@@ -1,6 +1,5 @@
 package com.ycngmn.nobook.ui.components.sheet
 
-import android.app.Activity
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -13,7 +12,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NobookSheet(openBottomSheet: MutableState<Boolean>, context: Activity, onRestart: () -> Unit) {
+fun NobookSheet(
+    openBottomSheet: MutableState<Boolean>,
+    onRestart: () -> Unit
+) {
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -33,7 +35,7 @@ fun NobookSheet(openBottomSheet: MutableState<Boolean>, context: Activity, onRes
             onDismissRequest = { openBottomSheet.value = false },
             sheetState = bottomSheetState,
         ) {
-            SheetContent(context, onRestart) { closeSheet() }
+            SheetContent(onRestart, closeSheet)
         }
     }
 }

@@ -1,11 +1,11 @@
 package com.ycngmn.nobook.ui.screens
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.View
 import android.webkit.CookieManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,23 +41,20 @@ fun BaseWebView(
     url: String,
     userAgent: String? = null,
     onInterceptAction: (() -> Unit) = {},
-    onPostLoad: (WebViewNavigator, Context) -> Unit = { _, _ -> },
+    onPostLoad: (WebViewNavigator, Context) -> Unit,
     onRestart: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val window = (context as Activity).window
+    val activity = LocalActivity.current
 
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
-    context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     val state = rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
-    if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
-
-
-    // To navigate away from messenger
+    // Navigate to Nobook when fb logo is pressed from messenger.
     val navTrigger = remember { mutableStateOf(false) }
     if (navTrigger.value) onInterceptAction()
 
@@ -69,10 +66,14 @@ fun BaseWebView(
     LaunchedEffect(colorState.value) {
         // Set status bar items color based on the brightness of its background
         val isLight = ColorUtils.calculateLuminance(colorState.value.toArgb()) > 0.5
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = isLight
+        val window = activity?.window
+        if (window != null) {
+            val controllerCompat = WindowInsetsControllerCompat(window, window.decorView)
+            controllerCompat.isAppearanceLightStatusBars = isLight
+            controllerCompat.isAppearanceLightNavigationBars = isLight
+        }
     }
 
-    // Handle loading state changes
     LaunchedEffect(state.loadingState) {
         if (state.loadingState is LoadingState.Finished && !isError) {
             onPostLoad(navigator, context)
@@ -80,20 +81,21 @@ fun BaseWebView(
         }
     }
 
-    // Show error dialog on network fail
     if (isError && isLoading.value) {
         NetworkErrorDialog(context)
         return
     }
 
     if (isLoading.value) SplashLoading(state.loadingState)
+    if (settingsToggle.value) NobookSheet(settingsToggle, onRestart)
+
+    // A possible overkill to fix https://github.com/ycngmn/Nobook/issues/5
+    if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
 
     Box(
         modifier = Modifier
             .fillMaxSize().background(colorState.value)
     ) {
-
-        if (settingsToggle.value) NobookSheet(settingsToggle, context, onRestart)
 
         WebView(
             modifier = Modifier.safeDrawingPadding(),
@@ -101,13 +103,12 @@ fun BaseWebView(
             navigator = navigator,
             platformWebViewParams = fileChooserWebViewParams(),
             onCreated = { webView ->
-                // Set up cookies
+
                 val cookieManager = CookieManager.getInstance()
                 cookieManager.setAcceptCookie(true)
                 cookieManager.setAcceptThirdPartyCookies(webView, true)
                 cookieManager.flush()
 
-                // Configure WebView
                 state.webSettings.apply {
                     customUserAgentString = userAgent
                     isJavaScriptEnabled = true
@@ -134,6 +135,7 @@ fun BaseWebView(
                     isHorizontalScrollBarEnabled = false
 
                     settings.setSupportZoom(true)
+                    // pinch to zoom doesn't work on settings refresh otherwise
                     settings.builtInZoomControls = true
                     settings.displayZoomControls = false
                 }

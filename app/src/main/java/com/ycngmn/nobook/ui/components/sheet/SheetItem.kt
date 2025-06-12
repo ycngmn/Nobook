@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 fun SheetItem(
     icon: Int,
     title: String,
-    subtitle: String,
     iconColor: Color? = null,
     isActive: Boolean = false,
     onClick: () -> Unit
@@ -43,7 +42,7 @@ fun SheetItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.5.dp)
+                .padding(horizontal = 16.dp, vertical = 4.5.dp)
         ) {
             Image(
                 painter = painterResource(icon),
@@ -60,8 +59,7 @@ fun SheetItem(
                 Text(
                     text = title,
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    fontSize = 16.sp,
                 )
 
             }
