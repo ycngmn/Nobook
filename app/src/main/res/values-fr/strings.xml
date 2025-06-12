@@ -2,45 +2,32 @@
     <string name="app_name">Nobook</string>
 
     <!-- Sheet Items -->
-    <string name="remove_ads_title">Supprimer les publicités</string>
-    <string name="remove_ads_subtitle">Bloquer pubs sponsorisées partout.</string>
+    <string name="remove_ads_title">Bloquer les publicités</string>
 
-    <string name="download_content_title">Télécharger du contenu</string>
-    <string name="download_content_subtitle">Ajouter un bouton téléchargement.</string>
+    <string name="download_content_title">Téléchargement</string>
 
     <string name="pinch_to_zoom_title">Pincer pour zoomer</string>
-    <string name="pinch_to_zoom_subtitle">Activer zoom avant/arrière.</string>
 
     <string name="amoled_black_title">Noir AMOLED</string>
-    <string name="amoled_black_subtitle">Nécessite le Mode sombre</string>
 
-    <string name="customize_feed_title">Personnaliser le flux</string>
-    <string name="customize_feed_subtitle">Afficher ou masquer du contenu.</string>
+    <string name="customize_feed_title">Personnalisation du flux</string>
 
     <string name="open_in_nobook_title">Ouvrir dans Nobook</string>
-    <string name="open_in_nobook_subtitle">Ouvrir les liens depuis extérieur.</string>
 
     <string name="star_at_github_title">Soutenez sur Github</string>
-    <string name="star_at_github_subtitle">Mises à jour et contributions.</string>
 
     <!-- Dialog Items -->
     <string name="hide_suggested_title">Masquer les publications suggérées</string>
-    <string name="hide_suggested_subtitle">Peut entraîner des chargements fréquents!</string>
 
     <string name="hide_reels_title">Masquer les reels</string>
-    <string name="hide_reels_subtitle" />
 
     <string name="hide_stories_title">Masquer les stories</string>
-    <string name="hide_stories_subtitle" />
 
     <string name="hide_people_you_may_know_title">Masquer les suggestions de personnes</string>
-    <string name="hide_people_you_may_know_subtitle" />
 
     <string name="hide_groups_title">Masquer les suggestions de groupes</string>
-    <string name="hide_groups_subtitle" />
 
     <!-- Bottom Text and Buttons -->
-    <string name="changes_apply_next_session">Les modifications s\'appliqueront à votre prochaine session !</string>
     <string name="apply_immediately">Appliquer maintenant?</string>
     <string name="close_menu">Masquer</string>
 </resources>

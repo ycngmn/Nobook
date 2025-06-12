@@ -53,16 +53,12 @@ fun SheetItem(
                     else ColorFilter.tint(MaterialTheme.colorScheme.secondary)
             )
 
-            Column(
-                modifier = Modifier.padding(start = 12.dp).weight(1F)
-            ) {
-                Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 16.sp,
-                )
-
-            }
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(start = 16.dp).weight(1F)
+            )
 
             if (iconColor == null) {
 
