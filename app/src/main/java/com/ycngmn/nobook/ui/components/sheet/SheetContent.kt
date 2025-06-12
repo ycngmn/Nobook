@@ -89,7 +89,7 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             }
 
             SheetItem(
-                icon = R.drawable.contrast_24px,
+                icon = R.drawable.motion_mode_24px,
                 title = stringResource(R.string.amoled_black_title),
                 subtitle = stringResource(R.string.amoled_black_subtitle),
                 isActive = amoledBlack.value
