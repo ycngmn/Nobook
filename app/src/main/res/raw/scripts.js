@@ -135,7 +135,6 @@ observer.observe(document.body, { childList: true, subtree: true });
     };
 
     applyStyles();
-    setTimeout(applyStyles, 2000);
     new MutationObserver(applyStyles).observe(document.body, { childList: true, subtree: true });
 })();
 
@@ -152,6 +151,7 @@ observer.observe(document.body, { childList: true, subtree: true });
       width: 36px;
       height: 36px;
       background: transparent;
+      box-shadow: 0.5px 0.5px 0.5px rgba(0, 0, 0, 0.2);
       color: white;
       font-size: 23px;
       font-weight: bold;
