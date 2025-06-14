@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
 
 data class Script(
     val condition: Boolean,
@@ -18,7 +19,9 @@ suspend fun fetchScripts(scripts: List<Script>, context: Context): String {
         scripts.filter { it.condition }.forEach { script ->
             val content =
                 try {
-                    httpClient.get(script.cdnUrl).body<String>()
+                    val res = httpClient.get(script.cdnUrl)
+                    if (res.status == HttpStatusCode.OK) res.body()
+                    else throw Exception("CDN Error")
                 } catch (_: Exception) {
                     context.resources.openRawResource(script.scriptRes)
                         .bufferedReader()
