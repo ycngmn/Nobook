@@ -35,17 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
 
 @Composable
-fun SheetContent(onRestart: () -> Unit, onClose: () -> Unit) {
+fun SheetContent(
+    viewModel: NobookViewModel,
+    onRestart: () -> Unit,
+    onClose: () -> Unit
+) {
 
     val isOpenDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    val viewModel: NobookViewModel = viewModel(key = "Nobook")
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()

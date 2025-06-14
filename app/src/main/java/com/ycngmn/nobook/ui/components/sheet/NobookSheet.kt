@@ -8,11 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.ycngmn.nobook.ui.NobookViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NobookSheet(
+    viewModel: NobookViewModel,
     openBottomSheet: MutableState<Boolean>,
     onRestart: () -> Unit
 ) {
@@ -35,7 +37,7 @@ fun NobookSheet(
             onDismissRequest = { openBottomSheet.value = false },
             sheetState = bottomSheetState,
         ) {
-            SheetContent(onRestart, closeSheet)
+            SheetContent(viewModel,onRestart, closeSheet)
         }
     }
 }

@@ -39,9 +39,8 @@ fun SplashLoading(loadingState: LoadingState) {
 
         Row (horizontalArrangement = Arrangement.SpaceBetween) {
 
-            if (loadingState is LoadingState.Loading) {
-
-                val progress = loadingState.progress
+                val progress = if (loadingState is LoadingState.Loading)
+                    loadingState.progress else 0.8F
 
                 repeat(5) {
                     Text(
@@ -50,7 +49,6 @@ fun SplashLoading(loadingState: LoadingState) {
                         color = if (progress >= it*0.20) Color.White else Color.Gray
                     )
                 }
-            }
         }
     }
 }

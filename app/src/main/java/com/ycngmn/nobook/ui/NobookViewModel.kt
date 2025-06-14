@@ -1,6 +1,7 @@
 package com.ycngmn.nobook.ui
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ycngmn.nobook.NobookDataStore
@@ -13,6 +14,9 @@ import kotlinx.coroutines.runBlocking
 class NobookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dataStore = NobookDataStore(application)
+
+    private val _scripts = mutableStateOf("")
+    val scripts = _scripts
 
     private val _removeAds = MutableStateFlow(true)
     val removeAds = _removeAds.asStateFlow()
@@ -53,6 +57,10 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
             _hideGroups.value = dataStore.hideGroups.first()
         }
+    }
+
+    fun setScripts(scripts: String) {
+        _scripts.value = scripts
     }
 
     fun setRemoveAds(removeAds: Boolean) {

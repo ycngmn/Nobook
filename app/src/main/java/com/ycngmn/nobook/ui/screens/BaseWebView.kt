@@ -1,8 +1,8 @@
 package com.ycngmn.nobook.ui.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import androidx.activity.compose.LocalActivity
@@ -22,9 +22,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
+import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.sheet.NobookSheet
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
@@ -41,14 +41,12 @@ fun BaseWebView(
     url: String,
     userAgent: String? = null,
     onInterceptAction: (() -> Unit) = {},
-    onPostLoad: (WebViewNavigator, Context) -> Unit,
+    onPostLoad: () -> Unit = {},
     onRestart: () -> Unit = {},
+    viewModel: NobookViewModel,
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current
-
-    // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     val state = rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
@@ -60,8 +58,12 @@ fun BaseWebView(
 
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
+
     val colorState = remember { mutableStateOf(Color.Transparent) }
     val settingsToggle = remember { mutableStateOf(false) }
+
+    // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     LaunchedEffect(colorState.value) {
         // Set status bar items color based on the brightness of its background
@@ -74,11 +76,16 @@ fun BaseWebView(
         }
     }
 
-    LaunchedEffect(state.loadingState) {
-        if (state.loadingState is LoadingState.Finished && !isError) {
-            onPostLoad(navigator, context)
-            isLoading.value = false
+    val userScripts = viewModel.scripts
+    if (userScripts.value.isEmpty()) onPostLoad()
+
+    LaunchedEffect(state.loadingState, userScripts.value) {
+        if (state.loadingState is LoadingState.Finished && userScripts.value.isNotEmpty()){
+            navigator.evaluateJavaScript(userScripts.value) {
+                if (isLoading.value) isLoading.value = false
+            }
         }
+        else if (state.loadingState is LoadingState.Loading) isLoading.value = true
     }
 
     if (isError && isLoading.value) {
@@ -87,14 +94,15 @@ fun BaseWebView(
     }
 
     if (isLoading.value) SplashLoading(state.loadingState)
-    if (settingsToggle.value) NobookSheet(settingsToggle, onRestart)
+    if (settingsToggle.value) NobookSheet(viewModel, settingsToggle, onRestart)
 
     // A possible overkill to fix https://github.com/ycngmn/Nobook/issues/5
     if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
 
     Box(
         modifier = Modifier
-            .fillMaxSize().background(colorState.value)
+            .fillMaxSize()
+            .background(colorState.value)
     ) {
 
         WebView(
