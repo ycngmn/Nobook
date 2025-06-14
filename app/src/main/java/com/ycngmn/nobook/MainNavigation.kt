@@ -2,7 +2,6 @@ package com.ycngmn.nobook
 
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -29,29 +28,29 @@ fun MainNavigation(data: Uri?) {
         // Adding column , fixes early initial load.. Idk why.
         composable("facebook") {
             key(shouldRestart.value) {
-                Column {
-                    FacebookWebView(
-                        data?.toString() ?: "https://facebook.com/",
-                        viewModel = viewModel,
-                        onRestart = {
-                            shouldRestart.value = !shouldRestart.value
-                            viewModel.setScripts("")
-                        },
-                        onOpenMessenger = {
-                            Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
-                            navController.navigate("messenger")
-                        }
-                    )
-                }
+
+                FacebookWebView(
+                    data?.toString() ?: "https://facebook.com/",
+                    viewModel = viewModel,
+                    onRestart = {
+                        shouldRestart.value = !shouldRestart.value
+                        viewModel.setScripts("")
+                    },
+                    onOpenMessenger = {
+                        Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
+                        navController.navigate("messenger")
+                    }
+                )
+
             }
         }
         composable("messenger") {
-            Column {
-                MessengerWebView(
-                    viewModel = viewModel,
-                    onNavigateFB = { navController.popBackStack() }
-                )
-            }
+
+            MessengerWebView(
+                viewModel = viewModel,
+                onNavigateFB = { navController.popBackStack() }
+            )
+
         }
     }
 }

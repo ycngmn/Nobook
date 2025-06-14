@@ -2,12 +2,10 @@ package com.ycngmn.nobook.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
@@ -85,7 +83,6 @@ fun BaseWebView(
                 if (isLoading.value) isLoading.value = false
             }
         }
-        else if (state.loadingState is LoadingState.Loading) isLoading.value = true
     }
 
     if (isError && isLoading.value) {
@@ -93,61 +90,58 @@ fun BaseWebView(
         return
     }
 
-    if (isLoading.value) SplashLoading(state.loadingState)
-    if (settingsToggle.value) NobookSheet(viewModel, settingsToggle, onRestart)
 
+    if (settingsToggle.value) NobookSheet(viewModel, settingsToggle, onRestart)
     // A possible overkill to fix https://github.com/ycngmn/Nobook/issues/5
     if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
 
-    Box(
+    if (isLoading.value) SplashLoading(state.loadingState)
+
+    WebView(
         modifier = Modifier
             .fillMaxSize()
             .background(colorState.value)
-    ) {
+            .safeDrawingPadding(),
+        state = state,
+        navigator = navigator,
+        platformWebViewParams = fileChooserWebViewParams(),
+        onCreated = { webView ->
 
-        WebView(
-            modifier = Modifier.safeDrawingPadding(),
-            state = state,
-            navigator = navigator,
-            platformWebViewParams = fileChooserWebViewParams(),
-            onCreated = { webView ->
+            val cookieManager = CookieManager.getInstance()
+            cookieManager.setAcceptCookie(true)
+            cookieManager.setAcceptThirdPartyCookies(webView, true)
+            cookieManager.flush()
 
-                val cookieManager = CookieManager.getInstance()
-                cookieManager.setAcceptCookie(true)
-                cookieManager.setAcceptThirdPartyCookies(webView, true)
-                cookieManager.flush()
+            state.webSettings.apply {
+                customUserAgentString = userAgent
+                isJavaScriptEnabled = true
 
-                state.webSettings.apply {
-                    customUserAgentString = userAgent
-                    isJavaScriptEnabled = true
-
-                    androidWebSettings.apply {
-                        //isDebugInspectorInfoEnabled = true
-                        domStorageEnabled = true
-                        hideDefaultVideoPoster = true
-                        mediaPlaybackRequiresUserGesture = false
-                    }
-                }
-
-                webView.apply {
-                    addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
-                    addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
-                    addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
-                    addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
-
-                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-                    // Hide scrollbars
-                    overScrollMode = View.OVER_SCROLL_NEVER
-                    isVerticalScrollBarEnabled = false
-                    isHorizontalScrollBarEnabled = false
-
-                    settings.setSupportZoom(true)
-                    // pinch to zoom doesn't work on settings refresh otherwise
-                    settings.builtInZoomControls = true
-                    settings.displayZoomControls = false
+                androidWebSettings.apply {
+                    //isDebugInspectorInfoEnabled = true
+                    domStorageEnabled = true
+                    hideDefaultVideoPoster = true
+                    mediaPlaybackRequiresUserGesture = false
                 }
             }
-        )
-    }
+
+            webView.apply {
+                addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
+                addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
+                addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
+                addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
+
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+                // Hide scrollbars
+                overScrollMode = View.OVER_SCROLL_NEVER
+                isVerticalScrollBarEnabled = false
+                isHorizontalScrollBarEnabled = false
+
+                settings.setSupportZoom(true)
+                // pinch to zoom doesn't work on settings refresh otherwise
+                settings.builtInZoomControls = true
+                settings.displayZoomControls = false
+            }
+        }
+    )
 }
