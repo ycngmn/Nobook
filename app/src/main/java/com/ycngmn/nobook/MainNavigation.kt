@@ -25,10 +25,8 @@ fun MainNavigation(data: Uri?) {
     val shouldRestart = remember { mutableStateOf(false) }
 
     NavHost(navController = navController, startDestination = "facebook") {
-        // Adding column , fixes early initial load.. Idk why.
         composable("facebook") {
             key(shouldRestart.value) {
-
                 FacebookWebView(
                     data?.toString() ?: "https://facebook.com/",
                     viewModel = viewModel,
