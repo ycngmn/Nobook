@@ -32,6 +32,7 @@ import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.NavigateFB
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("SourceLockedOrientationActivity")
@@ -51,16 +52,30 @@ fun BaseWebView(
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
-    BackHandler {
-        navigator.evaluateJavaScript("backHandlerNB();") { backHandled ->
-            if (backHandled != "true") {
-                if (navigator.canGoBack) navigator.navigateBack()
-                else activity?.finish()
-            }
+    // allow exiting while scrolling to top.
+    val exit = remember { mutableStateOf(false) }
+    LaunchedEffect(exit.value) {
+        if (exit.value) {
+            delay(800)
+            exit.value = false
         }
     }
 
-    // Navigate to Nobook when fb logo is pressed from messenger.
+    BackHandler {
+        if (exit.value) activity?.finish()
+        else
+        navigator.evaluateJavaScript("backHandlerNB();") {
+            val backHandled = it.removeSurrounding("\"")
+            if (backHandled == "false") {
+                if (navigator.canGoBack) navigator.navigateBack()
+                else onRestart()
+            }
+            else if (backHandled == "exit") activity?.finish()
+            else exit.value = true
+        }
+    }
+
+    // Navigate to Nobook on fb logo pressed from messenger.
     val navTrigger = remember { mutableStateOf(false) }
     if (navTrigger.value) onInterceptAction()
 

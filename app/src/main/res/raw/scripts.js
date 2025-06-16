@@ -4,10 +4,12 @@
     const isFeed = window.location.pathname === '/' &&
        document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
 
-    if (isFeed && window.scrollY !== 0) {
-       window.scrollTo({ top: 0, behavior: 'smooth' });
-       return true;
-    } else return false; }
+    if (isFeed) {
+       if (window.scrollY !== 0) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return "true";
+       } else return "exit";
+    } else return "false"; }
 })();
 
 // Enable press and hold caption selection.
