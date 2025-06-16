@@ -64,15 +64,18 @@ fun BaseWebView(
     BackHandler {
         if (exit.value) activity?.finish()
         else
-        navigator.evaluateJavaScript("backHandlerNB();") {
-            val backHandled = it.removeSurrounding("\"")
-            if (backHandled == "false") {
-                if (navigator.canGoBack) navigator.navigateBack()
-                else onRestart()
+            navigator.evaluateJavaScript("backHandlerNB();") {
+                val backHandled = it.removeSurrounding("\"")
+                if (backHandled == "false") {
+                    if (state.lastLoadedUrl?.contains(".facebook.com/messages/") == true)
+                        onInterceptAction()
+                    else if (navigator.canGoBack) navigator.navigateBack()
+                    else onRestart()
+                }
+                else if (backHandled == "exit") activity?.finish()
+                else exit.value = true
             }
-            else if (backHandled == "exit") activity?.finish()
-            else exit.value = true
-        }
+
     }
 
     // Navigate to Nobook on fb logo pressed from messenger.
