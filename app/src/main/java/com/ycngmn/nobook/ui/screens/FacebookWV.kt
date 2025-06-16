@@ -25,8 +25,10 @@ fun FacebookWebView(
     BaseWebView(
         url = url,
         onInterceptAction = onOpenMessenger,
+        onRestart = onRestart,
+        viewModel = viewModel,
         onPostLoad = {
-            val cdnBase = "https://cdn.jsdelivr.net/gh/ycngmn/Nobook@main/app/src/main/res/raw/"
+            val cdnBase = "https://raw.githubusercontent.com/ycngmn/Nobook/refs/heads/main/app/src/main/res/raw"
 
             val scripts = listOf(
                 Script(true, R.raw.scripts, "$cdnBase/scripts.js"), // always apply
@@ -47,10 +49,7 @@ fun FacebookWebView(
                     viewModel.setScripts(fetchScripts(scripts, context))
                 }
             }
-
-        },
-        onRestart = onRestart,
-        viewModel = viewModel
+        }
     )
 }
 
