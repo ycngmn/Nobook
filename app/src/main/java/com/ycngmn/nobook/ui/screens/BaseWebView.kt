@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.view.View
 import android.webkit.CookieManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,6 +51,15 @@ fun BaseWebView(
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
+    BackHandler {
+        navigator.evaluateJavaScript("backHandlerNB();") { backHandled ->
+            if (backHandled != "true") {
+                if (navigator.canGoBack) navigator.navigateBack()
+                else activity?.finish()
+            }
+        }
+    }
+
     // Navigate to Nobook when fb logo is pressed from messenger.
     val navTrigger = remember { mutableStateOf(false) }
     if (navTrigger.value) onInterceptAction()
@@ -83,6 +93,7 @@ fun BaseWebView(
                 if (isLoading.value) isLoading.value = false
             }
         }
+        else if (state.loadingState is LoadingState.Loading) isLoading.value = true
     }
 
     if (isError && isLoading.value) {
@@ -105,6 +116,7 @@ fun BaseWebView(
         state = state,
         navigator = navigator,
         platformWebViewParams = fileChooserWebViewParams(),
+        captureBackPresses = false,
         onCreated = { webView ->
 
             val cookieManager = CookieManager.getInstance()
