@@ -1,6 +1,5 @@
 package com.ycngmn.nobook.ui.components.sheet
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,23 +28,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
 
 @Composable
-fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) {
+fun SheetContent(
+    viewModel: NobookViewModel,
+    onRestart: () -> Unit,
+    onClose: () -> Unit
+) {
 
     val isOpenDialog = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    val viewModel: NobookViewModel = viewModel(key = "Nobook")
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
@@ -64,16 +66,14 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             SheetItem(
                 icon = R.drawable.ad_off_24px,
                 title = stringResource(R.string.remove_ads_title),
-                subtitle = stringResource(R.string.remove_ads_subtitle),
                 isActive = removeAds.value
             ) {
                 viewModel.setRemoveAds(!removeAds.value)
             }
 
             SheetItem(
-                icon = R.drawable.download_24px,
+                icon = R.drawable.download_outline,
                 title = stringResource(R.string.download_content_title),
-                subtitle = stringResource(R.string.download_content_subtitle),
                 isActive = enableDownloadContent.value
             ) {
                 viewModel.setEnableDownloadContent(!enableDownloadContent.value)
@@ -82,17 +82,15 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             SheetItem(
                 icon = R.drawable.pinch_zoom_out_24px,
                 title = stringResource(R.string.pinch_to_zoom_title),
-                subtitle = stringResource(R.string.pinch_to_zoom_subtitle),
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
             }
 
             SheetItem(
-                icon = R.drawable.contrast_24px,
+                icon = R.drawable.amoled_black_24px,
                 title = stringResource(R.string.amoled_black_title),
-                subtitle = stringResource(R.string.amoled_black_subtitle),
-                isActive = amoledBlack.value
+                isActive = amoledBlack.value,
             ) {
                 viewModel.setAmoledBlack(!amoledBlack.value)
             }
@@ -100,7 +98,6 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             SheetItem(
                 icon = R.drawable.widget_width_24px,
                 title = stringResource(R.string.customize_feed_title),
-                subtitle = stringResource(R.string.customize_feed_subtitle),
                 iconColor = Color(0xFFD8A7B1)
 
             ) {
@@ -116,7 +113,6 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
                 SheetItem(
                     icon = R.drawable.open_in_browser_24px,
                     title = stringResource(R.string.open_in_nobook_title),
-                    subtitle = stringResource(R.string.open_in_nobook_subtitle),
                     iconColor = Color(0xFF77E5B6)
                 ) {
                     // Open open by default settings
@@ -131,25 +127,15 @@ fun SheetContent(context: Activity, onRestart: () -> Unit, onClose: () -> Unit) 
             SheetItem(
                 icon = R.drawable.star_shine_24px,
                 title = stringResource(R.string.star_at_github_title),
-                subtitle = stringResource(R.string.star_at_github_subtitle),
                 iconColor = Color(0XFFE6B800)
             ) {
                 val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
                 context.startActivity(intent)
             }
 
-            Text(
-                text = stringResource(R.string.changes_apply_next_session),
-                fontSize = 16.sp,
-                color = Color.Red,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding(top = 16.dp)
-            )
-
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding(top = 8.dp, bottom = 16.dp),
+                    .padding( 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Card  (
@@ -213,7 +199,6 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             SheetItem(
                 icon = R.drawable.public_off_24px,
                 title = stringResource(R.string.hide_suggested_title),
-                subtitle = stringResource(R.string.hide_suggested_subtitle),
                 isActive = hideSuggested.value
 
             ) {
@@ -223,7 +208,6 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             SheetItem(
                 icon = R.drawable.movie_off_24px,
                 title = stringResource(R.string.hide_reels_title),
-                subtitle = stringResource(R.string.hide_reels_subtitle),
                 isActive = hideReels.value
             ) {
                 viewModel.setHideReels(!hideReels.value)
@@ -232,7 +216,6 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             SheetItem(
                 icon = R.drawable.landscape_2_off_24px,
                 title = stringResource(R.string.hide_stories_title),
-                subtitle = stringResource(R.string.hide_stories_subtitle),
                 isActive = hideStories.value
             ) {
                 viewModel.setHideStories(!hideStories.value)
@@ -241,7 +224,6 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             SheetItem(
                 icon = R.drawable.frame_person_off_24px,
                 title = stringResource(R.string.hide_people_you_may_know_title),
-                subtitle = stringResource(R.string.hide_people_you_may_know_subtitle),
                 isActive = hidePeopleYouMayKnow.value
             ) {
                 viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
@@ -250,7 +232,6 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             SheetItem(
                 icon = R.drawable.group_off_24px,
                 title = stringResource(R.string.hide_groups_title),
-                subtitle = stringResource(R.string.hide_groups_subtitle),
                 isActive = hideGroups.value
             ) {
                 viewModel.setHideGroups(!hideGroups.value)

@@ -135,7 +135,6 @@ observer.observe(document.body, { childList: true, subtree: true });
     };
 
     applyStyles();
-    setTimeout(applyStyles, 2000);
     new MutationObserver(applyStyles).observe(document.body, { childList: true, subtree: true });
 })();
 
@@ -143,21 +142,23 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 // Nobook settings : floating button
 (() => {
+  const getFill = () => {
+    const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
+    return color === '#ffffff' ? '#65676b' : '#d0d0d0';
+  };
+
   const btn = Object.assign(document.createElement('button'), {
-    innerHTML: '⚙️',
+    innerHTML: `
+      <svg width="28" height="28" fill="${getFill()}" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/>
+      </svg>`,
     style: `
       position: fixed;
-      top: 4px;
-      right: 98px;
-      width: 36px;
-      height: 36px;
+      top: 8px;
+      right: 100px;
       background: transparent;
-      color: white;
-      font-size: 23px;
-      font-weight: bold;
       border: none;
       border-radius: 50%;
-      z-index: 999999;
       cursor: pointer;
       display: none;
       align-items: center;
@@ -166,25 +167,20 @@ observer.observe(document.body, { childList: true, subtree: true });
   });
 
   btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
+  (document.body || document.addEventListener('DOMContentLoaded', () => document.body.appendChild(btn))) && document.body.appendChild(btn);
 
-  document.body
-    ? document.body.appendChild(btn)
-    : document.addEventListener('DOMContentLoaded', () => document.body.appendChild(btn));
+  new MutationObserver(() => {
+    const { hostname, pathname } = location;
+    const show = hostname.includes('facebook.com') && (!pathname || pathname === '/') &&
+                 document.querySelector('div[role="button"][aria-label*="Facebook"]');
+    btn.style.display = show ? 'flex' : 'none';
+  }).observe(document.body, { childList: true, subtree: true });
 
-  const checkAndToggleButton = () => {
-    const { hostname, pathname } = window.location;
-    const isHomepage =
-      hostname.includes('facebook.com') && (pathname === '/' || pathname === '');
-    const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]');
-    btn.style.display = exists && isHomepage ? 'flex' : 'none';
-  };
+  new MutationObserver(() => {
+    const svg = btn.querySelector('svg');
+    if (svg) svg.setAttribute('fill', getFill());
+  }).observe(document.head, { subtree: true, attributes: true, childList: true });
 
-  new MutationObserver(checkAndToggleButton).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  checkAndToggleButton();
 })();
 
 

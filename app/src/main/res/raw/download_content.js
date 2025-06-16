@@ -174,7 +174,6 @@
                 reader.result,
                 blob.type || "image/jpeg"
               );
-              createToast("Content downloaded successfully");
             }
           };
           reader.readAsDataURL(blob);
@@ -190,7 +189,7 @@
 
   // Extract and download videos or images
   const extractAndDownloadMedia = () => {
-    const processingToast = createToast("Processing download...", 0);
+    const processingToast = createToast("Download started...");
 
     // Find current media element
     const mediaElement = getCurrentMediaElement();

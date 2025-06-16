@@ -1,17 +1,13 @@
 package com.ycngmn.nobook.ui.screens
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.View
 import android.webkit.CookieManager
-import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +20,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
+import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.sheet.NobookSheet
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
@@ -43,122 +39,109 @@ fun BaseWebView(
     url: String,
     userAgent: String? = null,
     onInterceptAction: (() -> Unit) = {},
-    onPostLoad: (WebViewNavigator, Context) -> Unit = { _, _ -> },
+    onPostLoad: () -> Unit = {},
     onRestart: () -> Unit = {},
+    viewModel: NobookViewModel,
 ) {
     val context = LocalContext.current
-    val window = (context as Activity).window
-
-    // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
-    context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    val activity = LocalActivity.current
 
     val state = rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
-    if (state.lastLoadedUrl?.contains("facebook.com/messages/blocked") == true) {
-        Toast.makeText(context, "Opening messages...", Toast.LENGTH_SHORT).show()
-        onInterceptAction()
-    }
-
-    // To navigate away from messenger
+    // Navigate to Nobook when fb logo is pressed from messenger.
     val navTrigger = remember { mutableStateOf(false) }
     if (navTrigger.value) onInterceptAction()
 
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
+
     val colorState = remember { mutableStateOf(Color.Transparent) }
     val settingsToggle = remember { mutableStateOf(false) }
+
+    // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     LaunchedEffect(colorState.value) {
         // Set status bar items color based on the brightness of its background
         val isLight = ColorUtils.calculateLuminance(colorState.value.toArgb()) > 0.5
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = isLight
-    }
-
-    // Handle loading state changes
-    LaunchedEffect(state.loadingState) {
-        if (state.loadingState is LoadingState.Finished && !isError) {
-            onPostLoad(navigator, context)
-            isLoading.value = false
+        val window = activity?.window
+        if (window != null) {
+            val controllerCompat = WindowInsetsControllerCompat(window, window.decorView)
+            controllerCompat.isAppearanceLightStatusBars = isLight
+            controllerCompat.isAppearanceLightNavigationBars = isLight
         }
     }
 
-    // Show error dialog on network fail
+    val userScripts = viewModel.scripts
+    if (userScripts.value.isEmpty()) onPostLoad()
+
+    LaunchedEffect(state.loadingState, userScripts.value) {
+        if (state.loadingState is LoadingState.Finished && userScripts.value.isNotEmpty()){
+            navigator.evaluateJavaScript(userScripts.value) {
+                if (isLoading.value) isLoading.value = false
+            }
+        }
+    }
+
     if (isError && isLoading.value) {
         NetworkErrorDialog(context)
         return
     }
 
-    if (isLoading.value) {
-        SplashLoading(state.loadingState)
-    }
 
+    if (settingsToggle.value) NobookSheet(viewModel, settingsToggle, onRestart)
+    // A possible overkill to fix https://github.com/ycngmn/Nobook/issues/5
+    if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
 
-    Box(
+    if (isLoading.value) SplashLoading(state.loadingState)
+
+    WebView(
         modifier = Modifier
             .fillMaxSize()
             .background(colorState.value)
-    ) {
+            .safeDrawingPadding(),
+        state = state,
+        navigator = navigator,
+        platformWebViewParams = fileChooserWebViewParams(),
+        onCreated = { webView ->
 
-        if (settingsToggle.value) {
-            NobookSheet(settingsToggle, context, onRestart)
-        }
+            val cookieManager = CookieManager.getInstance()
+            cookieManager.setAcceptCookie(true)
+            cookieManager.setAcceptThirdPartyCookies(webView, true)
+            cookieManager.flush()
 
-        WebView(
-            modifier = Modifier
-                .imePadding()
-                .systemBarsPadding(),
-            state = state,
-            navigator = navigator,
-            platformWebViewParams = fileChooserWebViewParams(),
-            onCreated = { webView ->
-                // Set up cookies
-                val cookieManager = CookieManager.getInstance()
-                cookieManager.setAcceptCookie(true)
-                cookieManager.setAcceptThirdPartyCookies(webView, true)
-                cookieManager.flush()
+            state.webSettings.apply {
+                customUserAgentString = userAgent
+                isJavaScriptEnabled = true
 
-                // Configure WebView
-                state.webSettings.apply {
-                    customUserAgentString = userAgent
-                    isJavaScriptEnabled = true
-
-                    androidWebSettings.apply {
-                        //isDebugInspectorInfoEnabled = true
-                        useWideViewPort = true
-                        domStorageEnabled = true
-                        hideDefaultVideoPoster = true
-                        mediaPlaybackRequiresUserGesture = false
-                        allowFileAccess = true
-                    }
-                }
-
-                webView.apply {
-                    addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
-                    addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
-                    addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
-                    addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
-
-                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-                    // Hide scrollbars
-                    overScrollMode = View.OVER_SCROLL_NEVER
-                    isVerticalScrollBarEnabled = false
-                    isHorizontalScrollBarEnabled = false
-
-                    settings.setSupportZoom(true)
-                    settings.builtInZoomControls = true
-                    settings.displayZoomControls = false
-
-                    settings.loadWithOverviewMode = true
-
-                    // Show toast when download starts
-                    setDownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->
-                        Toast.makeText(context, "Processing blob download...", Toast.LENGTH_SHORT).show()
-                    }
+                androidWebSettings.apply {
+                    //isDebugInspectorInfoEnabled = true
+                    domStorageEnabled = true
+                    hideDefaultVideoPoster = true
+                    mediaPlaybackRequiresUserGesture = false
                 }
             }
-        )
-    }
+
+            webView.apply {
+                addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
+                addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
+                addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
+                addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
+
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+                // Hide scrollbars
+                overScrollMode = View.OVER_SCROLL_NEVER
+                isVerticalScrollBarEnabled = false
+                isHorizontalScrollBarEnabled = false
+
+                settings.setSupportZoom(true)
+                // pinch to zoom doesn't work on settings refresh otherwise
+                settings.builtInZoomControls = true
+                settings.displayZoomControls = false
+            }
+        }
+    )
 }

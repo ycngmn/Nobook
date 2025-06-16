@@ -7,8 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,13 +23,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 @Composable()
 fun SheetItem(
     icon: Int,
     title: String,
-    subtitle: String,
     iconColor: Color? = null,
     isActive: Boolean = false,
     onClick: () -> Unit
@@ -39,7 +42,7 @@ fun SheetItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 4.5.dp)
         ) {
             Image(
                 painter = painterResource(icon),
@@ -47,31 +50,35 @@ fun SheetItem(
                 modifier = Modifier.size(35.dp),
                 colorFilter =
                     if (iconColor != null) ColorFilter.tint(iconColor)
-                    else if (isActive)
-                        ColorFilter.tint(FacebookBlue)
                     else ColorFilter.tint(MaterialTheme.colorScheme.secondary)
             )
 
-            Column(
-                modifier = Modifier.padding(start = 16.dp)
-            ) {
-                Text(
-                    text = title,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(start = 16.dp).weight(1F)
+            )
 
-                if (subtitle.isNotEmpty()) {
-                    Text(
-                        text = subtitle,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8F),
-                        fontSize = 15.sp
-                    )
-                }
+            if (iconColor == null) {
+
+                Switch(
+                    checked = isActive,
+                    onCheckedChange = { onClick() },
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                    thumbContent = if (isActive) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else null
+                )
             }
         }
     }
 
-    HorizontalDivider(Modifier, color = Color.Gray, thickness = 0.2.dp)
+    HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
 }

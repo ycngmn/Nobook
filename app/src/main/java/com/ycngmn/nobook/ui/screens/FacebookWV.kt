@@ -1,59 +1,56 @@
 package com.ycngmn.nobook.ui.screens
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
+import com.ycngmn.nobook.utils.Script
+import com.ycngmn.nobook.utils.fetchScripts
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun FacebookWebView(
     url: String,
     onRestart: () -> Unit,
-    onOpenMessenger: () -> Unit
+    onOpenMessenger: () -> Unit,
+    viewModel: NobookViewModel
 ) {
-    val viewModel: NobookViewModel = viewModel(key = "Nobook")
-    // Nobook settings values.
-    val removeAds = viewModel.removeAds
-    val enableDownloadContent = viewModel.enableDownloadContent
-    val pinchToZoom = viewModel.pinchToZoom
-    val amoledBlack = viewModel.amoledBlack
-    val hideSuggested = viewModel.hideSuggested
-    val hideReels = viewModel.hideReels
-    val hideStories = viewModel.hideStories
-    val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow
-    val hideGroups = viewModel.hideGroups
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     BaseWebView(
         url = url,
         onInterceptAction = onOpenMessenger,
-        onRestart = onRestart,
-        onPostLoad = { navigator, context ->
-
-            data class Script(
-                val condition: Boolean,
-                val scriptRes: Int
-            )
+        onPostLoad = {
+            val cdnBase = "https://cdn.jsdelivr.net/gh/ycngmn/Nobook@main/app/src/main/res/raw/"
 
             val scripts = listOf(
-                Script(true, R.raw.scripts), // always apply
-                Script(removeAds.value, R.raw.adblock),
-                Script(enableDownloadContent.value, R.raw.download_content),
-                Script(!pinchToZoom.value, R.raw.pinch_to_zoom),
-                Script(amoledBlack.value, R.raw.amoled_black),
-                Script(hideSuggested.value, R.raw.hide_suggested),
-                Script(hideReels.value, R.raw.hide_reels),
-                Script(hideStories.value, R.raw.hide_stories),
-                Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk),
-                Script(hideGroups.value, R.raw.hide_groups)
+                Script(true, R.raw.scripts, "$cdnBase/scripts.js"), // always apply
+                Script(viewModel.removeAds.value, R.raw.adblock, "$cdnBase/adblock.js"),
+                Script(viewModel.enableDownloadContent.value, R.raw.download_content, "$cdnBase/download_content.js"),
+                Script(!viewModel.pinchToZoom.value, R.raw.pinch_to_zoom, "$cdnBase/pinch_to_zoom.js"),
+                Script(viewModel.amoledBlack.value, R.raw.amoled_black, "$cdnBase/amoled_black.js"),
+                Script(viewModel.hideSuggested.value, R.raw.hide_suggested, "$cdnBase/hide_suggested.js"),
+                Script(viewModel.hideReels.value, R.raw.hide_reels, "$cdnBase/hide_reels.js"),
+                Script(viewModel.hideStories.value, R.raw.hide_stories, "$cdnBase/hide_stories.js"),
+                Script(viewModel.hidePeopleYouMayKnow.value, R.raw.hide_pymk, "$cdnBase/hide_pymk.js"),
+                Script(viewModel.hideGroups.value, R.raw.hide_groups, "$cdnBase/hide_groups.js"),
+                Script(true, R.raw.messenger_scripts, "$cdnBase/messenger_scripts.js")
             )
 
-            scripts.filter { it.condition }.forEach { script ->
-                val scriptText =
-                    context.resources.openRawResource(script.scriptRes)
-                    .bufferedReader().use { it.readText() }
-                navigator.evaluateJavaScript(scriptText)
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    viewModel.setScripts(fetchScripts(scripts, context))
+                }
             }
-        }
+
+        },
+        onRestart = onRestart,
+        viewModel = viewModel
     )
 }
 
