@@ -50,6 +50,7 @@ fun SheetContent(
 
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
+    val immersiveMode = viewModel.immersiveMode.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
     val amoledBlack = viewModel.amoledBlack.collectAsState()
 
@@ -77,6 +78,14 @@ fun SheetContent(
                 isActive = enableDownloadContent.value
             ) {
                 viewModel.setEnableDownloadContent(!enableDownloadContent.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.immersive_mode_24px,
+                title = stringResource(R.string.immersive_mode_title),
+                isActive = immersiveMode.value
+            ) {
+                viewModel.setImmersiveMode(!immersiveMode.value)
             }
 
             SheetItem(

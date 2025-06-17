@@ -6,6 +6,8 @@
 
     <string name="download_content_title">Téléchargement</string>
 
+    <string name="immersive_mode_title">Mode immersif</string>
+
     <string name="pinch_to_zoom_title">Pincer pour zoomer</string>
 
     <string name="amoled_black_title">Noir AMOLED</string>

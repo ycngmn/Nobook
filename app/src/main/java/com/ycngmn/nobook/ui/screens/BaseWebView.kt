@@ -8,16 +8,21 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
@@ -86,18 +91,26 @@ fun BaseWebView(
 
     val colorState = remember { mutableStateOf(Color.Transparent) }
     val settingsToggle = remember { mutableStateOf(false) }
+    val isImmersiveMode = viewModel.immersiveMode.collectAsState()
 
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    LaunchedEffect(colorState.value) {
-        // Set status bar items color based on the brightness of its background
-        val isLight = ColorUtils.calculateLuminance(colorState.value.toArgb()) > 0.5
+    LaunchedEffect(isImmersiveMode.value) {
         val window = activity?.window
         if (window != null) {
-            val controllerCompat = WindowInsetsControllerCompat(window, window.decorView)
-            controllerCompat.isAppearanceLightStatusBars = isLight
-            controllerCompat.isAppearanceLightNavigationBars = isLight
+            val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
+            if (isImmersiveMode.value) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                windowInsetsController.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+            else {
+                val isLight = ColorUtils.calculateLuminance(colorState.value.toArgb()) > 0.5
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+                windowInsetsController.isAppearanceLightStatusBars = isLight
+                windowInsetsController.isAppearanceLightNavigationBars = isLight
+            }
         }
     }
 
@@ -124,11 +137,12 @@ fun BaseWebView(
 
     if (isLoading.value) SplashLoading(state.loadingState)
 
+    val wvModifier = Modifier.fillMaxSize().background(colorState.value).imePadding()
+
     WebView(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorState.value)
-            .safeDrawingPadding(),
+        modifier =
+            if (isImmersiveMode.value) wvModifier.padding(top = 5.dp)
+            else wvModifier.systemBarsPadding(),
         state = state,
         navigator = navigator,
         platformWebViewParams = fileChooserWebViewParams(),

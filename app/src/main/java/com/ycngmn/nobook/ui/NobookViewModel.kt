@@ -24,6 +24,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _enableDownloadContent = MutableStateFlow(true)
     val enableDownloadContent = _enableDownloadContent.asStateFlow()
 
+    private val _immersiveMode = MutableStateFlow(false)
+    val immersiveMode = _immersiveMode.asStateFlow()
+
     private val _pinchToZoom = MutableStateFlow(false)
     val pinchToZoom = _pinchToZoom.asStateFlow()
 
@@ -49,6 +52,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
             _enableDownloadContent.value = dataStore.enableDownloadContent.first()
+            _immersiveMode.value = dataStore.immersiveMode.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
             _amoledBlack.value = dataStore.amoledBlack.first()
             _hideSuggested.value = dataStore.hideSuggested.first()
@@ -75,6 +79,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setEnableDownloadContent(enableDownloadContent)
         }
         _enableDownloadContent.value = enableDownloadContent
+    }
+
+    fun setImmersiveMode(immersiveMode: Boolean) {
+        viewModelScope.launch {
+            dataStore.setImmersiveMode(immersiveMode)
+        }
+        _immersiveMode.value = immersiveMode
     }
 
     fun setPinchToZoom(pinchToZoom: Boolean) {
