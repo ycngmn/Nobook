@@ -3,7 +3,7 @@
         "Sponsored", "Gesponsert", "Sponsorlu", "Sponsorowane",
         "Ispoonsara godhameera", "Geborg", "Bersponsor", "Ditaja",
         "Disponsori", "Giisponsoran", "Sponzorováno", "Sponsoreret",
-        "Publicidad", "May Sponsor", "Sponsorisée", "Oipytyvôva",
+        "Publicidad", "May Sponsor", "Sponsorisée", "Sponsorisé", "Oipytyvôva",
         "Ɗaukar Nayin", "Sponzorirano", "Uterwa inkunga", "Sponsorizzato",
         "Imedhaminiwa", "Hirdetés", "Misy Mpiantoka", "Gesponsord",
         "Sponset", "Patrocinado", "Sponsorizat", "Sponzorované",
@@ -43,12 +43,15 @@
         {
             selector: 'div[data-status-bar-color] > div[data-mcomponent="MContainer"] > div[data-mcomponent="MContainer"]',
             textSelector: 'div[data-mcomponent="TextArea"] .native-text > span'
-        }
+        },
+        {
+            selector: 'div[data-mcomponent="MContainer"].m.bg-s3 div[data-mcomponent="MContainer"]',
+            textSelector: 'div[data-mcomponent="TextArea"] .native-text > span'
+        },
+
     ];
 
-    function hideAllAds() {
-        configs.forEach(hideSponsoredContent);
-    }
+    function hideAllAds() { configs.forEach(hideSponsoredContent); }
 
     hideAllAds();
 
