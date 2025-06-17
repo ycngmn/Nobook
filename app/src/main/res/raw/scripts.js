@@ -2,11 +2,17 @@
 (() => {
     window.backHandlerNB = () => {
     const isFeed = window.location.pathname === '/' &&
-       document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+    (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
+    && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
 
     if (isFeed) {
        if (window.scrollY !== 0) {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          // to interrupt any current scroll event.
+          document.body.style.overflow = 'hidden';
+          setTimeout(() => {
+             document.body.style.overflow = '';
+             window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 50);
           return "true";
        } else return "exit";
     } else return "false"; }
@@ -64,7 +70,8 @@
 // Hide annoying bottom banners
 const observer = new MutationObserver(() => {
 
-  if (location.pathname === '/'
+  if (location.pathname === '/' &&
+  (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
   && document.querySelector('div[role="button"][aria-label*="Facebook"]') === null) return;
 
   const element = document.querySelector('.bottom.fixed-container');
@@ -125,7 +132,8 @@ observer.observe(document.body, { childList: true, subtree: true });
             const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
             scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
 
-            const isHomepage = window.location.pathname === '/';
+            const isHomepage = window.location.pathname === '/' &&
+            (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
             const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
 
             if (isHomepage && exists) scroller.style.paddingBottom = '0';
@@ -184,8 +192,8 @@ observer.observe(document.body, { childList: true, subtree: true });
 
   new MutationObserver(() => {
     const { hostname, pathname } = location;
-    const show = hostname.includes('facebook.com') && (!pathname || pathname === '/') &&
-                 document.querySelector('div[role="button"][aria-label*="Facebook"]');
+    const show = pathname === '/' && (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
+                 && document.querySelector('div[role="button"][aria-label*="Facebook"]');
     btn.style.display = show ? 'flex' : 'none';
   }).observe(document.body, { childList: true, subtree: true });
 
