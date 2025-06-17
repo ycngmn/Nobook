@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Nobook</string>
+
+    <!-- Sheet Items -->
+    <string name="remove_ads_title">إزالة الإعلانات</string>
+
+    <string name="download_content_title">تنزيل المحتوى</string>
+
+    <string name="immersive_mode_title">الوضع المغمور</string>
+
+    <string name="sticky_navbar_title">شريط التنقل الثابت</string>
+
+    <string name="pinch_to_zoom_title">التصغير/التكبير</string>
+
+    <string name="amoled_black_title">وضع الأموليد</string>
+
+    <string name="customize_feed_title">تخصيص المحتوى المعروض</string>
+
+    <string name="open_in_nobook_title">فتح روابط فيسبوك في nobook</string>
+
+    <string name="star_at_github_title">أعطنا نجمة على GitHub!</string>
+
+    <!-- Dialog Items -->
+    <string name="hide_suggested_title">إخفاء المنشورات المقترحة</string>
+
+    <string name="hide_reels_title">إخفاء الريلز</string>
+
+    <string name="hide_stories_title">إخفاء القصص</string>
+
+    <string name="hide_people_you_may_know_title">إخفاء "أشخاص قد تعرفهم"</string>
+
+    <string name="hide_groups_title">إخفاء "اقتراحات المجموعات"</string>
+
+    <!-- Bottom Text and Buttons -->
+    <string name="apply_immediately">تطبيق التغييرات الأن!</string>
+    <string name="close_menu">إغلاق القائمة</string>
+</resources>
