@@ -51,6 +51,7 @@ fun SheetContent(
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
     val immersiveMode = viewModel.immersiveMode.collectAsState()
+    val stickyNavbar = viewModel.stickyNavbar.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
     val amoledBlack = viewModel.amoledBlack.collectAsState()
 
@@ -86,6 +87,14 @@ fun SheetContent(
                 isActive = immersiveMode.value
             ) {
                 viewModel.setImmersiveMode(!immersiveMode.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.sticky_navbar_24px,
+                title = stringResource(R.string.sticky_navbar_title),
+                isActive = stickyNavbar.value
+            ) {
+                viewModel.setStickyNavbar(!stickyNavbar.value)
             }
 
             SheetItem(

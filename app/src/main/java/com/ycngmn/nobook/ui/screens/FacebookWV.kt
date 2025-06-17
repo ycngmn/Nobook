@@ -34,6 +34,7 @@ fun FacebookWebView(
                 Script(true, R.raw.scripts, "$cdnBase/scripts.js"), // always apply
                 Script(viewModel.removeAds.value, R.raw.adblock, "$cdnBase/adblock.js"),
                 Script(viewModel.enableDownloadContent.value, R.raw.download_content, "$cdnBase/download_content.js"),
+                Script(viewModel.stickyNavbar.value, R.raw.sticky_navbar, "$cdnBase/sticky_navbar.js"),
                 Script(!viewModel.pinchToZoom.value, R.raw.pinch_to_zoom, "$cdnBase/pinch_to_zoom.js"),
                 Script(viewModel.amoledBlack.value, R.raw.amoled_black, "$cdnBase/amoled_black.js"),
                 Script(viewModel.hideSuggested.value, R.raw.hide_suggested, "$cdnBase/hide_suggested.js"),

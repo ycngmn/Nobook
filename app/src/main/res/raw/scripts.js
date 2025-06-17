@@ -113,80 +113,29 @@ observer.observe(document.body, { childList: true, subtree: true });
   document.head.appendChild(style);
 })();
 
-// Sticky Top Navbar Script
-(function() {
-    const applyStyles = () => {
-        const navbar = document.querySelector('div[data-tti-phase="-1"][data-mcomponent="MContainer"][data-type="container"][data-focusable="true"].m');
-        const tabbar = document.querySelector('div[role="tablist"][data-tti-phase="-1"][data-type="container"][data-mcomponent="MContainer"].m');
-        const scroller = document.querySelector('div[data-type="vscroller"][data-is-pull-to-refresh-allowed="true"]');
-
-        const hasLogo = navbar?.querySelector('div[aria-label*="Facebook"]');
-        const hasFeed = tabbar?.querySelector('div[aria-label*="feed"]');
-
-        const navbarHeight = navbar ? parseFloat(getComputedStyle(navbar).height) || parseFloat(navbar.style.height) || 0 : 0;
-        const tabbarHeight = tabbar ? parseFloat(getComputedStyle(tabbar).height) || parseFloat(tabbar.style.height) || 0 : 0;
-
-        if (hasLogo) Object.assign(navbar.style, {
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100%',
-            zIndex: '1000',
-            pointerEvents: 'auto'
-        });
-
-        if (hasFeed) Object.assign(tabbar.style, {
-            position: 'fixed',
-            top: hasLogo ? navbarHeight + 'px' : '',
-            left: '0',
-            width: '100%',
-            zIndex: '999',
-            pointerEvents: 'auto'
-        });
-
-        if (scroller) {
-            const offset = (hasLogo ? navbarHeight : 0) + (hasFeed ? tabbarHeight : 0);
-            const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
-            scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
-
-            if (window.isFeed()) scroller.style.paddingBottom = '0';
-
-            const spinnerContainer = scroller.querySelector('.pull-to-refresh-spinner-container');
-            if (spinnerContainer) Object.assign(spinnerContainer.style, {
-                zIndex: '1001',
-            });
-
-            const spinner = scroller.querySelector('.pull-to-refresh-spinner');
-            if (spinner) spinner.style.margin = '0 auto';
-        }
-
-        Object.assign(document.body.style, {
-            paddingTop: '0',
-            marginTop: '0',
-            overflow: 'visible',
-            height: '100%'
-        });
-    };
-
-    applyStyles();
-    new MutationObserver(applyStyles).observe(document.body, { childList: true, subtree: true });
-})();
 
 /* The below scripts are specific to com.ycngmn.Nobook application. */
 
-// Nobook settings : floating button
 (() => {
-  const getFill = () => {
-    const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
-    return color === '#ffffff' ? '#65676b' : '#d0d0d0';
-  };
+  const insertButton = () => {
+    const target = Array.from(document.querySelectorAll('span'))
+      .find(span => span.textContent === '󱥊');
 
-  const btn = Object.assign(document.createElement('button'), {
-    innerHTML: `
-      <svg width="28" height="28" fill="${getFill()}" viewBox="0 0 24 24">
-        <path fill-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/>
-      </svg>`,
-    style: `
+    if (!target) return;
+
+    const getFill = () => {
+      const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
+      return color === '#ffffff' ? '#65676b' : '#d0d0d0';
+    };
+
+    const container = target.closest('div[role="button"]');
+    if (!container || !container.parentNode) return;
+
+    if (document.getElementById('custom-settings-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'custom-settings-btn';
+    btn.setAttribute('style', `
       position: fixed;
       top: 8px;
       right: 100px;
@@ -194,24 +143,39 @@ observer.observe(document.body, { childList: true, subtree: true });
       border: none;
       border-radius: 50%;
       cursor: pointer;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-    `
+      z-index: 9999;
+      pointer-events: auto;
+    `);
+    btn.innerHTML = `
+      <svg width="28" height="28" fill="${getFill()}" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"/>
+      </svg>
+    `;
+
+    btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
+
+    container.parentNode.insertBefore(btn, container);
+  };
+
+  insertButton();
+
+  const observer = new MutationObserver(() => {
+    const customBtn = document.getElementById('custom-settings-btn');
+    const target = Array.from(document.querySelectorAll('span'))
+      .find(span => span.textContent === '󱥊');
+
+    if (target && !customBtn) {
+      insertButton();
+    }
   });
 
-  btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
-  (document.body || document.addEventListener('DOMContentLoaded', () => document.body.appendChild(btn))) && document.body.appendChild(btn);
-
-  new MutationObserver(() => {
-    btn.style.display = window.isFeed() ? 'flex' : 'none';
-  }).observe(document.body, { childList: true, subtree: true });
-
-  new MutationObserver(() => {
-    const svg = btn.querySelector('svg');
-    if (svg) svg.setAttribute('fill', getFill());
-  }).observe(document.head, { subtree: true, attributes: true, childList: true });
-
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
 })();
 
 

@@ -8,6 +8,8 @@
 
     <string name="immersive_mode_title">Immersive mode</string>
 
+    <string name="sticky_navbar_title">Sticky Navbar</string>
+
     <string name="pinch_to_zoom_title">Pinch to zoom</string>
 
     <string name="amoled_black_title">AMOLED Black</string>

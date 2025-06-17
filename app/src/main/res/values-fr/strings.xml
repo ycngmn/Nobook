@@ -8,6 +8,8 @@
 
     <string name="immersive_mode_title">Mode immersif</string>
 
+    <string name="sticky_navbar_title">Barre de navigation fixe</string>
+
     <string name="pinch_to_zoom_title">Pincer pour zoomer</string>
 
     <string name="amoled_black_title">Noir AMOLED</string>

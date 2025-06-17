@@ -15,6 +15,7 @@ class NobookDataStore(private val context: Context) {
         val REMOVE_ADS = booleanPreferencesKey("remove_ads")
         val ENABLE_DOWNLOAD_CONTENT = booleanPreferencesKey("enable_download_content")
         val IMMERSIVE_MODE = booleanPreferencesKey("immersive_mode")
+        val STICKY_NAVBAR = booleanPreferencesKey("sticky_navbar")
         val PINCH_TO_ZOOM = booleanPreferencesKey("pinch_to_zoom")
         val AMOLED_BLACK = booleanPreferencesKey("amoled_black")
         val HIDE_SUGGESTED = booleanPreferencesKey("hide_suggestion")
@@ -37,6 +38,11 @@ class NobookDataStore(private val context: Context) {
     val immersiveMode = context.dataStore.data.map { it[IMMERSIVE_MODE] == true }
     suspend fun setImmersiveMode(immersiveMode: Boolean) {
         context.dataStore.edit { it[IMMERSIVE_MODE] = immersiveMode }
+    }
+
+    val stickyNavbar = context.dataStore.data.map { it[STICKY_NAVBAR] != false }
+    suspend fun setStickyNavbar(stickyNavbar: Boolean) {
+        context.dataStore.edit { it[STICKY_NAVBAR] = stickyNavbar }
     }
 
     val pinchToZoom = context.dataStore.data.map { it[PINCH_TO_ZOOM] == true }

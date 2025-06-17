@@ -27,6 +27,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _immersiveMode = MutableStateFlow(false)
     val immersiveMode = _immersiveMode.asStateFlow()
 
+    private val _stickyNavbar = MutableStateFlow(false)
+    val stickyNavbar = _stickyNavbar.asStateFlow()
+
     private val _pinchToZoom = MutableStateFlow(false)
     val pinchToZoom = _pinchToZoom.asStateFlow()
 
@@ -53,6 +56,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _removeAds.value = dataStore.removeAds.first()
             _enableDownloadContent.value = dataStore.enableDownloadContent.first()
             _immersiveMode.value = dataStore.immersiveMode.first()
+            _stickyNavbar.value = dataStore.stickyNavbar.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
             _amoledBlack.value = dataStore.amoledBlack.first()
             _hideSuggested.value = dataStore.hideSuggested.first()
@@ -86,6 +90,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setImmersiveMode(immersiveMode)
         }
         _immersiveMode.value = immersiveMode
+    }
+
+    fun setStickyNavbar(stickyNavbar: Boolean) {
+        viewModelScope.launch {
+            dataStore.setStickyNavbar(stickyNavbar)
+        }
+        _stickyNavbar.value = stickyNavbar
     }
 
     fun setPinchToZoom(pinchToZoom: Boolean) {
