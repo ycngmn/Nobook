@@ -1,11 +1,17 @@
+// Feed identifier
+(() => {
+    window.isFeed = () => {
+        return window.location.pathname === '/' &&
+          (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
+          && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+    }
+})();
+
 // Scroll to top on back-press at feed.
 (() => {
     window.backHandlerNB = () => {
-    const isFeed = window.location.pathname === '/' &&
-    (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
-    && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-
-    if (isFeed) {
+    const isDialog = document.querySelector('div[role="dialog"]');
+    if (window.isFeed() && !isDialog) {
        if (window.scrollY !== 0) {
           // to interrupt any current scroll event.
           document.body.style.overflow = 'hidden';
@@ -18,7 +24,7 @@
     } else return "false"; }
 })();
 
-// Enable press and hold caption selection.
+// Enable press and hold caption selection and apply custom selection color.
 (() => {
   const makeSelectable = (el) => {
     if (el.closest('div[role="button"]')) return;
@@ -30,11 +36,23 @@
     document.querySelectorAll('.native-text').forEach(makeSelectable);
   };
 
+  const selectionStyle = document.createElement('style');
+  selectionStyle.textContent = `
+    .native-text::selection {
+      background: #ccc;
+      color: black;
+    }
+  `;
+  document.head.appendChild(selectionStyle);
+
   updateText();
 
-  new MutationObserver(updateText).observe(document.body,
-  { childList: true, subtree: true });
+  new MutationObserver(updateText).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 })();
+
 
 
 // Enhance Loading Overlay Script
@@ -70,8 +88,7 @@
 // Hide annoying bottom banners
 const observer = new MutationObserver(() => {
 
-  if (location.pathname === '/' &&
-  (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
+  if (location.pathname === '/'
   && document.querySelector('div[role="button"][aria-label*="Facebook"]') === null) return;
 
   const element = document.querySelector('.bottom.fixed-container');
@@ -132,11 +149,7 @@ observer.observe(document.body, { childList: true, subtree: true });
             const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
             scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
 
-            const isHomepage = window.location.pathname === '/' &&
-            (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
-            const exists = document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-
-            if (isHomepage && exists) scroller.style.paddingBottom = '0';
+            if (window.isFeed()) scroller.style.paddingBottom = '0';
 
             const spinnerContainer = scroller.querySelector('.pull-to-refresh-spinner-container');
             if (spinnerContainer) Object.assign(spinnerContainer.style, {
@@ -191,10 +204,7 @@ observer.observe(document.body, { childList: true, subtree: true });
   (document.body || document.addEventListener('DOMContentLoaded', () => document.body.appendChild(btn))) && document.body.appendChild(btn);
 
   new MutationObserver(() => {
-    const { hostname, pathname } = location;
-    const show = pathname === '/' && (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
-                 && document.querySelector('div[role="button"][aria-label*="Facebook"]');
-    btn.style.display = show ? 'flex' : 'none';
+    btn.style.display = window.isFeed() ? 'flex' : 'none';
   }).observe(document.body, { childList: true, subtree: true });
 
   new MutationObserver(() => {

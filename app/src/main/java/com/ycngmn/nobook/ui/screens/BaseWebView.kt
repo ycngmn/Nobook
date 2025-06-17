@@ -63,19 +63,19 @@ fun BaseWebView(
 
     BackHandler {
         if (exit.value) activity?.finish()
-        else if (navigator.canGoBack) navigator.navigateBack()
         else navigator.evaluateJavaScript("backHandlerNB();") {
             val backHandled = it.removeSurrounding("\"")
             if (backHandled == "false") {
-                if (state.lastLoadedUrl?.contains(".facebook.com/messages/") == true)
+                if (navigator.canGoBack) navigator.navigateBack()
+                else if (state.lastLoadedUrl?.contains(".facebook.com/messages/") == true)
                     onInterceptAction()
-                else onRestart()
+                else activity?.finish()
             }
             else if (backHandled == "exit") activity?.finish()
             else exit.value = true
         }
-
     }
+
 
     // Navigate to Nobook on fb logo pressed from messenger.
     val navTrigger = remember { mutableStateOf(false) }
@@ -117,7 +117,6 @@ fun BaseWebView(
         NetworkErrorDialog(context)
         return
     }
-
 
     if (settingsToggle.value) NobookSheet(viewModel, settingsToggle, onRestart)
     // A possible overkill to fix https://github.com/ycngmn/Nobook/issues/5
