@@ -3,7 +3,7 @@
   <img src='images/nobook_github_cover.png' height='200' alt="nobook_cover">
 </p>
 
-Nobook is a lightweight Android application to browse facebook. Built with Jetpack Compose and the [compose-webview-multiplatform](https://github.com/KevinnZou/compose-webview-multiplatform) library.
+<div align="center">Nobook is a lightweight Android application to browse facebook.</div>
 
 ## Features
 
@@ -35,5 +35,5 @@ Contributions to the project are welcome. Please follow these guidelines:
 2.  Create a new branch for your feature or bug fix.
 3.  Submit a pull request with a clear description of your changes.
 
-## Plans :
-- Add auto update feature.
+## Acknowledgements :
+* [@KevinnZou/compose-webview-multiplatform](https://github.com/KevinnZou/compose-webview-multiplatform)
