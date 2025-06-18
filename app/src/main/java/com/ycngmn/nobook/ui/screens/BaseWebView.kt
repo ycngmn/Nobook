@@ -96,7 +96,7 @@ fun BaseWebView(
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    LaunchedEffect(isImmersiveMode.value) {
+    LaunchedEffect(isImmersiveMode.value, colorState.value) {
         val window = activity?.window
         if (window != null) {
             val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
