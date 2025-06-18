@@ -121,7 +121,7 @@ observer.observe(document.body, { childList: true, subtree: true });
     const target = Array.from(document.querySelectorAll('span'))
       .find(span => span.textContent === '󱥊');
 
-    if (!target) return;
+    if (!target || !isFeed()) return;
 
     const getFill = () => {
       const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
