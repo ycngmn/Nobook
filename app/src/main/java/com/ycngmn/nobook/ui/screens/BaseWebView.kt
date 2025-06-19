@@ -16,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.ColorUtils
@@ -87,14 +86,14 @@ fun BaseWebView(
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
-    val colorState = remember { mutableStateOf(Color.Transparent) }
     val settingsToggle = remember { mutableStateOf(false) }
+    val themeColor = viewModel.themeColor
     val isImmersiveMode = viewModel.immersiveMode.collectAsState()
 
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    LaunchedEffect(isImmersiveMode.value, colorState.value) {
+    LaunchedEffect(isImmersiveMode.value, themeColor.value) {
         val window = activity?.window
         if (window != null) {
             val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
@@ -104,7 +103,7 @@ fun BaseWebView(
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
             else {
-                val isLight = ColorUtils.calculateLuminance(colorState.value.toArgb()) > 0.5
+                val isLight = ColorUtils.calculateLuminance(themeColor.value.toArgb()) > 0.5
                 windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
                 windowInsetsController.isAppearanceLightStatusBars = isLight
                 windowInsetsController.isAppearanceLightNavigationBars = isLight
@@ -135,7 +134,7 @@ fun BaseWebView(
 
     if (isLoading.value) SplashLoading(state.loadingState)
 
-    val wvModifier = Modifier.fillMaxSize().background(colorState.value).imePadding()
+    val wvModifier = Modifier.fillMaxSize().background(themeColor.value).imePadding()
 
     WebView(
         modifier =
@@ -166,7 +165,7 @@ fun BaseWebView(
 
             webView.apply {
                 addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
-                addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
+                addJavascriptInterface(ThemeChange(themeColor), "ThemeBridge")
                 addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
                 addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
 

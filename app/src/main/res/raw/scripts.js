@@ -125,7 +125,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 
     const getFill = () => {
       const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
-      return color === '#ffffff' ? '#65676b' : '#d0d0d0';
+      return color === '#ffffff' ? '#242526' : '#d0d0d0';
     };
 
     const container = target.closest('div[role="button"]');

@@ -47,7 +47,7 @@ fun FacebookWebView(
 
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    viewModel.setScripts(fetchScripts(scripts, context))
+                    viewModel.scripts.value = fetchScripts(scripts, context)
                 }
             }
         }

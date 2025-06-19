@@ -2,6 +2,7 @@ package com.ycngmn.nobook.ui
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ycngmn.nobook.NobookDataStore
@@ -17,6 +18,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _scripts = mutableStateOf("")
     val scripts = _scripts
+
+    private val _themeColor = mutableStateOf(Color.Transparent)
+    val themeColor = _themeColor
 
     private val _removeAds = MutableStateFlow(true)
     val removeAds = _removeAds.asStateFlow()
@@ -65,10 +69,6 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
             _hideGroups.value = dataStore.hideGroups.first()
         }
-    }
-
-    fun setScripts(scripts: String) {
-        _scripts.value = scripts
     }
 
     fun setRemoveAds(removeAds: Boolean) {
