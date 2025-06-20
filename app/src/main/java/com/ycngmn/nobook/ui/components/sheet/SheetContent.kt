@@ -1,10 +1,5 @@
 package com.ycngmn.nobook.ui.components.sheet
 
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -28,13 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.net.toUri
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
 
@@ -46,7 +42,6 @@ fun SheetContent(
 ) {
 
     val isOpenDialog = remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
@@ -82,6 +77,16 @@ fun SheetContent(
             }
 
             SheetItem(
+                icon = R.drawable.pinch_zoom_out_24px,
+                title = stringResource(R.string.pinch_to_zoom_title),
+                isActive = pinchToZoom.value
+            ) {
+                viewModel.setPinchToZoom(!pinchToZoom.value)
+            }
+
+            HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
+
+            SheetItem(
                 icon = R.drawable.immersive_mode_24px,
                 title = stringResource(R.string.immersive_mode_title),
                 isActive = immersiveMode.value
@@ -97,12 +102,19 @@ fun SheetContent(
                 viewModel.setStickyNavbar(!stickyNavbar.value)
             }
 
+            HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
+
             SheetItem(
-                icon = R.drawable.pinch_zoom_out_24px,
-                title = stringResource(R.string.pinch_to_zoom_title),
-                isActive = pinchToZoom.value
+                icon = R.drawable.widget_width_24px,
+                title = stringResource(R.string.customize_feed_title),
+                tailIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight
+
             ) {
-                viewModel.setPinchToZoom(!pinchToZoom.value)
+                isOpenDialog.value = true
+            }
+
+            if (isOpenDialog.value) HideOptionsDialog(viewModel) {
+                isOpenDialog.value = false
             }
 
             SheetItem(
@@ -113,47 +125,11 @@ fun SheetContent(
                 viewModel.setAmoledBlack(!amoledBlack.value)
             }
 
-            SheetItem(
-                icon = R.drawable.widget_width_24px,
-                title = stringResource(R.string.customize_feed_title),
-                iconColor = Color(0xFFD8A7B1)
-
-            ) {
-                isOpenDialog.value = true
-            }
-
-            if (isOpenDialog.value) HideOptionsDialog(viewModel) {
-                isOpenDialog.value = false
-            }
-
-            if (!canOpenByDefault(context)) {
-
-                SheetItem(
-                    icon = R.drawable.open_in_browser_24px,
-                    title = stringResource(R.string.open_in_nobook_title),
-                    iconColor = Color(0xFF77E5B6)
-                ) {
-                    // Open open by default settings
-                    val packageName = "package:${context.packageName}".toUri()
-                    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, packageName)
-                    else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageName)
-                    context.startActivity(intent)
-                }
-            }
-
-            SheetItem(
-                icon = R.drawable.star_shine_24px,
-                title = stringResource(R.string.star_at_github_title),
-                iconColor = Color(0XFFE6B800)
-            ) {
-                val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
-                context.startActivity(intent)
-            }
+            HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
 
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding( 16.dp),
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Card  (
@@ -174,8 +150,7 @@ fun SheetContent(
                     )
                 }
 
-                VerticalDivider(Modifier.height(30.dp),
-                    color = Color.Gray, thickness = 2.dp)
+                VerticalDivider(Modifier.height(30.dp), color = Color.Gray, thickness = 2.dp)
 
                 Card  (
                     shape = RoundedCornerShape(6.dp),
@@ -257,26 +232,3 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
         }
     }
 }
-
-private fun canOpenByDefault(context: Context): Boolean {
-    val urls = listOf(
-        "https://www.facebook.com",
-        "https://m.facebook.com",
-        "https://fb.watch",
-        "https://facebook.com"
-    )
-
-    val pm = context.packageManager
-    val packageName = context.packageName
-
-    for (url in urls) {
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-        val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
-        if (resolveInfo?.activityInfo?.packageName != packageName) {
-            return false
-        }
-    }
-
-    return true
-}
-

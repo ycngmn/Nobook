@@ -16,10 +16,6 @@
 
     <string name="customize_feed_title">Customize feed</string>
 
-    <string name="open_in_nobook_title">Open in Nobook</string>
-
-    <string name="star_at_github_title">Star at Github</string>
-
     <!-- Dialog Items -->
     <string name="hide_suggested_title">Hide suggested posts</string>
 

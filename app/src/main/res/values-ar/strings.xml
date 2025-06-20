@@ -16,10 +16,6 @@
 
     <string name="customize_feed_title">تخصيص المحتوى المعروض</string>
 
-    <string name="open_in_nobook_title">فتح روابط فيسبوك في nobook</string>
-
-    <string name="star_at_github_title">أعطنا نجمة على GitHub!</string>
-
     <!-- Dialog Items -->
     <string name="hide_suggested_title">إخفاء المنشورات المقترحة</string>
 

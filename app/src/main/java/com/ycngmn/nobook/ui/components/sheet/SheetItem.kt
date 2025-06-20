@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -20,15 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 @Composable()
 fun SheetItem(
     icon: Int,
     title: String,
-    iconColor: Color? = null,
+    tailIcon: ImageVector? = null,
     isActive: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -42,15 +43,13 @@ fun SheetItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.5.dp)
+                .padding(horizontal = 16.dp, vertical = 2.5.dp)
         ) {
             Image(
                 painter = painterResource(icon),
                 contentDescription = null,
-                modifier = Modifier.size(35.dp),
-                colorFilter =
-                    if (iconColor != null) ColorFilter.tint(iconColor)
-                    else ColorFilter.tint(MaterialTheme.colorScheme.secondary)
+                modifier = Modifier.size(32.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
             )
 
             Text(
@@ -60,25 +59,36 @@ fun SheetItem(
                 modifier = Modifier.padding(start = 16.dp).weight(1F)
             )
 
-            if (iconColor == null) {
+            if (tailIcon == null) {
 
                 Switch(
                     checked = isActive,
                     onCheckedChange = { onClick() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = FacebookBlue,
+                    ),
                     modifier = Modifier.padding(horizontal = 10.dp),
                     thumbContent = if (isActive) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
+                                tint = FacebookBlue,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         }
                     } else null
                 )
             }
+            else {
+                Icon(
+                    imageVector = tailIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(55.dp).padding(end = 20.dp),
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+            }
         }
     }
-
-    HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
 }
