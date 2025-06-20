@@ -23,8 +23,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.sheet.NobookSheet
@@ -50,9 +50,16 @@ fun BaseWebView(
     val context = LocalContext.current
     val activity = LocalActivity.current
 
-    val state = rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
+    val state =
+        rememberSaveableWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
+
+    LaunchedEffect(navigator) {
+        val bundle = state.viewState
+        if (bundle == null) navigator.loadUrl(url)
+    }
+
 
     // allow exiting while scrolling to top.
     val exit = remember { mutableStateOf(false) }
@@ -134,7 +141,10 @@ fun BaseWebView(
 
     if (isLoading.value) SplashLoading(state.loadingState)
 
-    val wvModifier = Modifier.fillMaxSize().background(themeColor.value).imePadding()
+    val wvModifier = Modifier
+        .fillMaxSize()
+        .background(themeColor.value)
+        .imePadding()
 
     WebView(
         modifier =
