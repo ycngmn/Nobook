@@ -1,20 +1,9 @@
 <resources>
     <string name="app_name">Nobook</string>
 
-    <!-- Sheet Items -->
-    <string name="remove_ads_title">Remove ads</string>
-
-    <string name="download_content_title">Download contents</string>
-
-    <string name="immersive_mode_title">Immersive mode</string>
-
-    <string name="sticky_navbar_title">Sticky Navbar</string>
-
-    <string name="pinch_to_zoom_title">Pinch to zoom</string>
-
-    <string name="amoled_black_title">AMOLED Black</string>
-
-    <string name="customize_feed_title">Customize feed</string>
+    <!-- Bottom Text and Buttons -->
+    <string name="apply_immediately">Apply Immediately?</string>
+    <string name="close_menu">Close Menu</string>
 
     <!-- Dialog Items -->
     <string name="hide_suggested_title">Hide suggested posts</string>
@@ -27,9 +16,24 @@
 
     <string name="hide_groups_title">Hide group suggestions</string>
 
-    <!-- Bottom Text and Buttons -->
-    <string name="apply_immediately">Apply Immediately?</string>
-    <string name="close_menu">Close Menu</string>
+    <!-- Sheet Items -->
+    <string name="remove_ads_title">Remove ads</string>
+
+    <string name="download_content_title">Download contents</string>
+
+    <string name="desktop_layout_title">Desktop layout</string>
+
+    <string name="immersive_mode_title">Immersive mode</string>
+
+    <string name="sticky_navbar_title">Sticky Navbar</string>
+
+    <string name="pinch_to_zoom_title">Pinch to zoom</string>
+
+    <string name="amoled_black_title">AMOLED Black</string>
+
+    <string name="customize_feed_title">Customize feed</string>
+
+    <string name="system_font_title">System font</string>
 
 
 </resources>

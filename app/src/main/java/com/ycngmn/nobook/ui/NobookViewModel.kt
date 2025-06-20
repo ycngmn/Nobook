@@ -28,6 +28,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _enableDownloadContent = MutableStateFlow(true)
     val enableDownloadContent = _enableDownloadContent.asStateFlow()
 
+    private val _desktopLayout = MutableStateFlow(false)
+    val desktopLayout = _desktopLayout.asStateFlow()
+
     private val _immersiveMode = MutableStateFlow(false)
     val immersiveMode = _immersiveMode.asStateFlow()
 
@@ -39,6 +42,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _amoledBlack = MutableStateFlow(false)
     val amoledBlack = _amoledBlack.asStateFlow()
+
+    private val _systemFont = MutableStateFlow(false)
+    val systemFont = _systemFont.asStateFlow()
 
     private val _hideSuggested = MutableStateFlow(false)
     val hideSuggested = _hideSuggested.asStateFlow()
@@ -59,10 +65,12 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
             _enableDownloadContent.value = dataStore.enableDownloadContent.first()
+            _desktopLayout.value = dataStore.desktopLayout.first()
             _immersiveMode.value = dataStore.immersiveMode.first()
             _stickyNavbar.value = dataStore.stickyNavbar.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
             _amoledBlack.value = dataStore.amoledBlack.first()
+            _systemFont.value = dataStore.systemFont.first()
             _hideSuggested.value = dataStore.hideSuggested.first()
             _hideReels.value = dataStore.hideReels.first()
             _hideStories.value = dataStore.hideStories.first()
@@ -83,6 +91,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setEnableDownloadContent(enableDownloadContent)
         }
         _enableDownloadContent.value = enableDownloadContent
+    }
+
+    fun setDesktopLayout(desktopLayout: Boolean) {
+        viewModelScope.launch {
+            dataStore.setDesktopLayout(desktopLayout)
+        }
+        _desktopLayout.value = desktopLayout
     }
 
     fun setImmersiveMode(immersiveMode: Boolean) {
@@ -111,6 +126,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setAmoledBlack(amoledBlack)
         }
         _amoledBlack.value = amoledBlack
+    }
+
+    fun setSystemFont(systemFont: Boolean) {
+        viewModelScope.launch {
+            dataStore.setSystemFont(systemFont)
+        }
+        _systemFont.value = systemFont
     }
 
     fun setHideSuggested(hideSuggested: Boolean) {

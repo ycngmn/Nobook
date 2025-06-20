@@ -1,6 +1,5 @@
 package com.ycngmn.nobook.ui.components.sheet
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -45,11 +43,11 @@ fun SheetItem(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 2.5.dp)
         ) {
-            Image(
+            Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
+                tint = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
@@ -85,8 +83,8 @@ fun SheetItem(
                 Icon(
                     imageVector = tailIcon,
                     contentDescription = null,
-                    modifier = Modifier.size(55.dp).padding(end = 20.dp),
-                    tint = MaterialTheme.colorScheme.secondary
+                    modifier = Modifier.size(50.dp).padding(end = 18.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

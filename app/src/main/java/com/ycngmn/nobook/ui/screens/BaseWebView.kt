@@ -36,7 +36,6 @@ import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import kotlinx.coroutines.delay
 
-
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BaseWebView(
@@ -96,9 +95,11 @@ fun BaseWebView(
     val settingsToggle = remember { mutableStateOf(false) }
     val themeColor = viewModel.themeColor
     val isImmersiveMode = viewModel.immersiveMode.collectAsState()
+    val isDesktop = viewModel.desktopLayout.collectAsState()
 
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    if (!isDesktop.value)
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     LaunchedEffect(isImmersiveMode.value, themeColor.value) {
         val window = activity?.window
@@ -140,6 +141,7 @@ fun BaseWebView(
     if (state.lastLoadedUrl?.contains(".com/messages/blocked") == true) onInterceptAction()
 
     if (isLoading.value) SplashLoading(state.loadingState)
+
 
     val wvModifier = Modifier
         .fillMaxSize()

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -45,10 +44,12 @@ fun SheetContent(
 
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
+    val desktopLayout = viewModel.desktopLayout.collectAsState()
     val immersiveMode = viewModel.immersiveMode.collectAsState()
     val stickyNavbar = viewModel.stickyNavbar.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
     val amoledBlack = viewModel.amoledBlack.collectAsState()
+    val systemFont = viewModel.systemFont.collectAsState()
 
 
     Box(
@@ -77,14 +78,20 @@ fun SheetContent(
             }
 
             SheetItem(
+                icon = R.drawable.desktop_layout_24px,
+                title = stringResource(R.string.desktop_layout_title),
+                isActive = desktopLayout.value
+            ) {
+                viewModel.setDesktopLayout(!desktopLayout.value)
+            }
+
+            SheetItem(
                 icon = R.drawable.pinch_zoom_out_24px,
                 title = stringResource(R.string.pinch_to_zoom_title),
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
             }
-
-            HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
 
             SheetItem(
                 icon = R.drawable.immersive_mode_24px,
@@ -102,8 +109,6 @@ fun SheetContent(
                 viewModel.setStickyNavbar(!stickyNavbar.value)
             }
 
-            HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
-
             SheetItem(
                 icon = R.drawable.widget_width_24px,
                 title = stringResource(R.string.customize_feed_title),
@@ -118,14 +123,20 @@ fun SheetContent(
             }
 
             SheetItem(
+                icon = R.drawable.font_family_24px,
+                title = stringResource(R.string.system_font_title),
+                isActive = systemFont.value
+            ) {
+                viewModel.setSystemFont(!systemFont.value)
+            }
+
+            SheetItem(
                 icon = R.drawable.amoled_black_24px,
                 title = stringResource(R.string.amoled_black_title),
                 isActive = amoledBlack.value,
             ) {
                 viewModel.setAmoledBlack(!amoledBlack.value)
             }
-
-            HorizontalDivider(color = Color.Gray, thickness = 0.2.dp)
 
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)

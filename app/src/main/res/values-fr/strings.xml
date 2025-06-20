@@ -6,6 +6,8 @@
 
     <string name="download_content_title">Téléchargement</string>
 
+    <string name="desktop_layout_title">Desktop layout</string>
+
     <string name="immersive_mode_title">Mode immersif</string>
 
     <string name="sticky_navbar_title">Barre de navigation fixe</string>
@@ -30,4 +32,5 @@
     <!-- Bottom Text and Buttons -->
     <string name="apply_immediately">Appliquer maintenant?</string>
     <string name="close_menu">Masquer</string>
+    <string name="system_font_title">System font</string>
 </resources>
