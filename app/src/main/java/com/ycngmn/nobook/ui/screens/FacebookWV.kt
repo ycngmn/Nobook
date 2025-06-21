@@ -1,6 +1,7 @@
 package com.ycngmn.nobook.ui.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.ycngmn.nobook.R
@@ -21,9 +22,11 @@ fun FacebookWebView(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val isDesktop = viewModel.desktopLayout.collectAsState()
 
     BaseWebView(
         url = url,
+        userAgent = if (isDesktop.value) DESKTOP_USER_AGENT else null,
         onInterceptAction = onOpenMessenger,
         onRestart = onRestart,
         viewModel = viewModel,
@@ -36,6 +39,7 @@ fun FacebookWebView(
                 Script(viewModel.enableDownloadContent.value, R.raw.download_content, "$cdnBase/download_content.js"),
                 Script(viewModel.stickyNavbar.value, R.raw.sticky_navbar, "$cdnBase/sticky_navbar.js"),
                 Script(!viewModel.pinchToZoom.value, R.raw.pinch_to_zoom, "$cdnBase/pinch_to_zoom.js"),
+                Script(viewModel.systemFont.value, R.raw.system_font, "$cdnBase/system_font.js"),
                 Script(viewModel.amoledBlack.value, R.raw.amoled_black, "$cdnBase/amoled_black.js"),
                 Script(viewModel.hideSuggested.value, R.raw.hide_suggested, "$cdnBase/hide_suggested.js"),
                 Script(viewModel.hideReels.value, R.raw.hide_reels, "$cdnBase/hide_reels.js"),

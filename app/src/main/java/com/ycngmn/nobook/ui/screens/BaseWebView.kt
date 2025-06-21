@@ -53,7 +53,6 @@ fun BaseWebView(
     val context = LocalContext.current
     val activity = LocalActivity.current
 
-
     val state =
         rememberSaveableWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
@@ -182,6 +181,7 @@ fun BaseWebView(
                     domStorageEnabled = true
                     hideDefaultVideoPoster = true
                     mediaPlaybackRequiresUserGesture = false
+                    textZoom = 96
                 }
             }
 
