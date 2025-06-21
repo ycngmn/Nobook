@@ -327,7 +327,7 @@
     let btn = document.getElementById(DOWNLOAD_BTN_ID);
     if (!btn) btn = createDownloadButton();
 
-    if (isInStoryOrReelView()) {
+    if (isInStoryOrReelView() && !isFeed()) {
       const mediaElement = getCurrentMediaElement();
 
       if (mediaElement) {
