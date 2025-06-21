@@ -71,7 +71,8 @@
 (() => {
     window.backHandlerNB = () => {
     const isDialog = document.querySelector('div[role="dialog"]');
-    if (window.isFeed() && !isDialog) {
+    const isDialogDesktop = document.querySelector('div.xu96u03.x10l6tqk.x1yf7rl7.x80663w');
+    if (window.isFeed() && !isDialog && !isDialogDesktop) {
        if (window.scrollY !== 0) {
           // to interrupt any current scroll event.
           document.body.style.overflow = 'hidden';
@@ -81,7 +82,21 @@
           }, 50);
           return "true";
        } else return "exit";
-    } else return "false"; }
+    } else if (isDesktopMode()) {
+        const escapeEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            code: 'Escape',
+            keyCode: 27,
+            which: 27,
+            bubbles: true,
+            cancelable: true
+          });
+
+          window.dispatchEvent(escapeEvent);
+          return "true";
+    }
+
+    else return "false"; }
 })();
 
 // Enable press and hold caption selection and apply custom selection color.

@@ -1,12 +1,9 @@
 (function() {
 
-
     if (isDesktopMode()) {
         (function() {
-          const selector = '.x1yztbdb.x1n2onr6.xh8yej3.x1ja2u2z.sponsored_ad';
-
+          const selector = '.sponsored_ad, article[data-ft*="sponsored_ad"]';
           document.querySelectorAll(selector).forEach(el => el.remove());
-
           new MutationObserver(mutations => {
             mutations.forEach(mutation => {
               mutation.addedNodes.forEach(node => {
