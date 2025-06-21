@@ -7,9 +7,11 @@ import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,6 +37,8 @@ import com.ycngmn.nobook.utils.jsBridge.NavigateFB
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import kotlinx.coroutines.delay
+import rememberImeHeight
+
 
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
@@ -48,6 +52,7 @@ fun BaseWebView(
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current
+
 
     val state =
         rememberSaveableWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
@@ -146,12 +151,17 @@ fun BaseWebView(
     val wvModifier = Modifier
         .fillMaxSize()
         .background(themeColor.value)
-        .imePadding()
+
+    val barsInsets = WindowInsets.systemBars.asPaddingValues()
+    val imeHeight = rememberImeHeight()
 
     WebView(
         modifier =
-            if (isImmersiveMode.value) wvModifier
-            else wvModifier.systemBarsPadding(),
+            if (isImmersiveMode.value) wvModifier.padding(bottom = imeHeight)
+            else wvModifier.padding(
+                top = barsInsets.calculateTopPadding(),
+                bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+            ),
         state = state,
         navigator = navigator,
         platformWebViewParams = fileChooserWebViewParams(),
