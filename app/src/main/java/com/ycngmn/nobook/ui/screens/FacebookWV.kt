@@ -39,7 +39,6 @@ fun FacebookWebView(
                 Script(viewModel.enableDownloadContent.value, R.raw.download_content, "$cdnBase/download_content.js"),
                 Script(viewModel.stickyNavbar.value, R.raw.sticky_navbar, "$cdnBase/sticky_navbar.js"),
                 Script(!viewModel.pinchToZoom.value, R.raw.pinch_to_zoom, "$cdnBase/pinch_to_zoom.js"),
-                Script(viewModel.systemFont.value, R.raw.system_font, "$cdnBase/system_font.js"),
                 Script(viewModel.amoledBlack.value, R.raw.amoled_black, "$cdnBase/amoled_black.js"),
                 Script(viewModel.hideSuggested.value, R.raw.hide_suggested, "$cdnBase/hide_suggested.js"),
                 Script(viewModel.hideReels.value, R.raw.hide_reels, "$cdnBase/hide_reels.js"),

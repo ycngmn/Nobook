@@ -49,7 +49,6 @@ fun SheetContent(
     val stickyNavbar = viewModel.stickyNavbar.collectAsState()
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
     val amoledBlack = viewModel.amoledBlack.collectAsState()
-    val systemFont = viewModel.systemFont.collectAsState()
 
 
     Box(
@@ -120,14 +119,6 @@ fun SheetContent(
 
             if (isOpenDialog.value) HideOptionsDialog(viewModel) {
                 isOpenDialog.value = false
-            }
-
-            SheetItem(
-                icon = R.drawable.font_family_24px,
-                title = stringResource(R.string.system_font_title),
-                isActive = systemFont.value
-            ) {
-                viewModel.setSystemFont(!systemFont.value)
             }
 
             SheetItem(

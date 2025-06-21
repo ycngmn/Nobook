@@ -19,7 +19,6 @@ class NobookDataStore(private val context: Context) {
         val STICKY_NAVBAR = booleanPreferencesKey("sticky_navbar")
         val PINCH_TO_ZOOM = booleanPreferencesKey("pinch_to_zoom")
         val AMOLED_BLACK = booleanPreferencesKey("amoled_black")
-        val SYSTEM_FONT = booleanPreferencesKey("system_font")
         val HIDE_SUGGESTED = booleanPreferencesKey("hide_suggestion")
         val HIDE_REELS = booleanPreferencesKey("hide_reels")
         val HIDE_STORIES = booleanPreferencesKey("hide_stories")
@@ -60,11 +59,6 @@ class NobookDataStore(private val context: Context) {
     val amoledBlack = context.dataStore.data.map { it[AMOLED_BLACK] == true }
     suspend fun setAmoledBlack(amoledBlack: Boolean) {
         context.dataStore.edit { it[AMOLED_BLACK] = amoledBlack }
-    }
-
-    val systemFont = context.dataStore.data.map { it[SYSTEM_FONT] == true }
-    suspend fun setSystemFont(systemFont: Boolean) {
-        context.dataStore.edit { it[SYSTEM_FONT] = systemFont }
     }
 
     val hideSuggested = context.dataStore.data.map { it[HIDE_SUGGESTED] == true }
