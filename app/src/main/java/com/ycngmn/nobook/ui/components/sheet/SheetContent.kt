@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
+import com.ycngmn.nobook.ui.screens.isAutoDesktop
 
 @Composable
 fun SheetContent(
@@ -76,12 +77,13 @@ fun SheetContent(
                 viewModel.setEnableDownloadContent(!enableDownloadContent.value)
             }
 
+            val isAutoDesktop = isAutoDesktop()
             SheetItem(
                 icon = R.drawable.desktop_layout_24px,
                 title = stringResource(R.string.desktop_layout_title),
                 isActive = desktopLayout.value
             ) {
-                viewModel.setDesktopLayout(!desktopLayout.value)
+               if (!isAutoDesktop) viewModel.setDesktopLayout(!desktopLayout.value)
             }
 
             SheetItem(

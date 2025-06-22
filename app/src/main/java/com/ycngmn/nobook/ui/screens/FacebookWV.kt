@@ -1,8 +1,11 @@
 package com.ycngmn.nobook.ui.screens
 
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
@@ -11,6 +14,14 @@ import com.ycngmn.nobook.utils.fetchScripts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+@Composable
+fun isAutoDesktop(): Boolean {
+    val configuration = LocalConfiguration.current
+    return if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        return true
+    } else configuration.smallestScreenWidthDp  >= 600
+}
 
 @Composable
 fun FacebookWebView(
@@ -23,6 +34,17 @@ fun FacebookWebView(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val isDesktop = viewModel.desktopLayout.collectAsState()
+    val isAutoDesktop = isAutoDesktop()
+
+    LaunchedEffect(Unit) {
+        if (isAutoDesktop && !isDesktop.value) {
+            viewModel.setRevertDesktop(true)
+            viewModel.setDesktopLayout(true)
+        } else if (viewModel.isRevertDesktop.value) {
+            viewModel.setRevertDesktop(false)
+            viewModel.setDesktopLayout(false)
+        }
+    }
 
     BaseWebView(
         url = url,
@@ -34,7 +56,7 @@ fun FacebookWebView(
             val cdnBase = "https://raw.githubusercontent.com/ycngmn/Nobook/refs/heads/main/app/src/main/res/raw"
 
             val scripts = listOf(
-                Script(true, R.raw.scripts, "$cdnBase/scripts.js"), // always apply
+                Script(true, R.raw.scripts, "$cdnBase/scriptss.js"), // always apply
                 Script(viewModel.removeAds.value, R.raw.adblock, "$cdnBase/adblock.js"),
                 Script(viewModel.enableDownloadContent.value, R.raw.download_content, "$cdnBase/download_content.js"),
                 Script(viewModel.stickyNavbar.value, R.raw.sticky_navbar, "$cdnBase/sticky_navbar.js"),

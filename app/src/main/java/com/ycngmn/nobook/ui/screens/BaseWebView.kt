@@ -1,7 +1,6 @@
 package com.ycngmn.nobook.ui.screens
 
-import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -25,8 +25,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
+import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.sheet.NobookSheet
@@ -40,7 +40,6 @@ import kotlinx.coroutines.delay
 import rememberImeHeight
 
 
-@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BaseWebView(
     url: String,
@@ -54,14 +53,10 @@ fun BaseWebView(
     val activity = LocalActivity.current
 
     val state =
-        rememberSaveableWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
+        rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
 
-    LaunchedEffect(navigator) {
-        val bundle = state.viewState
-        if (bundle == null) navigator.loadUrl(url)
-    }
 
 
     // allow exiting while scrolling to top.
@@ -99,11 +94,6 @@ fun BaseWebView(
     val settingsToggle = remember { mutableStateOf(false) }
     val themeColor = viewModel.themeColor
     val isImmersiveMode = viewModel.immersiveMode.collectAsState()
-    val isDesktop = viewModel.desktopLayout.collectAsState()
-
-    // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
-    if (!isDesktop.value)
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
     LaunchedEffect(isImmersiveMode.value, themeColor.value) {
         val window = activity?.window
@@ -127,6 +117,7 @@ fun BaseWebView(
     if (userScripts.value.isEmpty()) onPostLoad()
 
     LaunchedEffect(state.loadingState, userScripts.value) {
+        Log.d("loadingState", state.loadingState.toString())
         if (state.loadingState is LoadingState.Finished && userScripts.value.isNotEmpty()){
             navigator.evaluateJavaScript(userScripts.value) {
                 if (isLoading.value) isLoading.value = false
@@ -146,7 +137,6 @@ fun BaseWebView(
 
     if (isLoading.value) SplashLoading(state.loadingState)
 
-
     val wvModifier = Modifier
         .fillMaxSize()
         .background(themeColor.value)
@@ -154,55 +144,58 @@ fun BaseWebView(
     val barsInsets = WindowInsets.systemBars.asPaddingValues()
     val imeHeight = rememberImeHeight()
 
-    WebView(
-        modifier =
-            if (isImmersiveMode.value) wvModifier.padding(bottom = imeHeight)
-            else wvModifier.padding(
-                top = barsInsets.calculateTopPadding(),
-                bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
-            ),
-        state = state,
-        navigator = navigator,
-        platformWebViewParams = fileChooserWebViewParams(),
-        captureBackPresses = false,
-        onCreated = { webView ->
 
-            val cookieManager = CookieManager.getInstance()
-            cookieManager.setAcceptCookie(true)
-            cookieManager.setAcceptThirdPartyCookies(webView, true)
-            cookieManager.flush()
+    key(userAgent) {
+        WebView(
+            modifier =
+                if (isImmersiveMode.value) wvModifier.padding(bottom = imeHeight)
+                else wvModifier.padding(
+                    top = barsInsets.calculateTopPadding(),
+                    bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+                ),
+            state = state,
+            navigator = navigator,
+            platformWebViewParams = fileChooserWebViewParams(),
+            captureBackPresses = false,
+            onCreated = { webView ->
 
-            state.webSettings.apply {
-                customUserAgentString = userAgent
-                isJavaScriptEnabled = true
+                val cookieManager = CookieManager.getInstance()
+                cookieManager.setAcceptCookie(true)
+                cookieManager.setAcceptThirdPartyCookies(webView, true)
+                cookieManager.flush()
 
-                androidWebSettings.apply {
-                    //isDebugInspectorInfoEnabled = true
-                    domStorageEnabled = true
-                    hideDefaultVideoPoster = true
-                    mediaPlaybackRequiresUserGesture = false
-                    textZoom = 96
+                state.webSettings.apply {
+                    customUserAgentString = userAgent
+                    isJavaScriptEnabled = true
+
+                    androidWebSettings.apply {
+                        //isDebugInspectorInfoEnabled = true
+                        domStorageEnabled = true
+                        hideDefaultVideoPoster = true
+                        mediaPlaybackRequiresUserGesture = false
+                        textZoom = 96
+                    }
+                }
+
+                webView.apply {
+                    addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
+                    addJavascriptInterface(ThemeChange(themeColor), "ThemeBridge")
+                    addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
+                    addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
+
+                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+                    // Hide scrollbars
+                    overScrollMode = View.OVER_SCROLL_NEVER
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
+
+                    settings.setSupportZoom(true)
+                    // pinch to zoom doesn't work on settings refresh otherwise
+                    settings.builtInZoomControls = true
+                    settings.displayZoomControls = false
                 }
             }
-
-            webView.apply {
-                addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
-                addJavascriptInterface(ThemeChange(themeColor), "ThemeBridge")
-                addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
-                addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
-
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-                // Hide scrollbars
-                overScrollMode = View.OVER_SCROLL_NEVER
-                isVerticalScrollBarEnabled = false
-                isHorizontalScrollBarEnabled = false
-
-                settings.setSupportZoom(true)
-                // pinch to zoom doesn't work on settings refresh otherwise
-                settings.builtInZoomControls = true
-                settings.displayZoomControls = false
-            }
-        }
-    )
+        )
+    }
 }
