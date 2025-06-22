@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.ycngmn.nobook"
-        minSdk = 24
+        minSdk = 22
         targetSdk = 35
         versionCode = 9
         versionName = "0.0.9"
