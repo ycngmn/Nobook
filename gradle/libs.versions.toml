@@ -1,6 +1,6 @@
 [versions]
 agp = "8.10.1"
-composeWebviewMultiplatform = "2.0.0"
+composeWebviewMultiplatform = "2.0.1"
 datastorePreferences = "1.1.4"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
