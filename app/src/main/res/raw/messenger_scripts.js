@@ -1,5 +1,12 @@
 (function () {
   const hideAndInsert = () => {
+
+    if (!window.location.href.includes("www.facebook.com/messages")) {
+        if (document.getElementById('custom-fb-button'))
+            document.getElementById('custom-fb-button').remove();
+        return;
+    }
+
     // Hide fb items on topBar.
     document.querySelectorAll('.x6s0dn4.x78zum5.x5yr21d.xl56j7k.x1emribx')
       .forEach(el => el.style.display = 'none');

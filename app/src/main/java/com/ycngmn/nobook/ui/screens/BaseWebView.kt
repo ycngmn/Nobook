@@ -7,27 +7,26 @@ import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.sheet.NobookSheet
@@ -38,6 +37,7 @@ import com.ycngmn.nobook.utils.jsBridge.NavigateFB
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import kotlinx.coroutines.delay
+import rememberImeHeight
 
 
 @SuppressLint("SourceLockedOrientationActivity")
@@ -53,9 +53,16 @@ fun BaseWebView(
     val context = LocalContext.current
     val activity = LocalActivity.current
 
-    val state = rememberWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
+    val state =
+        rememberSaveableWebViewState(url, additionalHttpHeaders = mapOf("X-Requested-With" to ""))
     val navigator = rememberWebViewNavigator(requestInterceptor =
         ExternalRequestInterceptor(context = context, onInterceptAction))
+
+    LaunchedEffect(navigator) {
+        val bundle = state.viewState
+        if (bundle == null) navigator.loadUrl(url)
+    }
+
 
     // allow exiting while scrolling to top.
     val exit = remember { mutableStateOf(false) }
@@ -89,14 +96,16 @@ fun BaseWebView(
     val isLoading = remember { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
-    val colorState = remember { mutableStateOf(Color.Transparent) }
     val settingsToggle = remember { mutableStateOf(false) }
+    val themeColor = viewModel.themeColor
     val isImmersiveMode = viewModel.immersiveMode.collectAsState()
+    val isDesktop = viewModel.desktopLayout.collectAsState()
 
     // Lock orientation to portrait as fb mobile isn't optimized for landscape mode.
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    if (!isDesktop.value)
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-    LaunchedEffect(isImmersiveMode.value, colorState.value) {
+    LaunchedEffect(isImmersiveMode.value, themeColor.value) {
         val window = activity?.window
         if (window != null) {
             val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
@@ -106,7 +115,7 @@ fun BaseWebView(
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
             else {
-                val isLight = ColorUtils.calculateLuminance(colorState.value.toArgb()) > 0.5
+                val isLight = ColorUtils.calculateLuminance(themeColor.value.toArgb()) > 0.5
                 windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
                 windowInsetsController.isAppearanceLightStatusBars = isLight
                 windowInsetsController.isAppearanceLightNavigationBars = isLight
@@ -137,12 +146,21 @@ fun BaseWebView(
 
     if (isLoading.value) SplashLoading(state.loadingState)
 
-    val wvModifier = Modifier.fillMaxSize().background(colorState.value).imePadding()
+
+    val wvModifier = Modifier
+        .fillMaxSize()
+        .background(themeColor.value)
+
+    val barsInsets = WindowInsets.systemBars.asPaddingValues()
+    val imeHeight = rememberImeHeight()
 
     WebView(
         modifier =
-            if (isImmersiveMode.value) wvModifier.padding(top = 5.dp)
-            else wvModifier.systemBarsPadding(),
+            if (isImmersiveMode.value) wvModifier.padding(bottom = imeHeight)
+            else wvModifier.padding(
+                top = barsInsets.calculateTopPadding(),
+                bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+            ),
         state = state,
         navigator = navigator,
         platformWebViewParams = fileChooserWebViewParams(),
@@ -163,12 +181,13 @@ fun BaseWebView(
                     domStorageEnabled = true
                     hideDefaultVideoPoster = true
                     mediaPlaybackRequiresUserGesture = false
+                    textZoom = 96
                 }
             }
 
             webView.apply {
                 addJavascriptInterface(NobookSettings(settingsToggle), "SettingsBridge")
-                addJavascriptInterface(ThemeChange(colorState), "ThemeBridge")
+                addJavascriptInterface(ThemeChange(themeColor), "ThemeBridge")
                 addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
                 addJavascriptInterface(NavigateFB(navTrigger), "NavigateBridge")
 

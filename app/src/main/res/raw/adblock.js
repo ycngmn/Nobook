@@ -1,4 +1,38 @@
 (function() {
+
+    if (isDesktopMode()) {
+        (function() {
+          const selector = 'div.sponsored_ad, article[data-ft*="sponsored_ad"]';
+
+          const removeSponsored = (root = document) => {
+            root.querySelectorAll(selector).forEach(el => el.remove());
+          };
+
+          removeSponsored();
+
+          const observer = new MutationObserver(mutations => {
+            for (const mutation of mutations) {
+              for (const node of mutation.addedNodes) {
+                if (!(node instanceof HTMLElement)) continue;
+                if (node.matches(selector)) {
+                  node.remove();
+                } else {
+                  removeSponsored(node);
+                }
+              }
+            }
+          });
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+        })();
+
+
+        return;
+    }
+
+
     const sponsoredTexts = [
         "Sponsored", "Gesponsert", "Sponsorlu", "Sponsorowane",
         "Ispoonsara godhameera", "Geborg", "Bersponsor", "Ditaja",

@@ -1,3 +1,11 @@
+
+// desktop mode identifier
+(() => {
+    window.isDesktopMode = () => {
+        return document.querySelector('html[id="facebook"]') !== null;
+    }
+})();
+
 // Feed identifier
 (() => {
     window.isFeed = () => {
@@ -7,10 +15,57 @@
     }
 })();
 
+
+(function() {
+    if (!window.isDesktopMode()) return;
+
+    document.documentElement.style.fontSize = '18px';
+
+    // do not stick by default the navbar
+    (function() {
+        const style = document.createElement('style');
+        style.textContent = `.xixxii4 { position: absolute !important; }`;
+        document.head.appendChild(style);
+    })();
+
+    // remove "send" button to save space
+    // remove the third element in the interaction bar if nb is 4
+    (function() {
+      const parentSelector = '.xbmvrgn.x1diwwjn';
+      const childSelector = '.x10b6aqq.x1yrsyyn.xs83m0k';
+
+      function checkAndRemoveThird(parent) {
+        const children = parent.querySelectorAll(childSelector);
+        if (children.length === 4) {
+          children[2].remove();
+        }
+      }
+
+      document.querySelectorAll(parentSelector).forEach(checkAndRemoveThird);
+
+      const observer = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) {
+              if (node.matches(parentSelector)) {
+                checkAndRemoveThird(node);
+              }
+              node.querySelectorAll(parentSelector).forEach(checkAndRemoveThird);
+            }
+          });
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    })();
+})();
+
+
 // Scroll to top on back-press at feed.
 (() => {
     window.backHandlerNB = () => {
-    const isDialog = document.querySelector('div[role="dialog"]');
+    const isDialog = document.querySelector('div.xu96u03.x10l6tqk.x1yf7rl7.x80663w') ||
+      document.querySelector('div[role="dialog"]');;
     if (window.isFeed() && !isDialog) {
        if (window.scrollY !== 0) {
           // to interrupt any current scroll event.
@@ -21,7 +76,20 @@
           }, 50);
           return "true";
        } else return "exit";
-    } else return "false"; }
+    } else if (isDesktopMode() && isDialog) {
+        const escapeEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            code: 'Escape',
+            keyCode: 27,
+            which: 27,
+            bubbles: true,
+            cancelable: true
+          });
+
+          window.dispatchEvent(escapeEvent);
+          return "true";
+    }
+    else return "false"; }
 })();
 
 // Enable press and hold caption selection and apply custom selection color.
@@ -52,8 +120,6 @@
     subtree: true
   });
 })();
-
-
 
 // Enhance Loading Overlay Script
 (function() {
@@ -117,26 +183,31 @@ observer.observe(document.body, { childList: true, subtree: true });
 /* The below scripts are specific to com.ycngmn.Nobook application. */
 
 (() => {
+  const getFill = () => {
+    const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
+    return color === '#ffffff' ? '#242526' : '#d0d0d0';
+  };
+
+  const updateButtonColor = () => {
+    const svg = document.querySelector('#custom-settings-btn svg');
+    if (svg) {
+      svg.setAttribute('fill', getFill());
+    }
+  };
+
   const insertButton = () => {
     const target = Array.from(document.querySelectorAll('span'))
       .find(span => span.textContent === '󱥊');
 
-    if (!target || !isFeed()) return;
+    const desktopTarget = document.querySelector('.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z');
 
-    const getFill = () => {
-      const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
-      return color === '#ffffff' ? '#65676b' : '#d0d0d0';
-    };
-
-    const container = target.closest('div[role="button"]');
-    if (!container || !container.parentNode) return;
-
+    if (!target && !desktopTarget) return;
     if (document.getElementById('custom-settings-btn')) return;
 
     const btn = document.createElement('button');
     btn.id = 'custom-settings-btn';
     btn.setAttribute('style', `
-      position: fixed;
+      position: ${desktopTarget === null ? 'fixed' : 'block'};
       top: 8px;
       right: 100px;
       background: transparent;
@@ -157,7 +228,13 @@ observer.observe(document.body, { childList: true, subtree: true });
 
     btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
 
-    container.parentNode.insertBefore(btn, container);
+    if (desktopTarget) {
+      desktopTarget.appendChild(btn);
+    } else {
+      const container = target.closest('div[role="button"]');
+      if (!container || !container.parentNode) return;
+      container.parentNode.insertBefore(btn, container);
+    }
   };
 
   insertButton();
@@ -166,17 +243,29 @@ observer.observe(document.body, { childList: true, subtree: true });
     const customBtn = document.getElementById('custom-settings-btn');
     const target = Array.from(document.querySelectorAll('span'))
       .find(span => span.textContent === '󱥊');
+    const desktopTarget = document.querySelector('.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z');
 
-    if (target && !customBtn) {
-      insertButton();
-    }
+    if ((target || desktopTarget) && !customBtn) insertButton();
   });
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
   });
+
+  const metaTag = document.querySelector('meta[name="theme-color"]');
+  if (metaTag) {
+    const metaObserver = new MutationObserver(() => {
+      updateButtonColor();
+    });
+
+    metaObserver.observe(metaTag, {
+      attributes: true,
+      attributeFilter: ['content'],
+    });
+  }
 })();
+
 
 
 // Color Extraction Script

@@ -2,6 +2,7 @@ package com.ycngmn.nobook.ui
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ycngmn.nobook.NobookDataStore
@@ -18,11 +19,17 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _scripts = mutableStateOf("")
     val scripts = _scripts
 
+    private val _themeColor = mutableStateOf(Color.Transparent)
+    val themeColor = _themeColor
+
     private val _removeAds = MutableStateFlow(true)
     val removeAds = _removeAds.asStateFlow()
 
     private val _enableDownloadContent = MutableStateFlow(true)
     val enableDownloadContent = _enableDownloadContent.asStateFlow()
+
+    private val _desktopLayout = MutableStateFlow(false)
+    val desktopLayout = _desktopLayout.asStateFlow()
 
     private val _immersiveMode = MutableStateFlow(false)
     val immersiveMode = _immersiveMode.asStateFlow()
@@ -55,6 +62,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
             _enableDownloadContent.value = dataStore.enableDownloadContent.first()
+            _desktopLayout.value = dataStore.desktopLayout.first()
             _immersiveMode.value = dataStore.immersiveMode.first()
             _stickyNavbar.value = dataStore.stickyNavbar.first()
             _pinchToZoom.value = dataStore.pinchToZoom.first()
@@ -65,10 +73,6 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
             _hideGroups.value = dataStore.hideGroups.first()
         }
-    }
-
-    fun setScripts(scripts: String) {
-        _scripts.value = scripts
     }
 
     fun setRemoveAds(removeAds: Boolean) {
@@ -83,6 +87,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setEnableDownloadContent(enableDownloadContent)
         }
         _enableDownloadContent.value = enableDownloadContent
+    }
+
+    fun setDesktopLayout(desktopLayout: Boolean) {
+        viewModelScope.launch {
+            dataStore.setDesktopLayout(desktopLayout)
+        }
+        _desktopLayout.value = desktopLayout
     }
 
     fun setImmersiveMode(immersiveMode: Boolean) {

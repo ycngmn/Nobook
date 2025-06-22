@@ -1,4 +1,14 @@
 (function() {
+
+    if (window.isDesktopMode()) {
+        (function() {
+            const style = document.createElement('style');
+            style.textContent = `.xixxii4 { position: fixed !important; }`;
+            document.head.appendChild(style);
+        })();
+        return;
+    }
+
     const applyStyles = () => {
         const navbar = document.querySelector('div[data-tti-phase="-1"][data-mcomponent="MContainer"][data-type="container"][data-focusable="true"].m');
         const tabbar = document.querySelector('div[role="tablist"][data-tti-phase="-1"][data-type="container"][data-mcomponent="MContainer"].m');

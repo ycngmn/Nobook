@@ -14,6 +14,7 @@ class NobookDataStore(private val context: Context) {
     private companion object {
         val REMOVE_ADS = booleanPreferencesKey("remove_ads")
         val ENABLE_DOWNLOAD_CONTENT = booleanPreferencesKey("enable_download_content")
+        val DESKTOP_LAYOUT = booleanPreferencesKey("desktop_layout")
         val IMMERSIVE_MODE = booleanPreferencesKey("immersive_mode")
         val STICKY_NAVBAR = booleanPreferencesKey("sticky_navbar")
         val PINCH_TO_ZOOM = booleanPreferencesKey("pinch_to_zoom")
@@ -33,6 +34,11 @@ class NobookDataStore(private val context: Context) {
     val enableDownloadContent = context.dataStore.data.map { it[ENABLE_DOWNLOAD_CONTENT] != false }
     suspend fun setEnableDownloadContent(enableDownloadContent: Boolean) {
         context.dataStore.edit { it[ENABLE_DOWNLOAD_CONTENT] = enableDownloadContent }
+    }
+
+    val desktopLayout = context.dataStore.data.map { it[DESKTOP_LAYOUT] == true }
+    suspend fun setDesktopLayout(desktopLayout: Boolean) {
+        context.dataStore.edit { it[DESKTOP_LAYOUT] = desktopLayout }
     }
 
     val immersiveMode = context.dataStore.data.map { it[IMMERSIVE_MODE] == true }
