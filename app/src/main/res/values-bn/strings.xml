@@ -1,10 +1,30 @@
 <resources>
     <string name="app_name">Nobook</string>
 
+
+    <!-- Bottom Text and Buttons -->
+    <string name="apply_immediately">এখনই অ্যাপ্লাই করুন</string>
+    <string name="close_menu">মেনু বন্ধ করুন</string>
+
+    
+    <!-- Dialog Items -->
+    <string name="hide_suggested_title">সাজেস্টেড পোস্ট হাইড করুন</string>
+
+    <string name="hide_reels_title">রিলস হাইড করুন</string>
+
+    <string name="hide_stories_title">স্টোরি হাইড করুন</string>
+
+    <string name="hide_people_you_may_know_title">পিপল ইউ মে নো হাইড করুন</string>
+
+    <string name="hide_groups_title">গ্রুপ সাজেশান হাইড করুন</string>
+    
+    
     <!-- Sheet Items -->
     <string name="remove_ads_title">বিজ্ঞাপন রিমুভ করুন</string>
 
     <string name="download_content_title">ডাউনলোড অন করুন</string>
+
+    <string name="desktop_layout_title">ডেস্কটপ লেআউট</string>
 
     <string name="immersive_mode_title">ইমার্সিভ মোড</string>
 
@@ -16,24 +36,7 @@
 
     <string name="customize_feed_title">ফিড কাস্টমাইজেশন</string>
 
-    <string name="open_in_nobook_title">নোবুকে ওপেন করা</string>
-
-    <string name="star_at_github_title">গিটহাবে স্টার দিন</string>
-
-    <!-- Dialog Items -->
-    <string name="hide_suggested_title">সাজেস্টেড পোস্ট হাইড করুন</string>
-
-    <string name="hide_reels_title">রিলস হাইড করুন</string>
-
-    <string name="hide_stories_title">স্টোরি হাইড করুন</string>
-
-    <string name="hide_people_you_may_know_title">পিপল ইউ মে নো হাইড করুন</string>
-
-    <string name="hide_groups_title">গ্রুপ সাজেশান হাইড করুন</string>
-
-    <!-- Bottom Text and Buttons -->
-    <string name="apply_immediately">এখনই অ্যাপ্লাই করুন</string>
-    <string name="close_menu">মেনু বন্ধ করুন</string>
+    <string name="system_font_title">সিস্টেম ফন্ট</string>
 
 
 </resources>
