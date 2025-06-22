@@ -1,10 +1,42 @@
 (function() {
 
     if (window.isDesktopMode()) {
-        (function() {
-            const style = document.createElement('style');
-            style.textContent = `.xixxii4 { position: fixed !important; }`;
-            document.head.appendChild(style);
+        (() => {
+          const banner = document.querySelector('div[role="banner"]');
+          if (!banner) return;
+
+          const style = document.createElement('style');
+          style.textContent = `
+            div[role="banner"].xixxii4,
+            div[role="banner"] .xixxii4 {
+              position: absolute !important;
+            }
+          `;
+          document.head.appendChild(style);
+
+          const forcePosition = el => {
+            if (el.classList.contains('xixxii4')) {
+              el.style.setProperty('position', 'fixed', 'important');
+            }
+          };
+
+          forcePosition(banner);
+          banner.querySelectorAll('.xixxii4').forEach(forcePosition);
+
+          new MutationObserver(mutations => {
+            for (const m of mutations) {
+              if (m.type === 'childList') {
+                m.addedNodes.forEach(node => {
+                  if (node.nodeType === 1) {
+                    forcePosition(node);
+                    node.querySelectorAll('.xixxii4').forEach(forcePosition);
+                  }
+                });
+              } else if (m.type === 'attributes' && m.attributeName === 'class') {
+                forcePosition(m.target);
+              }
+            }
+          }).observe(banner, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
         })();
         return;
     }

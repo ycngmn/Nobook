@@ -9,6 +9,7 @@
 // Feed identifier
 (() => {
     window.isFeed = () => {
+        if (window.isDesktopMode()) return true;
         return window.location.pathname === '/' &&
           (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
           && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
@@ -22,11 +23,44 @@
     document.documentElement.style.fontSize = '18px';
 
     // do not stick by default the navbar
-    (function() {
-        const style = document.createElement('style');
-        style.textContent = `.xixxii4 { position: absolute !important; }`;
-        document.head.appendChild(style);
+    (() => {
+      const banner = document.querySelector('div[role="banner"]');
+      if (!banner) return;
+
+      const style = document.createElement('style');
+      style.textContent = `
+        div[role="banner"].xixxii4,
+        div[role="banner"] .xixxii4 {
+          position: absolute !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      const forcePosition = el => {
+        if (el.classList.contains('xixxii4')) {
+          el.style.setProperty('position', 'absolute', 'important');
+        }
+      };
+
+      forcePosition(banner);
+      banner.querySelectorAll('.xixxii4').forEach(forcePosition);
+
+      new MutationObserver(mutations => {
+        for (const m of mutations) {
+          if (m.type === 'childList') {
+            m.addedNodes.forEach(node => {
+              if (node.nodeType === 1) {
+                forcePosition(node);
+                node.querySelectorAll('.xixxii4').forEach(forcePosition);
+              }
+            });
+          } else if (m.type === 'attributes' && m.attributeName === 'class') {
+            forcePosition(m.target);
+          }
+        }
+      }).observe(banner, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
     })();
+
 
     // remove "send" button to save space
     // remove the third element in the interaction bar if nb is 4
@@ -36,9 +70,7 @@
 
       function checkAndRemoveThird(parent) {
         const children = parent.querySelectorAll(childSelector);
-        if (children.length === 4) {
-          children[2].remove();
-        }
+        if (children.length === 4) children[2].remove();
       }
 
       document.querySelectorAll(parentSelector).forEach(checkAndRemoveThird);
@@ -183,89 +215,96 @@ observer.observe(document.body, { childList: true, subtree: true });
 /* The below scripts are specific to com.ycngmn.Nobook application. */
 
 (() => {
-  const getFill = () => {
-    const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
-    return color === '#ffffff' ? '#242526' : '#d0d0d0';
-  };
-
-  const updateButtonColor = () => {
-    const svg = document.querySelector('#custom-settings-btn svg');
-    if (svg) {
-      svg.setAttribute('fill', getFill());
-    }
-  };
-
-  const insertButton = () => {
-    const target = Array.from(document.querySelectorAll('span'))
-      .find(span => span.textContent === '󱥊');
-
-    const desktopTarget = document.querySelector('.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z');
-
-    if (!target && !desktopTarget) return;
-    if (document.getElementById('custom-settings-btn')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'custom-settings-btn';
-    btn.setAttribute('style', `
-      position: ${desktopTarget === null ? 'fixed' : 'block'};
-      top: 8px;
-      right: 100px;
-      background: transparent;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      pointer-events: auto;
-    `);
-    btn.innerHTML = `
-      <svg width="28" height="28" fill="${getFill()}" viewBox="0 0 24 24">
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"/>
-      </svg>
-    `;
-
-    btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
-
-    if (desktopTarget) {
-      desktopTarget.appendChild(btn);
+  const onReady = (fn) => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
     } else {
-      const container = target.closest('div[role="button"]');
-      if (!container || !container.parentNode) return;
-      container.parentNode.insertBefore(btn, container);
+      fn();
     }
   };
 
-  insertButton();
+  onReady(() => {
+    const BUTTON_ID = 'custom-settings-btn';
+    const ICON_SVG = `
+      <svg width="28" height="28" fill="%FILL%" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"/>
+      </svg>`;
 
-  const observer = new MutationObserver(() => {
-    const customBtn = document.getElementById('custom-settings-btn');
-    const target = Array.from(document.querySelectorAll('span'))
-      .find(span => span.textContent === '󱥊');
-    const desktopTarget = document.querySelector('.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z');
+    const getFillColor = () => {
+      const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
+      return color === '#ffffff' ? '#242526' : '#d0d0d0';
+    };
 
-    if ((target || desktopTarget) && !customBtn) insertButton();
-  });
+    const updateButtonColor = () => {
+      const svg = document.querySelector(`#${BUTTON_ID} svg`);
+      if (svg) svg.setAttribute('fill', getFillColor());
+    };
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
+    const findInsertionPoint = () => {
+      const iconSpan = Array.from(document.querySelectorAll('span'))
+        .find(span => span.textContent === '󱥊');
+      const container = iconSpan?.closest('div[role="button"]')?.parentNode;
 
-  const metaTag = document.querySelector('meta[name="theme-color"]');
-  if (metaTag) {
-    const metaObserver = new MutationObserver(() => {
-      updateButtonColor();
+      const desktopTarget = document.querySelector(
+        '.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z'
+      );
+
+      return { container, desktopTarget };
+    };
+
+    const createButton = () => {
+      const btn = document.createElement('button');
+      btn.id = BUTTON_ID;
+      btn.setAttribute('style', `
+        position: ${findInsertionPoint().desktopTarget === null ? 'fixed' : 'block'};
+        top: 8px;
+        right: 100px;
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        pointer-events: auto;
+      `);
+      btn.innerHTML = ICON_SVG.replace('%FILL%', getFillColor());
+      btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
+      return btn;
+    };
+
+    const insertButton = () => {
+      if (document.getElementById(BUTTON_ID)) return;
+
+      const { container, desktopTarget } = findInsertionPoint();
+      const button = createButton();
+
+      if (desktopTarget) desktopTarget.appendChild(button);
+      else if (container) container.insertBefore(button, container.firstChild);
+    };
+
+    insertButton();
+
+    // Mutation observer to monitor DOM changes
+    const observer = new MutationObserver(() => {
+      if (!document.getElementById(BUTTON_ID) && isFeed()) {
+        insertButton();
+      }
     });
 
-    metaObserver.observe(metaTag, {
-      attributes: true,
-      attributeFilter: ['content'],
-    });
-  }
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Observer for theme-color changes
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) {
+      new MutationObserver(updateButtonColor).observe(themeMeta, {
+        attributes: true,
+        attributeFilter: ['content'],
+      });
+    }
+  });
 })();
-
 
 
 // Color Extraction Script
