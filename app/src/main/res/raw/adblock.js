@@ -2,16 +2,32 @@
 
     if (isDesktopMode()) {
         (function() {
-          const selector = '.sponsored_ad, article[data-ft*="sponsored_ad"]';
-          document.querySelectorAll(selector).forEach(el => el.remove());
-          new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-              mutation.addedNodes.forEach(node => {
-                if (node.matches && node.matches(selector)) node.remove();
-              });
-            });
-          }).observe(document.body, { childList: true, subtree: true });
+          const selector = 'div.sponsored_ad, article[data-ft*="sponsored_ad"]';
+
+          const removeSponsored = (root = document) => {
+            root.querySelectorAll(selector).forEach(el => el.remove());
+          };
+
+          removeSponsored();
+
+          const observer = new MutationObserver(mutations => {
+            for (const mutation of mutations) {
+              for (const node of mutation.addedNodes) {
+                if (!(node instanceof HTMLElement)) continue;
+                if (node.matches(selector)) {
+                  node.remove();
+                } else {
+                  removeSponsored(node);
+                }
+              }
+            }
+          });
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
         })();
+
 
         return;
     }

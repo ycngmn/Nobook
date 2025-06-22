@@ -19,19 +19,13 @@
 (function() {
     if (!window.isDesktopMode()) return;
 
-    (function () {
-      const minWidth = 408;
+    document.documentElement.style.fontSize = '18px';
 
-      function adjustZoom() {
-        const vw = window.innerWidth;
-        const scale = vw < minWidth ? vw / minWidth : 1;
-        document.body.style.width = minWidth + 'px';
-        document.body.style.zoom = scale;
-        document.documentElement.style.fontSize = `${22 * scale}px`;
-      }
-
-      window.addEventListener('resize', adjustZoom);
-      adjustZoom();
+    // do not stick by default the navbar
+    (function() {
+        const style = document.createElement('style');
+        style.textContent = `.xixxii4 { position: absolute !important; }`;
+        document.head.appendChild(style);
     })();
 
     // remove "send" button to save space
@@ -70,9 +64,9 @@
 // Scroll to top on back-press at feed.
 (() => {
     window.backHandlerNB = () => {
-    const isDialog = document.querySelector('div[role="dialog"]');
-    const isDialogDesktop = document.querySelector('div.xu96u03.x10l6tqk.x1yf7rl7.x80663w');
-    if (window.isFeed() && !isDialog && !isDialogDesktop) {
+    const isDialog = document.querySelector('div.xu96u03.x10l6tqk.x1yf7rl7.x80663w') ||
+      document.querySelector('div[role="dialog"]');;
+    if (window.isFeed() && !isDialog) {
        if (window.scrollY !== 0) {
           // to interrupt any current scroll event.
           document.body.style.overflow = 'hidden';
@@ -82,7 +76,7 @@
           }, 50);
           return "true";
        } else return "exit";
-    } else if (isDesktopMode()) {
+    } else if (isDesktopMode() && isDialog) {
         const escapeEvent = new KeyboardEvent('keydown', {
             key: 'Escape',
             code: 'Escape',
@@ -95,7 +89,6 @@
           window.dispatchEvent(escapeEvent);
           return "true";
     }
-
     else return "false"; }
 })();
 
