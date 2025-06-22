@@ -1,6 +1,5 @@
 package com.ycngmn.nobook.ui.screens
 
-import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
@@ -114,10 +113,10 @@ fun BaseWebView(
     }
 
     val userScripts = viewModel.scripts
-    if (userScripts.value.isEmpty()) onPostLoad()
+    if (userScripts.value.isEmpty()) {
+        LaunchedEffect(Unit) { onPostLoad() } }
 
     LaunchedEffect(state.loadingState, userScripts.value) {
-        Log.d("loadingState", state.loadingState.toString())
         if (state.loadingState is LoadingState.Finished && userScripts.value.isNotEmpty()){
             navigator.evaluateJavaScript(userScripts.value) {
                 if (isLoading.value) isLoading.value = false

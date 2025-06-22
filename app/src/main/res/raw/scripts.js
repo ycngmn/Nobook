@@ -9,10 +9,12 @@
 // Feed identifier
 (() => {
     window.isFeed = () => {
-        if (window.isDesktopMode()) return true;
-        return window.location.pathname === '/' &&
-          (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com')
-          && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
+
+        const isHomeUrl = window.location.pathname === '/' &&
+        (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com');
+
+        if (window.isDesktopMode()) return isHomeUrl;
+        return isHomeUrl && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
     }
 })();
 
@@ -21,6 +23,7 @@
     if (!window.isDesktopMode()) return;
 
     document.documentElement.style.fontSize = '18px';
+
 
     // do not stick by default the navbar
     (() => {
@@ -96,8 +99,10 @@
 // Scroll to top on back-press at feed.
 (() => {
     window.backHandlerNB = () => {
-    const isDialog = document.querySelector('div.xu96u03.x10l6tqk.x1yf7rl7.x80663w') ||
-      document.querySelector('div[role="dialog"]');;
+
+    const isDialog = document.querySelector('div[role="menu"]') ||
+    document.querySelector('div[role="dialog"]');
+
     if (window.isFeed() && !isDialog) {
        if (window.scrollY !== 0) {
           // to interrupt any current scroll event.
@@ -108,7 +113,7 @@
           }, 50);
           return "true";
        } else return "exit";
-    } else if (isDesktopMode() && isDialog) {
+    } else if (isDesktopMode() && isDialog ) {
         const escapeEvent = new KeyboardEvent('keydown', {
             key: 'Escape',
             code: 'Escape',
@@ -117,7 +122,6 @@
             bubbles: true,
             cancelable: true
           });
-
           window.dispatchEvent(escapeEvent);
           return "true";
     }
@@ -216,11 +220,9 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 (() => {
   const onReady = (fn) => {
-    if (document.readyState === 'loading') {
+    if (document.readyState === 'loading')
       document.addEventListener('DOMContentLoaded', fn);
-    } else {
-      fn();
-    }
+     else fn();
   };
 
   onReady(() => {
@@ -280,7 +282,7 @@ observer.observe(document.body, { childList: true, subtree: true });
       const { container, desktopTarget } = findInsertionPoint();
       const button = createButton();
 
-      if (desktopTarget) desktopTarget.appendChild(button);
+      if (desktopTarget) desktopTarget.insertBefore(button, desktopTarget.firstChild);
       else if (container) container.insertBefore(button, container.firstChild);
     };
 

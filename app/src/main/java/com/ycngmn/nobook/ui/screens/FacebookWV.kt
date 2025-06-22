@@ -56,7 +56,7 @@ fun FacebookWebView(
             val cdnBase = "https://raw.githubusercontent.com/ycngmn/Nobook/refs/heads/main/app/src/main/res/raw"
 
             val scripts = listOf(
-                Script(true, R.raw.scripts, "$cdnBase/scriptss.js"), // always apply
+                Script(true, R.raw.scripts, "$cdnBase/scripts.js"), // always apply
                 Script(viewModel.removeAds.value, R.raw.adblock, "$cdnBase/adblock.js"),
                 Script(viewModel.enableDownloadContent.value, R.raw.download_content, "$cdnBase/download_content.js"),
                 Script(viewModel.stickyNavbar.value, R.raw.sticky_navbar, "$cdnBase/sticky_navbar.js"),
