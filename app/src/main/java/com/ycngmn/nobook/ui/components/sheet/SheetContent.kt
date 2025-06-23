@@ -228,6 +228,8 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
                 viewModel.setHideStories(!hideStories.value)
             }
 
+            if (viewModel.desktopLayout.collectAsState().value) return@Card
+
             SheetItem(
                 icon = R.drawable.frame_person_off_24px,
                 title = stringResource(R.string.hide_people_you_may_know_title),
