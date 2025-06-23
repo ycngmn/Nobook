@@ -31,6 +31,7 @@ import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.sheet.NobookSheet
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
+import com.ycngmn.nobook.utils.isAutoDesktop
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.NavigateFB
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
@@ -143,8 +144,8 @@ fun BaseWebView(
     val barsInsets = WindowInsets.systemBars.asPaddingValues()
     val imeHeight = rememberImeHeight()
 
-
-    key(userAgent) {
+    // we limit the recomposition to specific cases with the condition.
+    key(if (isAutoDesktop() || viewModel.isRevertDesktop.value) userAgent else null) {
         WebView(
             modifier =
                 if (isImmersiveMode.value) wvModifier.padding(bottom = imeHeight)

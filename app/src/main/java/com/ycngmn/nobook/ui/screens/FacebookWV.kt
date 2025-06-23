@@ -1,27 +1,19 @@
 package com.ycngmn.nobook.ui.screens
 
-import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.utils.Script
 import com.ycngmn.nobook.utils.fetchScripts
+import com.ycngmn.nobook.utils.isAutoDesktop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@Composable
-fun isAutoDesktop(): Boolean {
-    val configuration = LocalConfiguration.current
-    return if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        return true
-    } else configuration.smallestScreenWidthDp  >= 600
-}
 
 @Composable
 fun FacebookWebView(
