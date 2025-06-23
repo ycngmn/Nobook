@@ -33,7 +33,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
-import com.ycngmn.nobook.ui.screens.isAutoDesktop
+import com.ycngmn.nobook.utils.isAutoDesktop
 
 @Composable
 fun SheetContent(
@@ -71,7 +71,7 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.cloud_download_24px,
+                icon = R.drawable.download_24px,
                 title = stringResource(R.string.download_content_title),
                 isActive = enableDownloadContent.value
             ) {
@@ -104,7 +104,7 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.subheader_24px,
+                icon = R.drawable.sticky_navbar_24px,
                 title = stringResource(R.string.sticky_navbar_title),
                 isActive = stickyNavbar.value
             ) {
@@ -120,7 +120,7 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.widget_width_24px,
+                icon = R.drawable.customize_feed_24px,
                 title = stringResource(R.string.customize_feed_title),
                 tailIcon = R.drawable.chevron_forward_24px
 
