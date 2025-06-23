@@ -32,7 +32,8 @@ fun FacebookWebView(
         if (isAutoDesktop && !isDesktop.value) {
             viewModel.setRevertDesktop(true)
             viewModel.setDesktopLayout(true)
-        } else if (viewModel.isRevertDesktop.value) {
+        }
+        else if (!isAutoDesktop && viewModel.isRevertDesktop.value) {
             viewModel.setRevertDesktop(false)
             viewModel.setDesktopLayout(false)
         }
