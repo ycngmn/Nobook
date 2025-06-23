@@ -22,6 +22,23 @@
 (function() {
     if (!window.isDesktopMode()) return;
 
+    /*
+       (function () {
+          const minWidth = 408;
+
+          function adjustZoom() {
+            const vw = window.innerWidth;
+            const scale = vw < minWidth ? vw / minWidth : 1;
+            document.body.style.width = minWidth + 'px';
+            document.body.style.zoom = scale;
+            document.documentElement.style.fontSize = `${22 * scale}px`;
+          }
+
+          window.addEventListener('resize', adjustZoom);
+          adjustZoom();
+        })();
+    */
+
     document.documentElement.style.fontSize = '18px';
 
 

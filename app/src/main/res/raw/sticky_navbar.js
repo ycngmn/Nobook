@@ -2,41 +2,54 @@
 
     if (window.isDesktopMode()) {
         (() => {
-          const banner = document.querySelector('div[role="banner"]');
-          if (!banner) return;
+          const waitForBanner = () => new Promise(resolve => {
+            const existing = document.querySelector('div[role="banner"]');
+            if (existing) return resolve(existing);
 
-          const style = document.createElement('style');
-          style.textContent = `
-            div[role="banner"].xixxii4,
-            div[role="banner"] .xixxii4 {
-              position: absolute !important;
-            }
-          `;
-          document.head.appendChild(style);
+            new MutationObserver((mutations, obs) => {
+              for (const { addedNodes } of mutations) {
+                for (const node of addedNodes) {
+                  if (node.nodeType === 1 && node.matches('div[role="banner"]')) {
+                    obs.disconnect();
+                    return resolve(node);
+                  }
+                }
+              }
+            }).observe(document.body, { childList: true, subtree: true });
+          });
 
-          const forcePosition = el => {
-            if (el.classList.contains('xixxii4')) {
+          const forceFixed = el => {
+            if (el?.classList.contains('xixxii4')) {
               el.style.setProperty('position', 'fixed', 'important');
             }
           };
 
-          forcePosition(banner);
-          banner.querySelectorAll('.xixxii4').forEach(forcePosition);
-
-          new MutationObserver(mutations => {
-            for (const m of mutations) {
-              if (m.type === 'childList') {
-                m.addedNodes.forEach(node => {
-                  if (node.nodeType === 1) {
-                    forcePosition(node);
-                    node.querySelectorAll('.xixxii4').forEach(forcePosition);
-                  }
-                });
-              } else if (m.type === 'attributes' && m.attributeName === 'class') {
-                forcePosition(m.target);
+          waitForBanner().then(banner => {
+            const style = document.createElement('style');
+            style.textContent = `
+              div[role="banner"].xixxii4,
+              div[role="banner"] .xixxii4 {
+                position: fixed !important;
               }
-            }
-          }).observe(banner, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+            `;
+            document.head.appendChild(style);
+
+            forceFixed(banner);
+            banner.querySelectorAll('.xixxii4').forEach(forceFixed);
+
+            new MutationObserver(mutations => {
+              for (const m of mutations) {
+                if (m.type === 'childList') {
+                  m.addedNodes.forEach(n => {
+                    forceFixed(n);
+                    n.querySelectorAll?.('.xixxii4')?.forEach(forceFixed);
+                  });
+                } else if (m.type === 'attributes' && m.attributeName === 'class') {
+                  forceFixed(m.target);
+                }
+              }
+            }).observe(banner, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+          });
         })();
         return;
     }
