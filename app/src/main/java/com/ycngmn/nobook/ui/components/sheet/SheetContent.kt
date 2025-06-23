@@ -63,7 +63,7 @@ fun SheetContent(
                 .padding(vertical = 12.dp)
         ) {
             SheetItem(
-                icon = R.drawable.ad_off_24px,
+                icon = R.drawable.adblock_24px,
                 title = stringResource(R.string.remove_ads_title),
                 isActive = removeAds.value
             ) {
@@ -71,7 +71,7 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.download_outline,
+                icon = R.drawable.cloud_download_24px,
                 title = stringResource(R.string.download_content_title),
                 isActive = enableDownloadContent.value
             ) {
@@ -88,7 +88,7 @@ fun SheetContent(
 
             val isAutoDesktop = isAutoDesktop()
             SheetItem(
-                icon = R.drawable.desktop_layout_24px,
+                icon = R.drawable.computer_24px,
                 title = stringResource(R.string.desktop_layout_title),
                 isActive = desktopLayout.value
             ) {
@@ -104,7 +104,7 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.sticky_navbar_24px,
+                icon = R.drawable.subheader_24px,
                 title = stringResource(R.string.sticky_navbar_title),
                 isActive = stickyNavbar.value
             ) {
