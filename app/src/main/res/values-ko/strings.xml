@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Nobook</string>
+
+    <string name="apply_immediately">즉시 적용하시겠습니까?</string>
+    <string name="close_menu">메뉴 닫기</string>
+
+    <string name="hide_suggested_title">추천 게시물 숨기기</string>
+    <string name="hide_reels_title">릴스 숨기기</string>
+    <string name="hide_stories_title">스토리 숨기기</string>
+    <string name="hide_people_you_may_know_title">아는 사람 숨기기</string>
+    <string name="hide_groups_title">그룹 추천 숨기기</string>
+
+    <string name="remove_ads_title">광고 제거</string>
+    <string name="download_content_title">콘텐츠 다운로드</string>
+    <string name="desktop_layout_title">데스크톱 레이아웃</string>
+    <string name="immersive_mode_title">몰입 모드</string>
+    <string name="sticky_navbar_title">고정 내비게이션 바</string>
+    <string name="pinch_to_zoom_title">확대하려면 핀치</string>
+    <string name="amoled_black_title">AMOLED 블랙</string>
+    <string name="customize_feed_title">피드 맞춤 설정</string>
+    <string name="follow_at_github">GitHub에서 팔로우하기</string>
+</resources>
