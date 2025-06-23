@@ -1,42 +1,25 @@
 <resources>
     <string name="app_name">Nobook</string>
 
-
     <!-- Bottom Text and Buttons -->
-    <string name="apply_immediately">এখনই অ্যাপ্লাই করুন</string>
+    <string name="apply_immediately">এখনই প্রয়োগ করুন</string>
     <string name="close_menu">মেনু বন্ধ করুন</string>
 
-    
     <!-- Dialog Items -->
-    <string name="hide_suggested_title">সাজেস্টেড পোস্ট হাইড করুন</string>
-
-    <string name="hide_reels_title">রিলস হাইড করুন</string>
-
-    <string name="hide_stories_title">স্টোরি হাইড করুন</string>
-
-    <string name="hide_people_you_may_know_title">পিপল ইউ মে নো হাইড করুন</string>
-
-    <string name="hide_groups_title">গ্রুপ সাজেশান হাইড করুন</string>
-    
+    <string name="hide_suggested_title">প্রস্তাবিত পোস্ট লুকান</string>
+    <string name="hide_reels_title">রিলস লুকান</string>
+    <string name="hide_stories_title">স্টোরি লুকান</string>
+    <string name="hide_people_you_may_know_title">পিপল ইউ মে নো লুকান</string>
+    <string name="hide_groups_title">গ্রুপ প্রস্তাবনা লুকান</string>
     
     <!-- Sheet Items -->
-    <string name="remove_ads_title">বিজ্ঞাপন রিমুভ করুন</string>
-
-    <string name="download_content_title">ডাউনলোড অন করুন</string>
-
-    <string name="desktop_layout_title">ডেস্কটপ লেআউট</string>
-
+    <string name="remove_ads_title">বিজ্ঞাপন বন্ধ করুন</string>
+    <string name="download_content_title">ডাউনলোড সক্রিয় করুন</string>
+    <string name="desktop_layout_title">ডেস্কটপ বিন্যাস</string>
     <string name="immersive_mode_title">ইমার্সিভ মোড</string>
-
-    <string name="sticky_navbar_title">স্টিকি ন্যাভবার</string>
-
+    <string name="sticky_navbar_title">স্থির নেভিগেশন বার</string>
     <string name="pinch_to_zoom_title">পিঞ্চ টু জুম</string>
-
     <string name="amoled_black_title">অ্যামোলেড ব্ল্যাক</string>
-
-    <string name="customize_feed_title">ফিড কাস্টমাইজেশন</string>
-
-    <string name="system_font_title">সিস্টেম ফন্ট</string>
-
-
+    <string name="customize_feed_title">ফিড সজ্জা</string>
+    <string name="follow_at_github">গিটহাবে আমাদের সঙ্গে যুক্ত হোন</string>
 </resources>
