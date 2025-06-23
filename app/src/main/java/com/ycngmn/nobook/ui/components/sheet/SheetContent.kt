@@ -134,7 +134,7 @@ fun SheetContent(
 
             SheetItem(
                 icon = R.drawable.github_mark_white,
-                title = "Follow us at Github",
+                title = stringResource(R.string.follow_at_github),
                 tailIcon = R.drawable.arrow_outward_24px
             ) {
                 val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
