@@ -1,10 +1,55 @@
 (function() {
 
     if (window.isDesktopMode()) {
-        (function() {
+        (() => {
+          const waitForBanner = () => new Promise(resolve => {
+            const existing = document.querySelector('div[role="banner"]');
+            if (existing) return resolve(existing);
+
+            new MutationObserver((mutations, obs) => {
+              for (const { addedNodes } of mutations) {
+                for (const node of addedNodes) {
+                  if (node.nodeType === 1 && node.matches('div[role="banner"]')) {
+                    obs.disconnect();
+                    return resolve(node);
+                  }
+                }
+              }
+            }).observe(document.body, { childList: true, subtree: true });
+          });
+
+          const forceFixed = el => {
+            if (el?.classList.contains('xixxii4')) {
+              el.style.setProperty('position', 'fixed', 'important');
+            }
+          };
+
+          waitForBanner().then(banner => {
             const style = document.createElement('style');
-            style.textContent = `.xixxii4 { position: fixed !important; }`;
+            style.textContent = `
+              div[role="banner"].xixxii4,
+              div[role="banner"] .xixxii4 {
+                position: fixed !important;
+              }
+            `;
             document.head.appendChild(style);
+
+            forceFixed(banner);
+            banner.querySelectorAll('.xixxii4').forEach(forceFixed);
+
+            new MutationObserver(mutations => {
+              for (const m of mutations) {
+                if (m.type === 'childList') {
+                  m.addedNodes.forEach(n => {
+                    forceFixed(n);
+                    n.querySelectorAll?.('.xixxii4')?.forEach(forceFixed);
+                  });
+                } else if (m.type === 'attributes' && m.attributeName === 'class') {
+                  forceFixed(m.target);
+                }
+              }
+            }).observe(banner, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+          });
         })();
         return;
     }

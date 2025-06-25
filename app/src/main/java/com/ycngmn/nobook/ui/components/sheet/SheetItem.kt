@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +26,7 @@ import com.ycngmn.nobook.ui.theme.FacebookBlue
 fun SheetItem(
     icon: Int,
     title: String,
-    tailIcon: ImageVector? = null,
+    tailIcon: Int? = null,
     isActive: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -81,9 +80,9 @@ fun SheetItem(
             }
             else {
                 Icon(
-                    imageVector = tailIcon,
+                    painter = painterResource(tailIcon),
                     contentDescription = null,
-                    modifier = Modifier.size(50.dp).padding(end = 18.dp),
+                    modifier = Modifier.size(48.dp).padding(end = 18.dp),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }

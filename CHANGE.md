@@ -1,13 +1,24 @@
-## Nobook - v0.0.9
+## Nobook - v0.1.0
 
 <ins>**Changelog:**</ins>
 
-* Feature: Load scripts from Github. 35e3a3a350ddc9c8397980514fa306349a291159
-* Feature: Immersive mode. 8a4f51b5d4f8ea293741fe349b8899cf7dc70138
-* Feature: Sticky navbar option. 469ff6245983bbeda7c3ae10a41154d51cdb4765
-* Feature: Scroll to top on back press. 136cb47191866244ac503b67d4da0c370c10d50f
-* Feature: Arabic translation by @ZG089. 120c4f6e45a3c2b8e38ff46c05f2ea4af0c11b85
-* Fix: Removed sponsored ads in 'Marketplace'. 7eee7c38f888efba8fad8a420bce195c05222825
-* Improved text selection style. 6af17b29f65b60c1d47c27d56be714815cede3d8
-* Improved `Nobook menu` ui with checkboxes. bba01f97d9f561e715e986f0c89eef6aa356046f
-* Minor fixes and enhancements.
+* Feature: Desktop layout. 13755873d93cd5a52b4a91cd1b905793b17a58a3
+    * Extends support for tablet and widescreen devices.
+    * Enables landscape browsing.
+    * Provides quicker access to messages.
+    * Not optimized for mobile devices!
+* Feature: Extends support down to Android 5.1. 0f49051e57672449847433065cd9086729371a63
+* Feature: Process death recovery. 815a6ca3d6d53a2046ff3b1d687eb3c920a09992
+* Feature: Added 8 new languages. 
+  * Bengali by @qomarhsn (#83)
+  * Portuguese by @marciozomb13 (#88)
+  * The rest were added using AI. 3a350375b48c68b6d9ecacedbeeb693ea026649f
+* Feature: Nobook menu follows the facebook theme. 55fdd2a868b3052acd30a0ac7cfa1998cd8d661e
+* Fix: Reduced screen resize lag when toggling the soft keyboard. 5ba6a1966c3f41ce4f7bad7c7c389573569bd033
+* Many other fixes and enhancements.
+
+**Full changelog:** [v0.0.9...v0.1.0](https://github.com/ycngmn/Nobook/compare/v0.0.9...v0.1.0)
+
+>[!IMPORTANT]
+> Please expect less frequent releases from this update onward.
+> Userscripts will be maintained as needed without requiring additional updates.

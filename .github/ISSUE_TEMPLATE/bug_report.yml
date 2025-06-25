@@ -12,7 +12,7 @@ body:
           required: true
         - label: I have searched for existing issues related to this bug.
           required: true
-        - label: This is not a feature request or enhancement suggestion.
+        - label: This issue is specific to Nobook ,i.e., not a bug of Facebook.
           required: true
           
   - type: input

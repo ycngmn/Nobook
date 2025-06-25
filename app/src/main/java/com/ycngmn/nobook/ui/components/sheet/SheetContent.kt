@@ -1,5 +1,6 @@
 package com.ycngmn.nobook.ui.components.sheet
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -25,13 +24,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.NobookViewModel
+import com.ycngmn.nobook.utils.isAutoDesktop
 
 @Composable
 fun SheetContent(
@@ -39,7 +41,7 @@ fun SheetContent(
     onRestart: () -> Unit,
     onClose: () -> Unit
 ) {
-
+    val context = LocalContext.current
     val isOpenDialog = remember { mutableStateOf(false) }
 
     val removeAds = viewModel.removeAds.collectAsState()
@@ -61,7 +63,7 @@ fun SheetContent(
                 .padding(vertical = 12.dp)
         ) {
             SheetItem(
-                icon = R.drawable.ad_off_24px,
+                icon = R.drawable.adblock_24px,
                 title = stringResource(R.string.remove_ads_title),
                 isActive = removeAds.value
             ) {
@@ -69,19 +71,11 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.download_outline,
+                icon = R.drawable.download_24px,
                 title = stringResource(R.string.download_content_title),
                 isActive = enableDownloadContent.value
             ) {
                 viewModel.setEnableDownloadContent(!enableDownloadContent.value)
-            }
-
-            SheetItem(
-                icon = R.drawable.desktop_layout_24px,
-                title = stringResource(R.string.desktop_layout_title),
-                isActive = desktopLayout.value
-            ) {
-                viewModel.setDesktopLayout(!desktopLayout.value)
             }
 
             SheetItem(
@@ -90,6 +84,15 @@ fun SheetContent(
                 isActive = pinchToZoom.value
             ) {
                 viewModel.setPinchToZoom(!pinchToZoom.value)
+            }
+
+            val isAutoDesktop = isAutoDesktop()
+            SheetItem(
+                icon = R.drawable.computer_24px,
+                title = stringResource(R.string.desktop_layout_title),
+                isActive = desktopLayout.value
+            ) {
+                if (!isAutoDesktop) viewModel.setDesktopLayout(!desktopLayout.value)
             }
 
             SheetItem(
@@ -109,9 +112,17 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.widget_width_24px,
+                icon = R.drawable.amoled_black_24px,
+                title = stringResource(R.string.amoled_black_title),
+                isActive = amoledBlack.value,
+            ) {
+                viewModel.setAmoledBlack(!amoledBlack.value)
+            }
+
+            SheetItem(
+                icon = R.drawable.customize_feed_24px,
                 title = stringResource(R.string.customize_feed_title),
-                tailIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight
+                tailIcon = R.drawable.chevron_forward_24px
 
             ) {
                 isOpenDialog.value = true
@@ -122,11 +133,12 @@ fun SheetContent(
             }
 
             SheetItem(
-                icon = R.drawable.amoled_black_24px,
-                title = stringResource(R.string.amoled_black_title),
-                isActive = amoledBlack.value,
+                icon = R.drawable.github_mark_white,
+                title = stringResource(R.string.follow_at_github),
+                tailIcon = R.drawable.arrow_outward_24px
             ) {
-                viewModel.setAmoledBlack(!amoledBlack.value)
+                val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
+                context.startActivity(intent)
             }
 
             Row(
@@ -215,6 +227,8 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
             ) {
                 viewModel.setHideStories(!hideStories.value)
             }
+
+            if (viewModel.desktopLayout.collectAsState().value) return@Card
 
             SheetItem(
                 icon = R.drawable.frame_person_off_24px,

@@ -1,36 +1,25 @@
 <resources>
     <string name="app_name">Nobook</string>
 
-    <!-- Sheet Items -->
-    <string name="remove_ads_title">Bloquer les publicités</string>
-
-    <string name="download_content_title">Téléchargement</string>
-
-    <string name="desktop_layout_title">Desktop layout</string>
-
-    <string name="immersive_mode_title">Mode immersif</string>
-
-    <string name="sticky_navbar_title">Barre de navigation fixe</string>
-
-    <string name="pinch_to_zoom_title">Pincer pour zoomer</string>
-
-    <string name="amoled_black_title">Noir AMOLED</string>
-
-    <string name="customize_feed_title">Personnalisation du flux</string>
-
-    <!-- Dialog Items -->
-    <string name="hide_suggested_title">Masquer les publications suggérées</string>
-
-    <string name="hide_reels_title">Masquer les reels</string>
-
-    <string name="hide_stories_title">Masquer les stories</string>
-
-    <string name="hide_people_you_may_know_title">Masquer les suggestions de personnes</string>
-
-    <string name="hide_groups_title">Masquer les suggestions de groupes</string>
-
     <!-- Bottom Text and Buttons -->
     <string name="apply_immediately">Appliquer maintenant?</string>
     <string name="close_menu">Masquer</string>
-    <string name="system_font_title">System font</string>
+
+    <!-- Dialog Items -->
+    <string name="hide_suggested_title">Masquer les publications suggérées</string>
+    <string name="hide_reels_title">Masquer les reels</string>
+    <string name="hide_stories_title">Masquer les stories</string>
+    <string name="hide_people_you_may_know_title">Masquer les suggestions de personnes</string>
+    <string name="hide_groups_title">Masquer les suggestions de groupes</string>
+
+    <!-- Sheet Items -->
+    <string name="remove_ads_title">Bloquer les publicités</string>
+    <string name="download_content_title">Téléchargement</string>
+    <string name="desktop_layout_title">Interface ordinateur</string>
+    <string name="immersive_mode_title">Mode immersif</string>
+    <string name="sticky_navbar_title">Barre de navigation fixe</string>
+    <string name="pinch_to_zoom_title">Pincer pour zoomer</string>
+    <string name="amoled_black_title">Noir AMOLED</string>
+    <string name="customize_feed_title">Personnalisation du flux</string>
+    <string name="follow_at_github">Suivez nous sur Github</string>
 </resources>

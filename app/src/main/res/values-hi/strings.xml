@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Nobook</string>
+
+    <string name="apply_immediately">तुरंत लागू करें?</string>
+    <string name="close_menu">मेनू बंद करें</string>
+
+    <string name="hide_suggested_title">सुझाए गए पोस्ट छिपाएँ</string>
+    <string name="hide_reels_title">रील्स छिपाएँ</string>
+    <string name="hide_stories_title">स्टोरीज़ छिपाएँ</string>
+    <string name="hide_people_you_may_know_title">आप जिन्हें जानते हों उन्हें छिपाएँ</string>
+    <string name="hide_groups_title">ग्रुप सुझाव छिपाएँ</string>
+
+    <string name="remove_ads_title">विज्ञापन हटाएँ</string>
+    <string name="download_content_title">सामग्री डाउनलोड करें</string>
+    <string name="desktop_layout_title">डेस्कटॉप लेआउट</string>
+    <string name="immersive_mode_title">इमर्सिव मोड</string>
+    <string name="sticky_navbar_title">स्थिर नेवबार</string>
+    <string name="pinch_to_zoom_title">जूम करने के लिए पिंच करें</string>
+    <string name="amoled_black_title">AMOLED काला</string>
+    <string name="customize_feed_title">फीड अनुकूलित करें</string>
+    <string name="follow_at_github">GitHub पर हमें फॉलो करें</string>
+</resources>

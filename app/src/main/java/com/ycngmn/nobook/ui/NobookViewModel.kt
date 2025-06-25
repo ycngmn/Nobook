@@ -58,6 +58,11 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _hideGroups = MutableStateFlow(false)
     val hideGroups = _hideGroups.asStateFlow()
 
+
+    private val _isRevertDesktop = mutableStateOf(false)
+    val isRevertDesktop = _isRevertDesktop
+
+
     init {
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
@@ -72,6 +77,8 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _hideStories.value = dataStore.hideStories.first()
             _hidePeopleYouMayKnow.value = dataStore.hidePeopleYouMayKnow.first()
             _hideGroups.value = dataStore.hideGroups.first()
+
+            _isRevertDesktop.value = dataStore.revertDesktop.first()
         }
     }
 
@@ -157,5 +164,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setHideGroups(hideGroups)
         }
         _hideGroups.value = hideGroups
+    }
+
+
+    fun setRevertDesktop(revertDesktop: Boolean) {
+        viewModelScope.launch {
+            dataStore.setRevertDesktop(revertDesktop)
+        }
+        _isRevertDesktop.value = revertDesktop
     }
 }

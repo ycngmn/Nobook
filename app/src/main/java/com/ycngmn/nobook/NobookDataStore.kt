@@ -24,6 +24,13 @@ class NobookDataStore(private val context: Context) {
         val HIDE_STORIES = booleanPreferencesKey("hide_stories")
         val HIDE_PEOPLE_YOU_MAY_KNOW = booleanPreferencesKey("hide_people_you_may_know")
         val HIDE_GROUPS = booleanPreferencesKey("hide_groups")
+
+        val isRevertDesktop = booleanPreferencesKey("is_revert_desktop")
+    }
+
+    val revertDesktop = context.dataStore.data.map { it[isRevertDesktop] == true }
+    suspend fun setRevertDesktop(revertDesktop: Boolean) {
+        context.dataStore.edit { it[isRevertDesktop] = revertDesktop }
     }
 
     val removeAds = context.dataStore.data.map { it[REMOVE_ADS] != false }
