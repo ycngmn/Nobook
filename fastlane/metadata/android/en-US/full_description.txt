@@ -1,0 +1,10 @@
+Nobook is a lightweight, ad-free Facebook client for Android.
+
+Features:
+• Blocks ads, sponsored posts, and other annoyances
+• Supports desktop-like layouts for tablets and widescreens
+• Download photos, videos, reels
+• Multiple language support
+• And more
+
+Nobook aims to provide a clean, fast, and customizable Facebook experience.
