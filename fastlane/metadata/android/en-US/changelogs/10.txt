@@ -1,0 +1,16 @@
+🎉 Initial F-Droid release
+
+This release brings together all improvements made in Nobook up to version 0.1.0:
+
+- Brand-new desktop layout for tablets and widescreen devices
+- Android 5.1+ support for wider compatibility
+- Faster app startup and smoother navigation
+- Process death recovery (better app stability)
+- Nobook menu now follows the Facebook theme
+- Reduced lag when toggling the soft keyboard
+- Added 8 new languages (including Bengali, Portuguese, Arabic, and French)
+- Photo, video, reels, and story downloads
+- Privacy improvements (sanitized external links, fewer trackers)
+- Block ads, sponsored posts, and other annoyances
+- General UI and performance improvements
+- Various bug fixes
