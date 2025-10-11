@@ -20,7 +20,7 @@
     }).observe(document.body, { childList: true, subtree: true });
 
   } else {
-    const ICON = '󱣝';
+    const ICON = '󰣝';
     const FLAG = 'data-reel-hidden';
 
     const handle = node => {
