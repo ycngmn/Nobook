@@ -49,7 +49,7 @@ android {
 dependencies {
     api(libs.compose.webview.multiplatform)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.androidx.core.ktx)
