@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.ycngmn.nobook"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.ycngmn.nobook"
-        minSdk = 22
-        targetSdk = 35
+        minSdk = 23
+        targetSdk = 36
         versionCode = 10
         versionName = "0.1.0"
 
@@ -32,9 +34,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
+
     buildFeatures {
         compose = true
     }
@@ -42,6 +48,8 @@ android {
 
 dependencies {
     api(libs.compose.webview.multiplatform)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.androidx.core.ktx)
