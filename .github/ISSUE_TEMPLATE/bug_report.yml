@@ -33,6 +33,7 @@ body:
     validations:
       required: true
 
+
   - type: textarea
     id: steps
     attributes:
@@ -45,14 +46,6 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected Behavior
-      placeholder: |
-        Describe what you expected to happen.
-    validations:
-      required: true
 
   - type: textarea
     id: logs
@@ -60,14 +53,5 @@ body:
       label: Screenshots
       placeholder: |
         If applicable, attach screenshots
-    validations:
-      required: false
-
-  - type: textarea
-    id: additional
-    attributes:
-      label: Additional Context
-      placeholder: |
-        Any other information that might help us understand the issue.
     validations:
       required: false

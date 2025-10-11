@@ -8,7 +8,7 @@
 ## • Features
 
 *  Blocks sponsored ads.
-*  Blocks suggested posts. 
+*  Blocks suggested posts.
 *  Downloads media.
 * And more.
 
@@ -20,10 +20,10 @@
 
 1.  **Clone the repository**
     * In Android Studio:
-      * File > New > Project from Version Control
-      * Paste `https://github.com/ycngmn/Nobook.git` and clone.
-    * Or via terminal: 
-    ```
+        * File > New > Project from Version Control
+        * Paste `https://github.com/ycngmn/Nobook.git` and clone.
+    * Or via terminal:
+    ```bash
     git clone https://github.com/ycngmn/Nobook.git
     cd Nobook
     ``` 
@@ -42,7 +42,4 @@ Contributions to the project are welcome. Please follow these guidelines:
 3.  Submit a pull request with a clear description of your changes.
 
 ## Acknowledgement :
-> [!NOTE]
-> [@KevinnZou/compose-webview-multiplatform](https://github.com/KevinnZou/compose-webview-multiplatform)  is at the core of this project. 
-> Developing Nobook would have been much harder and time-consuming without it.
-> If you like our app, please consider supporting that project as well.
+* [@KevinnZou/compose-webview-multiplatform](https://github.com/KevinnZou/compose-webview-multiplatform)  
