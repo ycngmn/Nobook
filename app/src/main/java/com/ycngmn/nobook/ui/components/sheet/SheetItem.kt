@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ycngmn.nobook.ui.theme.FacebookBlue
 
-@Composable()
+@Composable
 fun SheetItem(
     icon: Any,
     title: String,

@@ -15,15 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
 import com.multiplatform.webview.web.AccompanistWebChromeClient
 import com.multiplatform.webview.web.PlatformWebViewParams
 
 // src: https://github.com/KevinnZou/compose-webview-multiplatform
 
-@Preview
 @Composable
-fun fileChooserWebViewParams(): PlatformWebViewParams? {
+fun fileChooserWebViewParams(): PlatformWebViewParams {
     var fileChooserIntent by remember { mutableStateOf<Intent?>(null) }
 
     val webViewChromeClient =
