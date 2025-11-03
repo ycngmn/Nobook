@@ -22,4 +22,10 @@
     <string name="amoled_black_title">AMOLED Black</string>
     <string name="customize_feed_title">Customize feed</string>
     <string name="follow_at_github">Follow us on Github</string>
+    <string name="network_error_title">Connect to a network</string>
+    <string name="network_error_description">To use Nobook, turn on mobile data or connect to Wi-Fi.</string>
+    <string name="ok">OK</string>
+    <string name="saved_to_downloads">Saved to Downloads</string>
+    <string name="download_failed_invalid_data">Download failed: Invalid data</string>
+    <string name="failed_to_save_file">Failed to save file</string>
 </resources>

@@ -1,7 +1,5 @@
 package com.ycngmn.nobook.ui.components
 
-import android.app.Activity
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -15,33 +13,38 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.theme.FacebookBlue
 
 
 @Composable
-fun NetworkErrorDialog(context: Context) {
-
-    val activity = context as? Activity
-
+fun NetworkErrorDialog(
+    onDismiss: () -> Unit
+) {
     Dialog(
-        onDismissRequest = {}
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(dismissOnClickOutside = false)
     ) {
         Column (
-            modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(16.dp)
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp)
         ) {
             Text(
-                "Connect to a network",
+                stringResource(R.string.network_error_title),
                 fontSize = 17.sp,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             Text(
-                "To use Nobook, turn on mobile data or connect to Wi-Fi.",
+                stringResource(R.string.network_error_description),
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 20.dp),
                 color = MaterialTheme.colorScheme.secondary
@@ -52,10 +55,10 @@ fun NetworkErrorDialog(context: Context) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 border = BorderStroke(1.5.dp, FacebookBlue),
                 shape = RoundedCornerShape(2.dp),
-                onClick = { activity?.finish() }
+                onClick = { onDismiss() }
             ) {
                 Text(
-                    "OK",
+                    stringResource(R.string.ok),
                     color = FacebookBlue,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp

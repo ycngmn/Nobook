@@ -11,8 +11,6 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent {
-            MainNavigation(intent?.data)
-        }
+        setContent { MainNavigation(intent?.data) }
     }
 }

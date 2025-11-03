@@ -32,11 +32,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,18 +50,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
+import com.ycngmn.nobook.NobookViewModel
 import com.ycngmn.nobook.R
-import com.ycngmn.nobook.ui.NobookViewModel
 import com.ycngmn.nobook.utils.isAutoDesktop
 
 @Composable
 fun SheetContent(
     viewModel: NobookViewModel,
     onRestart: () -> Unit,
-    onClose: () -> Unit
+    onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val isOpenDialog = remember { mutableStateOf(false) }
+    var isOpenDialog by remember { mutableStateOf(false) }
 
     val removeAds = viewModel.removeAds.collectAsState()
     val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
@@ -138,14 +141,14 @@ fun SheetContent(
             SheetItem(
                 icon = Icons.Outlined.Widgets,
                 title = stringResource(R.string.customize_feed_title),
-                tailIcon = Icons.AutoMirrored.Default.KeyboardArrowRight
+                tailIcon = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                onClick = { isOpenDialog = true }
+            )
 
-            ) {
-                isOpenDialog.value = true
-            }
-
-            if (isOpenDialog.value) HideOptionsDialog(viewModel) {
-                isOpenDialog.value = false
+            if (isOpenDialog) {
+                HideOptionsDialog(viewModel) {
+                    isOpenDialog = false
+                }
             }
 
             SheetItem(
@@ -153,7 +156,8 @@ fun SheetContent(
                 title = stringResource(R.string.follow_at_github),
                 tailIcon = Icons.AutoMirrored.Outlined.OpenInNew
             ) {
-                val intent = Intent(Intent.ACTION_VIEW, "https://github.com/ycngmn/nobook".toUri())
+                val githubRepoUrl = "https://github.com/ycngmn/nobook"
+                val intent = Intent(Intent.ACTION_VIEW, githubRepoUrl.toUri())
                 context.startActivity(intent)
             }
 
@@ -162,7 +166,7 @@ fun SheetContent(
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Card  (
+                Card(
                     modifier = Modifier.clickable { onRestart() },
                     shape = RoundedCornerShape(6.dp),
                     elevation = CardDefaults.cardElevation(2.dp),
@@ -188,16 +192,16 @@ fun SheetContent(
                         containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
-
-                    Text(
-                        text = stringResource(R.string.close_menu),
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .clickable { onClose() }
-                    )
+                    TextButton(
+                        onClick = { onDismiss() }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.close_menu),
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -205,7 +209,7 @@ fun SheetContent(
 }
 
 @Composable
-private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
+private fun HideOptionsDialog(viewModel: NobookViewModel, onDismiss: () -> Unit) {
 
     val hideSuggested = viewModel.hideSuggested.collectAsState()
     val hideReels = viewModel.hideReels.collectAsState()
@@ -214,7 +218,7 @@ private fun HideOptionsDialog(viewModel: NobookViewModel, onClose: () -> Unit) {
     val hideGroups = viewModel.hideGroups.collectAsState()
 
     Dialog(
-        onDismissRequest = { onClose() }
+        onDismissRequest = { onDismiss() }
     ) {
         Card(
             shape = RoundedCornerShape(10.dp)

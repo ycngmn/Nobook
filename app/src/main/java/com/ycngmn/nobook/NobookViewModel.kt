@@ -1,26 +1,30 @@
-package com.ycngmn.nobook.ui
+package com.ycngmn.nobook
 
 import android.app.Application
+import android.content.res.Resources
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ycngmn.nobook.NobookDataStore
+import com.ycngmn.nobook.utils.Script
+import com.ycngmn.nobook.utils.fetchScripts
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class NobookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dataStore = NobookDataStore(application)
 
-    private val _scripts = mutableStateOf("")
-    val scripts = _scripts
+    private val _scripts = MutableStateFlow<String?>(null)
+    val scripts = _scripts.asStateFlow()
 
-    private val _themeColor = mutableStateOf(Color.Transparent)
-    val themeColor = _themeColor
+    private val _themeColor = MutableStateFlow(Color.Transparent)
+    val themeColor = _themeColor.asStateFlow()
 
     private val _removeAds = MutableStateFlow(true)
     val removeAds = _removeAds.asStateFlow()
@@ -58,10 +62,8 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _hideGroups = MutableStateFlow(false)
     val hideGroups = _hideGroups.asStateFlow()
 
-
     private val _isRevertDesktop = mutableStateOf(false)
     val isRevertDesktop = _isRevertDesktop
-
 
     init {
         runBlocking {
@@ -79,6 +81,38 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             _hideGroups.value = dataStore.hideGroups.first()
 
             _isRevertDesktop.value = dataStore.revertDesktop.first()
+        }
+    }
+
+    fun setThemeColor(color: Color) { _themeColor.value = color }
+    fun setScripts(script: String?) { _scripts.value = script }
+
+    fun loadScripts(resources: Resources) {
+        val scripts = listOf(
+            Script(true, R.raw.scripts, "/scripts.js"), // always apply
+            Script(removeAds.value, R.raw.adblock, "/adblock.js"),
+            Script(enableDownloadContent.value, R.raw.download_content, "download_content.js"),
+            Script(stickyNavbar.value, R.raw.sticky_navbar, "sticky_navbar.js"),
+            Script(!pinchToZoom.value, R.raw.pinch_to_zoom, "pinch_to_zoom.js"),
+            Script(amoledBlack.value, R.raw.amoled_black, "amoled_black.js"),
+            Script(hideSuggested.value, R.raw.hide_suggested, "hide_suggested.js"),
+            Script(hideReels.value, R.raw.hide_reels, "hide_reels.js"),
+            Script(hideStories.value, R.raw.hide_stories, "hide_stories.js"),
+            Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk, "hide_pymk.js"),
+            Script(hideGroups.value, R.raw.hide_groups, "hide_groups.js"),
+            Script(!desktopLayout.value, R.raw.messenger_scripts, "messenger_scripts.js")
+        )
+
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                setScripts(
+                    fetchScripts(scripts) { resId ->
+                        resources.openRawResource(resId)
+                            .bufferedReader()
+                            .use { it.readText() }
+                    }
+                )
+            }
         }
     }
 

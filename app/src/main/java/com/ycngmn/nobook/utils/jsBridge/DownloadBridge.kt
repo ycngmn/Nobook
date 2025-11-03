@@ -9,16 +9,20 @@ import android.util.Base64
 import android.webkit.JavascriptInterface
 import android.webkit.MimeTypeMap
 import android.widget.Toast
+import com.ycngmn.nobook.R
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 
 class DownloadBridge(private val context: Context) {
     @JavascriptInterface
     fun downloadBase64File(base64Data: String, mimeType: String) {
-        try {
+        runCatching {
             if (!base64Data.contains(",")) {
-                Toast.makeText(context, "Failed to save file: Invalid data", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.download_failed_invalid_data),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return
             }
 
@@ -27,7 +31,6 @@ class DownloadBridge(private val context: Context) {
             val fileName = "${System.currentTimeMillis()}.$extension"
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Android 10+: Use MediaStore to save to public Downloads
                 val contentValues = ContentValues().apply {
                     put(MediaStore.Downloads.DISPLAY_NAME, fileName)
                     put(MediaStore.Downloads.MIME_TYPE, mimeType)
@@ -39,29 +42,36 @@ class DownloadBridge(private val context: Context) {
                 val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
 
                 uri?.let {
-                    resolver.openOutputStream(it)?.use { outputStream: OutputStream ->
+                    resolver.openOutputStream(it)?.use { outputStream ->
                         outputStream.write(data)
                     }
                     contentValues.clear()
                     contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                     resolver.update(uri, contentValues, null, null)
 
-                    Toast.makeText(context, "Saved to Downloads", Toast.LENGTH_SHORT).show()
-                } ?: run {
-                    Toast.makeText(context, "Failed to save file: Storage error", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.saved_to_downloads),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } else {
-                // Android 9 and below: Save to public Downloads with legacy storage
                 val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 val file = File(downloadsDir, fileName)
 
-                FileOutputStream(file).use {
-                    it.write(data)
-                }
-                Toast.makeText(context, "Saved to Downloads", Toast.LENGTH_LONG).show()
+                FileOutputStream(file).use { it.write(data) }
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.saved_to_downloads),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-        } catch (e: Exception) {
-            Toast.makeText(context, "Failed to save file: ${e.message}", Toast.LENGTH_LONG).show()
+        }.onFailure {
+            Toast.makeText(
+                context,
+                context.getString(R.string.failed_to_save_file),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }
