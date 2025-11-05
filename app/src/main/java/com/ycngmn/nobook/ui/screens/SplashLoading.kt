@@ -45,17 +45,22 @@ fun SplashLoading(progress: Float) {
         Spacer(Modifier.height(16.dp))
 
         Row (horizontalArrangement = Arrangement.SpaceBetween) {
-
-                val progress = if (loadingState is LoadingState.Loading)
-                    loadingState.progress else 0.8F
-
-                repeat(5) {
-                    Text(
-                        text = "•",
-                        fontSize = 40.sp,
-                        color = if (progress >= it*0.20) Color.White else Color.Gray
-                    )
-                }
+            val animate = rememberInfiniteTransition()
+            val progressColor by animate.animateColor(
+                initialValue = Color.Gray,
+                targetValue = Color.White,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(800),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
+            repeat(5) {
+                Text(
+                    text = "•",
+                    fontSize = 40.sp,
+                    color = if (progress >= it*0.20) progressColor else Color.DarkGray
+                )
+            }
         }
     }
 }
