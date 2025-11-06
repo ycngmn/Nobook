@@ -31,7 +31,7 @@ import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
-import com.ycngmn.nobook.ui.components.sheet.NobookSheet
+import com.ycngmn.nobook.ui.components.settings.SettingsDialog
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.getDesktopUserAgent
@@ -103,13 +103,14 @@ fun NobookWebView(
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
     val themeColor = viewModel.themeColor.collectAsState().value
-    val isImmersiveMode = viewModel.immersiveMode.collectAsState().value
+    // Manual handling to fix visual & padding bug on settings dialog.
+    var isImmersiveMode by rememberSaveable { mutableStateOf(viewModel.immersiveMode.value) }
 
-    LaunchedEffect(isImmersiveMode, themeColor.value) {
-        val window = activity?.window ?: return@LaunchedEffect
+    fun setWindow(immersive: Boolean) {
+        val window = activity?.window ?: return
         val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
 
-        if (isImmersiveMode) {
+        if (immersive) {
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             windowInsetsController.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -119,6 +120,10 @@ fun NobookWebView(
             windowInsetsController.isAppearanceLightStatusBars = isLight
             windowInsetsController.isAppearanceLightNavigationBars = isLight
         }
+        isImmersiveMode = immersive
+    }
+    LaunchedEffect(isImmersiveMode, themeColor.value) {
+        setWindow(isImmersiveMode)
     }
 
     val userScripts = viewModel.scripts.collectAsState().value
@@ -131,7 +136,7 @@ fun NobookWebView(
     LaunchedEffect(loadingState, userScripts) {
         if (loadingState is LoadingState.Finished && userScripts != null) {
             navigator.evaluateJavaScript(userScripts) { isLoading = false }
-        } else { isLoading = loadingState is LoadingState.Loading }
+        } else { isLoading = userScripts == null || loadingState is LoadingState.Loading }
     }
 
     if (isError && isLoading) {
@@ -141,10 +146,15 @@ fun NobookWebView(
 
     var settingsToggle by rememberSaveable { mutableStateOf(false) }
     if (settingsToggle) {
-        NobookSheet(
+        setWindow(false)
+        SettingsDialog(
             viewModel = viewModel,
-            onDismiss = { settingsToggle = false },
+            onDismiss = {
+                setWindow(viewModel.immersiveMode.value)
+                settingsToggle = false
+            },
             onReload = {
+                setWindow(viewModel.immersiveMode.value)
                 settingsToggle = false
                 viewModel.setScripts(null)
                 navigator.reload()

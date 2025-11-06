@@ -1,0 +1,274 @@
+package com.ycngmn.nobook.ui.components.settings
+
+import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BurstMode
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Diversity1
+import androidx.compose.material.icons.filled.EmojiPeople
+import androidx.compose.material.icons.filled.Padding
+import androidx.compose.material.icons.filled.Try
+import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.outlined.DesktopWindows
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.PanoramaWideAngle
+import androidx.compose.material.icons.outlined.Pinch
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
+import com.ycngmn.nobook.NobookViewModel
+import com.ycngmn.nobook.R
+import com.ycngmn.nobook.utils.isAutoDesktop
+
+@Composable
+fun SettingsContent(
+    modifier: Modifier,
+    viewModel: NobookViewModel
+) {
+    val context = LocalContext.current
+    var isOpenDialog by rememberSaveable { mutableStateOf(false) }
+
+    val removeAds = viewModel.removeAds.collectAsState()
+    val enableDownloadContent = viewModel.enableDownloadContent.collectAsState()
+    val desktopLayout = viewModel.desktopLayout.collectAsState()
+    val immersiveMode = viewModel.immersiveMode.collectAsState()
+    val stickyNavbar = viewModel.stickyNavbar.collectAsState()
+    val pinchToZoom = viewModel.pinchToZoom.collectAsState()
+    val amoledBlack = viewModel.amoledBlack.collectAsState()
+
+    val isAutoDesktop = isAutoDesktop()
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SettingsGroup(
+            items = listOf(
+                SettingsItem(
+                    icon = Icons.Outlined.Shield,
+                    title = stringResource(R.string.remove_ads_title),
+                    supportingText = "Hide sponsored ads from your feed",
+                    isActive = removeAds.value,
+                    onClick = { viewModel.setRemoveAds(!removeAds.value) },
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.FileDownload,
+                    title = stringResource(R.string.download_content_title),
+                    supportingText = "Enable download button on media view",
+                    isActive = enableDownloadContent.value,
+                    onClick = { viewModel.setEnableDownloadContent(!enableDownloadContent.value) },
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.GridView,
+                    title = stringResource(R.string.customize_feed_title),
+                    supportingText = "Customize feed",
+                    isActive = null,
+                    onClick = { isOpenDialog = true },
+                )
+            )
+        )
+
+        SettingsGroup(
+            items = listOf(
+                SettingsItem(
+                    icon = Icons.Outlined.Pinch,
+                    title = stringResource(R.string.pinch_to_zoom_title),
+                    supportingText = "Use two fingers to zoom in or out",
+                    isActive = pinchToZoom.value,
+                    onClick = { viewModel.setPinchToZoom(!pinchToZoom.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.DesktopWindows,
+                    title = stringResource(R.string.desktop_layout_title),
+                    supportingText = "Force desktop layout. May not be suitable for smaller display.",
+                    isActive = desktopLayout.value,
+                    onClick = { if (!isAutoDesktop) viewModel.setDesktopLayout(!desktopLayout.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.PanoramaWideAngle,
+                    title = stringResource(R.string.immersive_mode_title),
+                    supportingText = "Hide system bars for a fullscreen experience",
+                    isActive = immersiveMode.value,
+                    onClick = { viewModel.setImmersiveMode(!immersiveMode.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Default.Padding,
+                    title = stringResource(R.string.sticky_navbar_title),
+                    supportingText = "Keep the navigation bar visible while scrolling",
+                    isActive = stickyNavbar.value,
+                    onClick = { viewModel.setStickyNavbar(!stickyNavbar.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.Circle,
+                    title = stringResource(R.string.amoled_black_title),
+                    supportingText = "Enable pure black theme for AMOLED displays",
+                    isActive = amoledBlack.value,
+                    onClick = { viewModel.setAmoledBlack(!amoledBlack.value) }
+                )
+            )
+        )
+
+        SettingsGroup(
+            items = listOf(
+                SettingsItem(
+                    icon = Icons.Outlined.StarOutline,
+                    title = stringResource(R.string.follow_at_github),
+                    supportingText = "Thanks for your support",
+                    isActive = null,
+                    onClick = {
+                        val githubRepoUrl = "https://github.com/ycngmn/nobook"
+                        val intent = Intent(Intent.ACTION_VIEW, githubRepoUrl.toUri())
+                        context.startActivity(intent)
+                    }
+                )
+            )
+        )
+    }
+
+    if(isOpenDialog) {
+        HideOptionsDialog(
+            viewModel = viewModel,
+            onDismiss = { isOpenDialog = false }
+        )
+    }
+
+}
+
+@Composable
+private fun HideOptionsDialog(
+    viewModel: NobookViewModel,
+    onDismiss: () -> Unit
+) {
+
+    val hideSuggested = viewModel.hideSuggested.collectAsState()
+    val hideReels = viewModel.hideReels.collectAsState()
+    val hideStories = viewModel.hideStories.collectAsState()
+    val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
+    val hideGroups = viewModel.hideGroups.collectAsState()
+
+    Dialog(
+        onDismissRequest = { onDismiss() }
+    ) {
+
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(24.dp))
+                .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                .padding(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            HideDialogItem(
+                SettingsItem(
+                    icon = Icons.Filled.Try,
+                    title = "Suggested posts",
+                    isActive = hideSuggested.value,
+                    onClick = { viewModel.setHideSuggested(!hideSuggested.value) }
+                )
+            )
+
+            HideDialogItem(
+                SettingsItem(
+                    icon = Icons.Filled.Camera,
+                    title = "Reels",
+                    isActive = hideReels.value,
+                    onClick = { viewModel.setHideReels(!hideReels.value) }
+                )
+            )
+
+            HideDialogItem(
+                SettingsItem(
+                    icon = Icons.Filled.BurstMode,
+                    title = "Stories",
+                    isActive = hideStories.value,
+                    onClick = { viewModel.setHideStories(!hideStories.value) }
+                )
+            )
+
+            if (!viewModel.desktopLayout.collectAsState().value) {
+                HideDialogItem(
+                    SettingsItem(
+                        icon = Icons.Filled.EmojiPeople,
+                        title = "People you may know",
+                        isActive = hidePeopleYouMayKnow.value,
+                        onClick = { viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value) }
+                    )
+                )
+
+                HideDialogItem(
+                    SettingsItem(
+                        icon = Icons.Filled.Diversity1,
+                        title = "Groups",
+                        isActive = hideGroups.value,
+                        onClick = { viewModel.setHideGroups(!hideGroups.value) }
+                    )
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun HideDialogItem(
+    item: SettingsItem
+) {
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .clickable { item.onClick() }
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Icon(
+            item.icon,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+            tint = MaterialTheme.colorScheme.onBackground
+        )
+
+        Text(
+            text = item.title,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 18.sp,
+            modifier = Modifier.padding(start = 16.dp).weight(1F)
+        )
+
+        item.isActive?.let {
+            Checkbox(
+                checked = item.isActive,
+                onCheckedChange = { item.onClick() },
+            )
+        }
+    }
+}
