@@ -28,4 +28,19 @@
     <string name="saved_to_downloads">Saved to Downloads</string>
     <string name="download_failed_invalid_data">Download failed: Invalid data</string>
     <string name="failed_to_save_file">Failed to save file</string>
+    <string name="thanks_for_your_support">Thanks for your support</string>
+    <string name="suggested_posts">Suggested posts</string>
+    <string name="reels">Reels</string>
+    <string name="stories">Stories</string>
+    <string name="people_you_may_know">People you may know</string>
+    <string name="groups">Groups</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Enable pure black theme for AMOLED displays</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">Keep the navigation bar visible while scrolling</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">Hide system bars for a fullscreen experience</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Force desktop layout. May not be suitable for smaller display.</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">Use two fingers to zoom in or out</string>
+    <string name="customize_feed">Customize feed</string>
+    <string name="hide_sponsored_ads_from_your_feed">Hide sponsored ads from your feed</string>
+    <string name="enable_download_button_on_media_view">Enable download button on media view</string>
+    <string name="nobook_settings">Nobook settings</string>
 </resources>

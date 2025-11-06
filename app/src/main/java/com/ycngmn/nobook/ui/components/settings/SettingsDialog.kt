@@ -60,18 +60,21 @@ fun SettingsDialog(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 Box(
-                    Modifier.background(themeColor.value)
+                    Modifier
+                        .background(themeColor.value)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
-                        modifier = Modifier.align(Alignment.TopStart).size(22.dp),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .size(22.dp),
                         onClick = { onDismiss() }
                     ) { Icon(Icons.AutoMirrored.Default.ArrowBackIos, "back button") }
 
                     Text(
-                        "Nobook settings",
+                        stringResource(R.string.nobook_settings),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -83,7 +86,8 @@ fun SettingsDialog(
                 Column {
                     HorizontalDivider(thickness = 1.dp)
                     Row(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .background(themeColor.value)
                             .padding(horizontal = 16.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -119,7 +123,8 @@ fun SettingsDialog(
             }
         ) { paddingValues ->
             SettingsContent(
-                modifier = Modifier.padding(paddingValues)
+                modifier = Modifier
+                    .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 viewModel = viewModel

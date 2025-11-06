@@ -75,21 +75,21 @@ fun SettingsContent(
                 SettingsItem(
                     icon = Icons.Outlined.Shield,
                     title = stringResource(R.string.remove_ads_title),
-                    supportingText = "Hide sponsored ads from your feed",
+                    supportingText = stringResource(R.string.hide_sponsored_ads_from_your_feed),
                     isActive = removeAds.value,
                     onClick = { viewModel.setRemoveAds(!removeAds.value) },
                 ),
                 SettingsItem(
                     icon = Icons.Outlined.FileDownload,
                     title = stringResource(R.string.download_content_title),
-                    supportingText = "Enable download button on media view",
+                    supportingText = stringResource(R.string.enable_download_button_on_media_view),
                     isActive = enableDownloadContent.value,
                     onClick = { viewModel.setEnableDownloadContent(!enableDownloadContent.value) },
                 ),
                 SettingsItem(
                     icon = Icons.Outlined.GridView,
                     title = stringResource(R.string.customize_feed_title),
-                    supportingText = "Customize feed",
+                    supportingText = stringResource(R.string.customize_feed),
                     isActive = null,
                     onClick = { isOpenDialog = true },
                 )
@@ -101,35 +101,35 @@ fun SettingsContent(
                 SettingsItem(
                     icon = Icons.Outlined.Pinch,
                     title = stringResource(R.string.pinch_to_zoom_title),
-                    supportingText = "Use two fingers to zoom in or out",
+                    supportingText = stringResource(R.string.use_two_fingers_to_zoom_in_or_out),
                     isActive = pinchToZoom.value,
                     onClick = { viewModel.setPinchToZoom(!pinchToZoom.value) }
                 ),
                 SettingsItem(
                     icon = Icons.Outlined.DesktopWindows,
                     title = stringResource(R.string.desktop_layout_title),
-                    supportingText = "Force desktop layout. May not be suitable for smaller display.",
+                    supportingText = stringResource(R.string.force_desktop_layout_may_not_be_suitable_for_smaller_display),
                     isActive = desktopLayout.value,
                     onClick = { if (!isAutoDesktop) viewModel.setDesktopLayout(!desktopLayout.value) }
                 ),
                 SettingsItem(
                     icon = Icons.Outlined.PanoramaWideAngle,
                     title = stringResource(R.string.immersive_mode_title),
-                    supportingText = "Hide system bars for a fullscreen experience",
+                    supportingText = stringResource(R.string.hide_system_bars_for_a_fullscreen_experience),
                     isActive = immersiveMode.value,
                     onClick = { viewModel.setImmersiveMode(!immersiveMode.value) }
                 ),
                 SettingsItem(
                     icon = Icons.Default.Padding,
                     title = stringResource(R.string.sticky_navbar_title),
-                    supportingText = "Keep the navigation bar visible while scrolling",
+                    supportingText = stringResource(R.string.keep_the_navigation_bar_visible_while_scrolling),
                     isActive = stickyNavbar.value,
                     onClick = { viewModel.setStickyNavbar(!stickyNavbar.value) }
                 ),
                 SettingsItem(
                     icon = Icons.Outlined.Circle,
                     title = stringResource(R.string.amoled_black_title),
-                    supportingText = "Enable pure black theme for AMOLED displays",
+                    supportingText = stringResource(R.string.enable_pure_black_theme_for_amoled_displays),
                     isActive = amoledBlack.value,
                     onClick = { viewModel.setAmoledBlack(!amoledBlack.value) }
                 )
@@ -141,7 +141,7 @@ fun SettingsContent(
                 SettingsItem(
                     icon = Icons.Outlined.StarOutline,
                     title = stringResource(R.string.follow_at_github),
-                    supportingText = "Thanks for your support",
+                    supportingText = stringResource(R.string.thanks_for_your_support),
                     isActive = null,
                     onClick = {
                         val githubRepoUrl = "https://github.com/ycngmn/nobook"
@@ -189,7 +189,7 @@ private fun HideOptionsDialog(
             HideDialogItem(
                 SettingsItem(
                     icon = Icons.Filled.Try,
-                    title = "Suggested posts",
+                    title = stringResource(R.string.suggested_posts),
                     isActive = hideSuggested.value,
                     onClick = { viewModel.setHideSuggested(!hideSuggested.value) }
                 )
@@ -198,7 +198,7 @@ private fun HideOptionsDialog(
             HideDialogItem(
                 SettingsItem(
                     icon = Icons.Filled.Camera,
-                    title = "Reels",
+                    title = stringResource(R.string.reels),
                     isActive = hideReels.value,
                     onClick = { viewModel.setHideReels(!hideReels.value) }
                 )
@@ -207,7 +207,7 @@ private fun HideOptionsDialog(
             HideDialogItem(
                 SettingsItem(
                     icon = Icons.Filled.BurstMode,
-                    title = "Stories",
+                    title = stringResource(R.string.stories),
                     isActive = hideStories.value,
                     onClick = { viewModel.setHideStories(!hideStories.value) }
                 )
@@ -217,7 +217,7 @@ private fun HideOptionsDialog(
                 HideDialogItem(
                     SettingsItem(
                         icon = Icons.Filled.EmojiPeople,
-                        title = "People you may know",
+                        title = stringResource(R.string.people_you_may_know),
                         isActive = hidePeopleYouMayKnow.value,
                         onClick = { viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value) }
                     )
@@ -226,7 +226,7 @@ private fun HideOptionsDialog(
                 HideDialogItem(
                     SettingsItem(
                         icon = Icons.Filled.Diversity1,
-                        title = "Groups",
+                        title = stringResource(R.string.groups),
                         isActive = hideGroups.value,
                         onClick = { viewModel.setHideGroups(!hideGroups.value) }
                     )
@@ -261,7 +261,9 @@ private fun HideDialogItem(
             text = item.title,
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 18.sp,
-            modifier = Modifier.padding(start = 16.dp).weight(1F)
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1F)
         )
 
         item.isActive?.let {
