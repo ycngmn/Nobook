@@ -27,8 +27,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewState
 import com.ycngmn.nobook.NobookViewModel
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.settings.SettingsDialog
@@ -51,13 +51,21 @@ fun NobookWebView(
     val activity = LocalActivity.current
     val resources = LocalResources.current
 
-    val state = rememberWebViewState(url)
+    val state = rememberSaveableWebViewState(url)
     val navigator = rememberWebViewNavigator(
         requestInterceptor = ExternalRequestInterceptor {
             val intent = Intent.parseUri(it, Intent.URI_INTENT_SCHEME)
             context.startActivity(intent)
         }
     )
+
+    LaunchedEffect(navigator) {
+        val bundle = state.viewState
+        if (bundle == null) {
+            navigator.loadUrl(url)
+        }
+    }
+
 
     // allow exiting while scrolling to top.
     var exit by remember { mutableStateOf(false) }
