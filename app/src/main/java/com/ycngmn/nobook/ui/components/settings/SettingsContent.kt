@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,11 +25,11 @@ import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.PanoramaWideAngle
 import androidx.compose.material.icons.outlined.Pinch
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -136,21 +137,25 @@ fun SettingsContent(
             )
         )
 
-        SettingsGroup(
-            items = listOf(
-                SettingsItem(
-                    icon = Icons.Outlined.StarOutline,
-                    title = stringResource(R.string.follow_at_github),
-                    supportingText = stringResource(R.string.thanks_for_your_support),
-                    isActive = null,
-                    onClick = {
-                        val githubRepoUrl = "https://github.com/ycngmn/nobook"
-                        val intent = Intent(Intent.ACTION_VIEW, githubRepoUrl.toUri())
-                        context.startActivity(intent)
-                    }
+        Box(modifier = Modifier.fillMaxWidth()) {
+            TextButton(
+                modifier = Modifier.align(Alignment.Center),
+                onClick = {
+                    val githubRepoUrl = "https://github.com/ycngmn/nobook"
+                    val intent = Intent(Intent.ACTION_VIEW, githubRepoUrl.toUri())
+                    context.startActivity(intent)
+                }
+            ) {
+                val packageName = context.packageName
+                val versionName = context.packageManager.getPackageInfo(packageName, 0).versionName
+                Text(
+                    "$packageName | v$versionName",
+                    modifier = Modifier.padding(4.dp),
+                    maxLines = 1
                 )
-            )
-        )
+            }
+        }
+
     }
 
     if(isOpenDialog) {
@@ -254,12 +259,12 @@ private fun HideDialogItem(
             item.icon,
             contentDescription = null,
             modifier = Modifier.size(28.dp),
-            tint = MaterialTheme.colorScheme.onBackground
+            tint = MaterialTheme.colorScheme.onBackground.copy(0.6F)
         )
 
         Text(
             text = item.title,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = MaterialTheme.colorScheme.onBackground.copy(0.6F),
             fontSize = 18.sp,
             modifier = Modifier
                 .padding(start = 16.dp)
@@ -268,7 +273,7 @@ private fun HideDialogItem(
 
         item.isActive?.let {
             Checkbox(
-                checked = item.isActive,
+                checked = !item.isActive,
                 onCheckedChange = { item.onClick() },
             )
         }
