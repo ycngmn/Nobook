@@ -162,6 +162,7 @@ fun NobookWebView(
                 settingsToggle = false
             },
             onReload = {
+                viewModel.setThemeColor(Color.Transparent)
                 setWindow(viewModel.immersiveMode.value)
                 settingsToggle = false
                 viewModel.setScripts(null)
