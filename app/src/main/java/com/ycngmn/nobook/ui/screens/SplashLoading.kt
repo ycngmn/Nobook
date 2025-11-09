@@ -47,7 +47,7 @@ fun SplashLoading(progress: Float) {
         Row (horizontalArrangement = Arrangement.SpaceBetween) {
             val animate = rememberInfiniteTransition()
             val progressColor by animate.animateColor(
-                initialValue = Color.Gray,
+                initialValue = Color.DarkGray,
                 targetValue = Color.White,
                 animationSpec = infiniteRepeatable(
                     animation = tween(800),
