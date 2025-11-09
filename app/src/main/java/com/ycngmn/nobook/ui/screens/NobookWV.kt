@@ -6,9 +6,11 @@ import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,7 +67,6 @@ fun NobookWebView(
             navigator.loadUrl(url)
         }
     }
-
 
     // allow exiting while scrolling to top.
     var exit by remember { mutableStateOf(false) }
@@ -182,11 +183,20 @@ fun NobookWebView(
     val userAgent = if (isDesktop.value) getDesktopUserAgent() else ""
     LaunchedEffect(userAgent) { state.nativeWebView.settings.userAgentString = userAgent }
 
+    // needed to consume extra padding when keyboard is open
+    val barsInsets = WindowInsets.systemBars.asPaddingValues()
+    val imeHeight = rememberImeHeight()
+
     WebView(
         modifier = Modifier.fillMaxSize()
             .background(themeColor)
-            .padding(bottom = rememberImeHeight())
-            .then(if (!isImmersiveMode) Modifier.systemBarsPadding() else Modifier),
+            .then(
+                if (isImmersiveMode) Modifier.padding(bottom = imeHeight)
+                else Modifier.padding(
+                    top = barsInsets.calculateTopPadding(),
+                    bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+                )
+            ),
         state = state,
         navigator = navigator,
         platformWebViewParams = fileChooserWebViewParams(),
