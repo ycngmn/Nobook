@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BurstMode
 import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Diversity1
 import androidx.compose.material.icons.filled.EmojiPeople
 import androidx.compose.material.icons.filled.Padding
@@ -25,9 +26,10 @@ import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.PanoramaWideAngle
 import androidx.compose.material.icons.outlined.Pinch
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import com.ycngmn.nobook.NobookViewModel
 import com.ycngmn.nobook.R
+import com.ycngmn.nobook.ui.theme.FacebookBlue
 import com.ycngmn.nobook.utils.isAutoDesktop
 
 @Composable
@@ -243,9 +247,7 @@ private fun HideOptionsDialog(
 }
 
 @Composable
-private fun HideDialogItem(
-    item: SettingsItem
-) {
+private fun HideDialogItem(item: SettingsItem) {
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.large)
@@ -272,9 +274,24 @@ private fun HideDialogItem(
         )
 
         item.isActive?.let {
-            Checkbox(
-                checked = !item.isActive,
+            Switch(
+                checked = item.isActive,
                 onCheckedChange = { item.onClick() },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White.copy(0.6F),
+                    checkedTrackColor = FacebookBlue.copy(0.6F),
+                ),
+                modifier = Modifier,
+                thumbContent = if (item.isActive) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = FacebookBlue.copy(0.6F),
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    }
+                } else null
             )
         }
     }

@@ -37,8 +37,8 @@ data class SettingsItem(
 
 @Composable
 fun SettingsItem(
+    modifier: Modifier = Modifier,
     item: SettingsItem,
-    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier

@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -69,9 +70,7 @@ fun SettingsDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .size(22.dp),
+                        modifier = Modifier.align(Alignment.TopStart).size(22.dp),
                         onClick = { onDismiss() }
                     ) { Icon(Icons.AutoMirrored.Default.ArrowBackIos, "back button") }
 
@@ -96,10 +95,10 @@ fun SettingsDialog(
                     exit = fadeOut() + scaleOut()
                 ) {
                     ExtendedFloatingActionButton(
-                        onClick = { onReload() }
-                    ) {
-                        Text(stringResource(R.string.apply_immediately))
-                    }
+                        onClick = { onReload(); onDismiss() },
+                        text = { Text(stringResource(R.string.apply_immediately)) },
+                        icon = { Icon(Icons.Default.Bolt, null) }
+                    )
                 }
             }
         ) { paddingValues ->

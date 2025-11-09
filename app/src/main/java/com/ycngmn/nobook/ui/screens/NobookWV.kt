@@ -145,7 +145,7 @@ fun NobookWebView(
     LaunchedEffect(loadingState, userScripts) {
         if (loadingState is LoadingState.Finished && userScripts != null) {
             navigator.evaluateJavaScript(userScripts) { isLoading = false }
-        } else { isLoading = userScripts == null || loadingState is LoadingState.Loading }
+        } else { isLoading = true }
     }
 
     if (isError && isLoading) {
@@ -153,7 +153,7 @@ fun NobookWebView(
         return
     }
 
-    var settingsToggle by rememberSaveable { mutableStateOf(false) }
+    var settingsToggle by remember { mutableStateOf(false) }
     if (settingsToggle) {
         setWindow(false)
         SettingsDialog(
@@ -165,7 +165,6 @@ fun NobookWebView(
             onReload = {
                 viewModel.setThemeColor(Color.Transparent)
                 setWindow(viewModel.immersiveMode.value)
-                settingsToggle = false
                 viewModel.setScripts(null)
                 navigator.reload()
             }
