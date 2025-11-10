@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Nobook</string>
+
+    <string name="apply_immediately">立即應用？</string>
+    <string name="close_menu">關閉選單</string>
+
+    <string name="hide_suggested_title">隱藏推薦貼文</string>
+    <string name="hide_reels_title">隱藏 Reels</string>
+    <string name="hide_stories_title">隱藏限時動態</string>
+    <string name="hide_people_you_may_know_title">隱藏可能認識的人</string>
+    <string name="hide_groups_title">隱藏群組推薦</string>
+
+    <string name="remove_ads_title">移除廣告</string>
+    <string name="download_content_title">下載內容</string>
+    <string name="desktop_layout_title">桌面佈局</string>
+    <string name="immersive_mode_title">沉浸模式</string>
+    <string name="sticky_navbar_title">固定導航欄</string>
+    <string name="pinch_to_zoom_title">雙指縮放</string>
+    <string name="amoled_black_title">純黑</string>
+    <string name="customize_feed_title">首頁自定義</string>
+    <string name="follow_at_github">在 GitHub 上關注我們</string>
+</resources>

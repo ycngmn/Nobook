@@ -1,0 +1,26 @@
+<resources> 
+    <string name="app_name">Nobook</string> 
+ 
+    <!-- Bottom Text and Buttons --> 
+    <string name="apply_immediately">Sofort anwenden?</string> 
+    <string name="close_menu">Menü schließen</string> 
+ 
+    <!-- Dialog Items --> 
+    <string name="hide_suggested_title">Vorgeschlagene Beiträge ausblenden</string> 
+    <string name="hide_reels_title">Reels ausblenden</string> 
+    <string name="hide_stories_title">Stories ausblenden</string> 
+    <string name="hide_people_you_may_know_title">Personenvorschläge ausblenden</string> 
+    <string name="hide_groups_title">Gruppenvorschläge ausblenden</string> 
+ 
+    <!-- Sheet Items --> 
+    <string name="remove_ads_title">Werbung entfernen</string> 
+    <string name="download_content_title">Inhalte herunterladen</string> 
+    <string name="desktop_layout_title">Desktop-Layout</string> 
+    <string name="immersive_mode_title">Immersiver Modus</string> 
+    <string name="sticky_navbar_title">Navbar anheften</string> 
+    <string name="pinch_to_zoom_title">Zum Zoomen kneifen</string> 
+    <string name="amoled_black_title">AMOLED Schwarz</string> 
+    <string name="customize_feed_title">Feed anpassen</string> 
+    <string name="follow_at_github">Folge uns auf Github</string> 
+</resources> 
+
