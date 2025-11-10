@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Nobook</string>
+    <string name="apply_immediately">立即應用？</string>
+    <string name="remove_ads_title">移除廣告</string>
+    <string name="download_content_title">下載內容</string>
+    <string name="desktop_layout_title">桌面佈局</string>
+    <string name="immersive_mode_title">沉浸模式</string>
+    <string name="sticky_navbar_title">固定導航欄</string>
+    <string name="pinch_to_zoom_title">雙指縮放</string>
+    <string name="amoled_black_title">純黑</string>
+    <string name="customize_feed_title">首頁自定義</string>
+    <string name="network_error_title">連線到網路</string>
+    <string name="network_error_description">使用 Nobook 前，請開啟行動數據或連接 Wi-Fi。</string>
+    <string name="ok">確定</string>
+    <string name="saved_to_downloads">已儲存至下載</string>
+    <string name="download_failed_invalid_data">下載失敗：資料無效</string>
+    <string name="failed_to_save_file">儲存檔案失敗</string>
+    <string name="suggested_posts">推薦貼文</string>
+    <string name="reels">Reels</string>
+    <string name="stories">限時動態</string>
+    <string name="people_you_may_know">可能認識的人</string>
+    <string name="groups">社團</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">啟用純黑主題，需要「深色模式」</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">捲動時保持導覽列可見</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">隱藏系統列以進入全螢幕</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">強制桌面佈局，不適用於小螢幕</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">使用兩指縮放</string>
+    <string name="customize_feed">顯示或隱藏項目</string>
+    <string name="hide_sponsored_ads_from_your_feed">隱藏動態中的廣告</string>
+    <string name="enable_download_button_on_media_view">在媒體檢視中啟用下載按鈕</string>
+    <string name="nobook_settings">Nobook 設定</string>
+</resources>

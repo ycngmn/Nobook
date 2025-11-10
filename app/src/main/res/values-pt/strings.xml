@@ -1,25 +1,32 @@
 <resources>
     <string name="app_name">Nobook</string>
-    
-    <!-- Bottom Text and Buttons -->
-    <string name="apply_immediately">Aplicar Imediatamente?</string>
-    <string name="close_menu">Fechar Menu</string>
-    
-    <!-- Dialog Items -->
-    <string name="hide_suggested_title">Ocultar publicações sugeridas</string>
-    <string name="hide_reels_title">Ocultar reels</string>
-    <string name="hide_stories_title">Ocultar stories</string>
-    <string name="hide_people_you_may_know_title">Ocultar pessoas que talvez você conheça</string>
-    <string name="hide_groups_title">Ocultar sugestões de grupos</string>
-    
-    <!-- Sheet Items -->
+    <string name="apply_immediately">Aplicar imediatamente?</string>
     <string name="remove_ads_title">Remover anúncios</string>
     <string name="download_content_title">Baixar conteúdo</string>
-    <string name="desktop_layout_title">Layout área de trabalho</string>
+    <string name="desktop_layout_title">Layout de desktop</string>
     <string name="immersive_mode_title">Modo imersivo</string>
     <string name="sticky_navbar_title">Barra de navegação fixa</string>
     <string name="pinch_to_zoom_title">Beliscar para ampliar</string>
     <string name="amoled_black_title">Preto AMOLED</string>
-    <string name="customize_feed_title">Personalizar o feed</string>
-    <string name="follow_at_github">Siga-nos no GitHub</string>
+    <string name="customize_feed_title">Personalizar feed</string>
+    <string name="network_error_title">Conectar à rede</string>
+    <string name="network_error_description">Para usar o Nobook, ative os dados móveis ou conecte-se ao Wi-Fi.</string>
+    <string name="ok">OK</string>
+    <string name="saved_to_downloads">Salvo em Downloads</string>
+    <string name="download_failed_invalid_data">Falha no download: dados inválidos</string>
+    <string name="failed_to_save_file">Falha ao salvar arquivo</string>
+    <string name="suggested_posts">Postagens sugeridas</string>
+    <string name="reels">Reels</string>
+    <string name="stories">Stories</string>
+    <string name="people_you_may_know">Pessoas que você pode conhecer</string>
+    <string name="groups">Grupos</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Ativar tema preto puro. Requer 'Modo escuro'.</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">Manter a barra de navegação visível ao rolar</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">Ocultar barras do sistema para experiência em tela cheia</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Forçar layout de desktop. Pode não ser adequado para telas menores.</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">Use dois dedos para aumentar ou reduzir</string>
+    <string name="customize_feed">Mostrar ou ocultar itens</string>
+    <string name="hide_sponsored_ads_from_your_feed">Ocultar anúncios patrocinados do feed</string>
+    <string name="enable_download_button_on_media_view">Ativar botão de download na visualização de mídia</string>
+    <string name="nobook_settings">Configurações do Nobook</string>
 </resources>

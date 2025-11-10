@@ -1,26 +1,32 @@
-<resources> 
-    <string name="app_name">Nobook</string> 
- 
-    <!-- Bottom Text and Buttons --> 
-    <string name="apply_immediately">Sofort anwenden?</string> 
-    <string name="close_menu">Menü schließen</string> 
- 
-    <!-- Dialog Items --> 
-    <string name="hide_suggested_title">Vorgeschlagene Beiträge ausblenden</string> 
-    <string name="hide_reels_title">Reels ausblenden</string> 
-    <string name="hide_stories_title">Stories ausblenden</string> 
-    <string name="hide_people_you_may_know_title">Personenvorschläge ausblenden</string> 
-    <string name="hide_groups_title">Gruppenvorschläge ausblenden</string> 
- 
-    <!-- Sheet Items --> 
-    <string name="remove_ads_title">Werbung entfernen</string> 
-    <string name="download_content_title">Inhalte herunterladen</string> 
-    <string name="desktop_layout_title">Desktop-Layout</string> 
-    <string name="immersive_mode_title">Immersiver Modus</string> 
-    <string name="sticky_navbar_title">Navbar anheften</string> 
-    <string name="pinch_to_zoom_title">Zum Zoomen kneifen</string> 
-    <string name="amoled_black_title">AMOLED Schwarz</string> 
-    <string name="customize_feed_title">Feed anpassen</string> 
-    <string name="follow_at_github">Folge uns auf Github</string> 
-</resources> 
-
+<resources>
+    <string name="app_name">Nobook</string>
+    <string name="apply_immediately">Sofort anwenden?</string>
+    <string name="remove_ads_title">Werbung entfernen</string>
+    <string name="download_content_title">Inhalte herunterladen</string>
+    <string name="desktop_layout_title">Desktop-Layout</string>
+    <string name="immersive_mode_title">Vollbildmodus</string>
+    <string name="sticky_navbar_title">Fixierte Navigationsleiste</string>
+    <string name="pinch_to_zoom_title">Mit zwei Fingern zoomen</string>
+    <string name="amoled_black_title">AMOLED Schwarz</string>
+    <string name="customize_feed_title">Feed anpassen</string>
+    <string name="network_error_title">Mit Netzwerk verbinden</string>
+    <string name="network_error_description">Um Nobook zu nutzen, mobile Daten aktivieren oder WLAN verbinden.</string>
+    <string name="ok">OK</string>
+    <string name="saved_to_downloads">In Downloads gespeichert</string>
+    <string name="download_failed_invalid_data">Download fehlgeschlagen: Ungültige Daten</string>
+    <string name="failed_to_save_file">Datei konnte nicht gespeichert werden</string>
+    <string name="suggested_posts">Vorgeschlagene Beiträge</string>
+    <string name="reels">Reels</string>
+    <string name="stories">Stories</string>
+    <string name="people_you_may_know">Leute, die Sie kennen könnten</string>
+    <string name="groups">Gruppen</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Reines Schwarz aktivieren. Benötigt 'Dunkelmodus'.</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">Navigationsleiste beim Scrollen sichtbar halten</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">Systemleisten für Vollbild-Erlebnis ausblenden</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Desktop-Layout erzwingen. Nicht für kleine Displays geeignet.</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">Mit zwei Fingern hinein- oder herauszoomen</string>
+    <string name="customize_feed">Elemente anzeigen oder ausblenden</string>
+    <string name="hide_sponsored_ads_from_your_feed">Gesponserte Werbung im Feed ausblenden</string>
+    <string name="enable_download_button_on_media_view">Download-Button in Medienansicht aktivieren</string>
+    <string name="nobook_settings">Nobook-Einstellungen</string>
+</resources>

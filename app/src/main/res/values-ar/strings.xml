@@ -1,18 +1,6 @@
 <resources>
     <string name="app_name">Nobook</string>
-
-    <!-- Bottom Text and Buttons -->
-    <string name="apply_immediately">تطبيق التغييرات الأن!</string>
-    <string name="close_menu">إغلاق القائمة</string>
-
-    <!-- Dialog Items -->
-    <string name="hide_suggested_title">إخفاء المنشورات المقترحة</string>
-    <string name="hide_reels_title">إخفاء الريلز</string>
-    <string name="hide_stories_title">إخفاء القصص</string>
-    <string name="hide_people_you_may_know_title">إخفاء "أشخاص قد تعرفهم"</string>
-    <string name="hide_groups_title">إخفاء "اقتراحات المجموعات"</string>
-
-    <!-- Sheet Items -->
+    <string name="apply_immediately">تطبيق التغييرات الآن؟</string>
     <string name="remove_ads_title">إزالة الإعلانات</string>
     <string name="download_content_title">تنزيل المحتوى</string>
     <string name="desktop_layout_title">تخطيط سطح المكتب</string>
@@ -21,5 +9,24 @@
     <string name="pinch_to_zoom_title">التصغير/التكبير</string>
     <string name="amoled_black_title">وضع الأموليد</string>
     <string name="customize_feed_title">تخصيص المحتوى المعروض</string>
-    <string name="follow_at_github">تابعونا على GitHub</string>
+    <string name="network_error_title">الاتصال بالشبكة</string>
+    <string name="network_error_description">لاستخدام Nobook، قم بتشغيل بيانات الجوال أو الاتصال بشبكة Wi-Fi.</string>
+    <string name="ok">موافق</string>
+    <string name="saved_to_downloads">تم الحفظ في التنزيلات</string>
+    <string name="download_failed_invalid_data">فشل التنزيل: بيانات غير صالحة</string>
+    <string name="failed_to_save_file">فشل حفظ الملف</string>
+    <string name="suggested_posts">المنشورات المقترحة</string>
+    <string name="reels">ريلز</string>
+    <string name="stories">قصص</string>
+    <string name="people_you_may_know">قد تعرف هؤلاء الأشخاص</string>
+    <string name="groups">المجموعات</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">تفعيل الوضع الأسود النقي. يحتاج إلى "الوضع الداكن" للعمل</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">ابق شريط التنقل مرئياً أثناء التمرير</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">إخفاء أشرطة النظام لتجربة ملء الشاشة</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">فرض تخطيط سطح المكتب. قد لا يكون مناسباً للشاشات الصغيرة.</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">استخدم إصبعين للتكبير أو التصغير</string>
+    <string name="customize_feed">عرض أو إخفاء العناصر</string>
+    <string name="hide_sponsored_ads_from_your_feed">إخفاء الإعلانات الممولة من المحتوى</string>
+    <string name="enable_download_button_on_media_view">تفعيل زر التنزيل عند عرض الوسائط</string>
+    <string name="nobook_settings">إعدادات Nobook</string>
 </resources>

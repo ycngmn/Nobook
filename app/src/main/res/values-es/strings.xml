@@ -1,22 +1,32 @@
 <resources>
     <string name="app_name">Nobook</string>
-
     <string name="apply_immediately">¿Aplicar inmediatamente?</string>
-    <string name="close_menu">Cerrar menú</string>
-
-    <string name="hide_suggested_title">Ocultar publicaciones sugeridas</string>
-    <string name="hide_reels_title">Ocultar reels</string>
-    <string name="hide_stories_title">Ocultar historias</string>
-    <string name="hide_people_you_may_know_title">Ocultar personas que quizá conozcas</string>
-    <string name="hide_groups_title">Ocultar sugerencias de grupos</string>
-
     <string name="remove_ads_title">Eliminar anuncios</string>
     <string name="download_content_title">Descargar contenido</string>
     <string name="desktop_layout_title">Diseño de escritorio</string>
     <string name="immersive_mode_title">Modo inmersivo</string>
     <string name="sticky_navbar_title">Barra de navegación fija</string>
-    <string name="pinch_to_zoom_title">Pellizcar para ampliar</string>
+    <string name="pinch_to_zoom_title"> pellizcar para hacer zoom</string>
     <string name="amoled_black_title">Negro AMOLED</string>
     <string name="customize_feed_title">Personalizar feed</string>
-    <string name="follow_at_github">Síguenos en GitHub</string>
+    <string name="network_error_title">Conectar a la red</string>
+    <string name="network_error_description">Para usar Nobook, activa los datos móviles o conéctate a Wi-Fi.</string>
+    <string name="ok">OK</string>
+    <string name="saved_to_downloads">Guardado en Descargas</string>
+    <string name="download_failed_invalid_data">Descarga fallida: datos inválidos</string>
+    <string name="failed_to_save_file">Error al guardar el archivo</string>
+    <string name="suggested_posts">Publicaciones sugeridas</string>
+    <string name="reels">Reels</string>
+    <string name="stories">Stories</string>
+    <string name="people_you_may_know">Personas que puedes conocer</string>
+    <string name="groups">Grupos</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Activar tema negro puro. Requiere 'Modo oscuro'.</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">Mantener la barra de navegación visible al desplazarse</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">Ocultar barras del sistema para experiencia de pantalla completa</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Forzar diseño de escritorio. Puede no ser adecuado para pantallas pequeñas.</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">Usar dos dedos para acercar o alejar</string>
+    <string name="customize_feed">Mostrar u ocultar elementos</string>
+    <string name="hide_sponsored_ads_from_your_feed">Ocultar anuncios patrocinados en el feed</string>
+    <string name="enable_download_button_on_media_view">Activar botón de descarga en vista de medios</string>
+    <string name="nobook_settings">Configuración de Nobook</string>
 </resources>
