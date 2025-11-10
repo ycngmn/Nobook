@@ -69,10 +69,9 @@ fun NobookWebView(
     }
 
     // allow exiting while scrolling to top.
-    var exit by remember { mutableStateOf(false) }
-
+    var exitScroll by remember { mutableStateOf(false) }
     BackHandler {
-        if (exit) activity?.finish()
+        if (exitScroll) activity?.finish()
         else navigator.evaluateJavaScript("backHandlerNB();") {
             val backHandled = it.removeSurrounding("\"")
             when (backHandled) {
@@ -81,15 +80,15 @@ fun NobookWebView(
                     else activity?.finish()
                 }
                 "exit" -> activity?.finish()
-                else -> exit = true
+                "scrolling" -> exitScroll = true
             }
         }
     }
 
-    LaunchedEffect(exit) {
-        if (exit) {
+    LaunchedEffect(exitScroll) {
+        if (exitScroll) {
             delay(800)
-            exit = false
+            exitScroll = false
         }
     }
 

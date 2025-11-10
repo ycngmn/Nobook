@@ -9,40 +9,25 @@
 // Feed identifier
 (() => {
     window.isFeed = () => {
-
         const isHomeUrl = window.location.pathname === '/' &&
         (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com');
+        const canScroll = document.documentElement.scrollHeight > document.documentElement.clientHeight;
 
         if (window.isDesktopMode()) return isHomeUrl;
-        return isHomeUrl && document.querySelector('div[role="button"][aria-label*="Facebook"]') !== null;
-    }
+
+        return isHomeUrl && document.title === 'Facebook' && canScroll;
+    };
 })();
+
 
 
 (function() {
     if (!window.isDesktopMode()) return;
 
-    /*
-       (function () {
-          const minWidth = 408;
-
-          function adjustZoom() {
-            const vw = window.innerWidth;
-            const scale = vw < minWidth ? vw / minWidth : 1;
-            document.body.style.width = minWidth + 'px';
-            document.body.style.zoom = scale;
-            document.documentElement.style.fontSize = `${22 * scale}px`;
-          }
-
-          window.addEventListener('resize', adjustZoom);
-          adjustZoom();
-        })();
-    */
-
     document.documentElement.style.fontSize = '18px';
 
 
-    // do not stick by default the navbar
+    // do not stick the navbar by default
     (() => {
       const waitForBanner = () => new Promise(resolve => {
         const existing = document.querySelector('div[role="banner"]');
@@ -130,32 +115,32 @@
 (() => {
     window.backHandlerNB = () => {
 
-    const isDialog = document.querySelector('div[role="menu"]') ||
-    document.querySelector('div[role="dialog"]');
+        const dialogs = document.querySelectorAll('div[role="dialog"]');
+        const isDialog = document.querySelector('div[role="menu"]') || dialogs.length >= 2
 
-    if (window.isFeed() && !isDialog) {
-       if (window.scrollY !== 0) {
-          // to interrupt any current scroll event.
-          document.body.style.overflow = 'hidden';
-          setTimeout(() => {
-             document.body.style.overflow = '';
-             window.scrollTo({ top: 0, behavior: 'smooth' });
-          }, 50);
-          return "true";
-       } else return "exit";
-    } else if (isDesktopMode() && isDialog ) {
-        const escapeEvent = new KeyboardEvent('keydown', {
-            key: 'Escape',
-            code: 'Escape',
-            keyCode: 27,
-            which: 27,
-            bubbles: true,
-            cancelable: true
-          });
-          window.dispatchEvent(escapeEvent);
-          return "true";
+        if (window.isFeed() && !isDialog) {
+           if (window.scrollY !== 0) {
+              // to interrupt any current scroll event.
+              document.body.style.overflow = 'hidden';
+              setTimeout(() => {
+                 document.body.style.overflow = '';
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+              }, 30);
+              return "scrolling";
+           } else return "exit";
+        } else if (window.isDesktopMode() && isDialog ) {
+            const escapeEvent = new KeyboardEvent('keydown', {
+                key: 'Escape',
+                code: 'Escape',
+                keyCode: 27,
+                which: 27,
+                bubbles: true,
+                cancelable: true
+              });
+              window.dispatchEvent(escapeEvent);
+              return "true";
+        } else return "false";
     }
-    else return "false"; }
 })();
 
 // Enable press and hold caption selection and apply custom selection color.
@@ -189,7 +174,6 @@
 
 // Enhance Loading Overlay Script
 (function() {
-    // Function to apply the background color
     function applyOverlayStyle() {
         const overlays = document.querySelectorAll('.loading-overlay');
         overlays.forEach(overlay => {
@@ -318,7 +302,6 @@ observer.observe(document.body, { childList: true, subtree: true });
 
     insertButton();
 
-    // Mutation observer to monitor DOM changes
     const observer = new MutationObserver(() => {
       if (!document.getElementById(BUTTON_ID) && isFeed()) {
         insertButton();
