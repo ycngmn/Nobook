@@ -20,7 +20,7 @@
     <string name="stories">Stories</string>
     <string name="people_you_may_know">Leute, die Sie kennen könnten</string>
     <string name="groups">Gruppen</string>
-    <string name="enable_pure_black_theme_for_amoled_displays">Reines Schwarz aktivieren. Benötigt 'Dunkelmodus'.</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Reines Schwarz aktivieren. Benötigt \'Dunkelmodus\'.</string>
     <string name="keep_the_navigation_bar_visible_while_scrolling">Navigationsleiste beim Scrollen sichtbar halten</string>
     <string name="hide_system_bars_for_a_fullscreen_experience">Systemleisten für Vollbild-Erlebnis ausblenden</string>
     <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Desktop-Layout erzwingen. Nicht für kleine Displays geeignet.</string>

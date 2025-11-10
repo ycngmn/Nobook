@@ -20,7 +20,7 @@
     <string name="stories">স্টোরিজ</string>
     <string name="people_you_may_know">যারা আপনি চিনতে পারেন</string>
     <string name="groups">গ্রুপ</string>
-    <string name="enable_pure_black_theme_for_amoled_displays">শুদ্ধ কালো থিম চালু করুন। 'ডার্ক মোড' প্রয়োজন।</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">শুদ্ধ কালো থিম চালু করুন। \'ডার্ক মোড\' প্রয়োজন।</string>
     <string name="keep_the_navigation_bar_visible_while_scrolling">স্ক্রল করার সময় নেভিগেশন বার দৃশ্যমান রাখুন</string>
     <string name="hide_system_bars_for_a_fullscreen_experience">পূর্ণস্ক্রিন অভিজ্ঞতার জন্য সিস্টেম বার লুকান</string>
     <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">ডেস্কটপ বিন্যাস বাধ্যতামূলক করুন। ছোট ডিসপ্লের জন্য উপযুক্ত নাও হতে পারে।</string>

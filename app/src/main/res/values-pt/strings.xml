@@ -20,7 +20,7 @@
     <string name="stories">Stories</string>
     <string name="people_you_may_know">Pessoas que você pode conhecer</string>
     <string name="groups">Grupos</string>
-    <string name="enable_pure_black_theme_for_amoled_displays">Ativar tema preto puro. Requer 'Modo escuro'.</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Ativar tema preto puro. Requer \'Modo escuro\'.</string>
     <string name="keep_the_navigation_bar_visible_while_scrolling">Manter a barra de navegação visível ao rolar</string>
     <string name="hide_system_bars_for_a_fullscreen_experience">Ocultar barras do sistema para experiência em tela cheia</string>
     <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Forçar layout de desktop. Pode não ser adequado para telas menores.</string>
