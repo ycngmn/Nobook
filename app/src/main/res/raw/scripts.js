@@ -116,10 +116,10 @@
     window.backHandlerNB = () => {
 
         const dialogs = document.querySelectorAll('div[role="dialog"]');
-        const isDialog = document.querySelector('div[role="menu"]') || dialogs.length >= 2
+        const isMenu = document.querySelector('div[role="menu"]')
 
-        if (window.isFeed() && !isDialog) {
-           if (window.scrollY !== 0) {
+        function scrollToTop() {
+            if (window.scrollY !== 0) {
               // to interrupt any current scroll event.
               document.body.style.overflow = 'hidden';
               setTimeout(() => {
@@ -128,17 +128,25 @@
               }, 30);
               return "scrolling";
            } else return "exit";
-        } else if (window.isDesktopMode() && isDialog ) {
-            const escapeEvent = new KeyboardEvent('keydown', {
-                key: 'Escape',
-                code: 'Escape',
-                keyCode: 27,
-                which: 27,
-                bubbles: true,
-                cancelable: true
-              });
-              window.dispatchEvent(escapeEvent);
-              return "true";
+        }
+
+        if (window.isDesktopMode()) {
+            if (window.isFeed() && !isMenu && dialogs.length === 1)
+                return scrollToTop();
+            else if (isMenu || dialogs.length > 1) {
+                const escapeEvent = new KeyboardEvent('keydown', {
+                    key: 'Escape',
+                    code: 'Escape',
+                    keyCode: 27,
+                    which: 27,
+                    bubbles: true,
+                    cancelable: true
+                });
+                window.dispatchEvent(escapeEvent);
+                return "true";
+            } else return "false"
+        } else if (window.isFeed() && !isMenu && !dialogs.length) {
+            return scrollToTop();
         } else return "false";
     }
 })();
