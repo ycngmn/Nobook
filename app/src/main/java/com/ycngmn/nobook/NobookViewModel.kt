@@ -99,8 +99,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             Script(hideReels.value, R.raw.hide_reels, "hide_reels.js"),
             Script(hideStories.value, R.raw.hide_stories, "hide_stories.js"),
             Script(hidePeopleYouMayKnow.value, R.raw.hide_pymk, "hide_pymk.js"),
-            Script(hideGroups.value, R.raw.hide_groups, "hide_groups.js"),
-            Script(!desktopLayout.value, R.raw.messenger_scripts, "messenger_scripts.js")
+            Script(hideGroups.value, R.raw.hide_groups, "hide_groups.js")
         )
 
         viewModelScope.launch {
