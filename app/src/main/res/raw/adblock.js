@@ -34,7 +34,7 @@
 
 
     const sponsoredTexts = [
-        "Sponsored", "Gesponsert", "Sponsorlu", "Sponsorowane",
+        "Sponsored", "Ad", "Gesponsert", "Sponsorlu", "Sponsorowane",
         "Ispoonsara godhameera", "Geborg", "Bersponsor", "Ditaja",
         "Disponsori", "Giisponsoran", "Sponzorováno", "Sponsoreret",
         "Publicidad", "May Sponsor", "Sponsorisée", "Sponsorisé", "Oipytyvôva",
