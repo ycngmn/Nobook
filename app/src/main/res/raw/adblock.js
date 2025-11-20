@@ -28,10 +28,8 @@
           });
         })();
 
-
         return;
     }
-
 
     const sponsoredTexts = [
         "Sponsored", "Ad", "Gesponsert", "Sponsorlu", "Sponsorowane",
@@ -53,7 +51,9 @@
         "Anzeige","Peye","Oglas"
     ];
 
-    const sponsoredRegex = new RegExp(sponsoredTexts.join('|'), 'i');
+    const specialChar = '󰞋';
+
+    const sponsoredRegex = new RegExp(`(${sponsoredTexts.join('|')})\\s*${specialChar}`, 'i');
 
     function hideSponsoredContent(config) {
         const { selector, textSelector } = config;
@@ -83,7 +83,6 @@
             selector: 'div[data-mcomponent="MContainer"].m.bg-s3 div[data-mcomponent="MContainer"]',
             textSelector: 'div[data-mcomponent="TextArea"] .native-text > span'
         },
-
     ];
 
     function hideAllAds() { configs.forEach(hideSponsoredContent); }
@@ -92,4 +91,5 @@
 
     const observer = new MutationObserver(hideAllAds);
     observer.observe(document.body, { childList: true, subtree: true });
+
 })();
