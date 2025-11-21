@@ -10,14 +10,18 @@
 (() => {
     window.isFeed = () => {
         const isHomeUrl = window.location.pathname === '/' &&
-        (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com');
-        const canScroll = document.documentElement.scrollHeight > document.documentElement.clientHeight;
+            (window.location.hostname === 'm.facebook.com' || window.location.hostname === 'www.facebook.com');
 
         if (window.isDesktopMode()) return isHomeUrl;
 
-        return isHomeUrl && document.title === 'Facebook' && canScroll;
+        const hasSpecialButton = Array.from(document.querySelectorAll('[role="button"] span'))
+            .some(span => span.textContent === '󱥆');
+
+        return isHomeUrl && hasSpecialButton;
     };
 })();
+
+
 
 
 
