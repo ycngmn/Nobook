@@ -57,7 +57,16 @@ fun NobookWebView(
     val navigator = rememberWebViewNavigator(
         requestInterceptor = ExternalRequestInterceptor {
             val intent = Intent.parseUri(it, Intent.URI_INTENT_SCHEME)
-            context.startActivity(intent)
+            runCatching {
+                context.startActivity(intent)
+            }.onFailure {
+                Toast.makeText(
+                    context,
+                    "Not supported",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
         }
     )
 
