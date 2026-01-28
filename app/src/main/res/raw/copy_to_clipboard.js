@@ -22,7 +22,7 @@
       'div[role="dialog"] img[src*="fbcdn"]:not([width="16"]):not([hidden])',
       'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"] img[src*="fbcdn"]',
       'div[data-pagelet="Story"] img[src*="fbcdn"]',
-      //'div[aria-label*="reel"] img[src*="fbcdn"]',
+      'div[aria-label*="reel"] img[src*="fbcdn"]',
       'div[data-pagelet="ProfilePhoto"] img[src*="fbcdn"]'
     ],
     containers: [
@@ -134,7 +134,7 @@
     const url = window.location.href;
     if (
       url.includes("/stories/") ||
-      //url.includes("/reel/") ||
+      url.includes("/reel/") ||
       url.includes("/videos/") ||
       url.includes("/watch/?") ||
       url.includes("/photo") ||
