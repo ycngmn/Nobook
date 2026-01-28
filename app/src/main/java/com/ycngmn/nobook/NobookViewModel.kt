@@ -32,6 +32,9 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
     private val _enableDownloadContent = MutableStateFlow(true)
     val enableDownloadContent = _enableDownloadContent.asStateFlow()
 
+    private val _enableCopyToClipboard = MutableStateFlow(true)
+    val enableCopyToClipboard = _enableCopyToClipboard.asStateFlow()
+
     private val _desktopLayout = MutableStateFlow(false)
     val desktopLayout = _desktopLayout.asStateFlow()
 
@@ -69,6 +72,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
         runBlocking {
             _removeAds.value = dataStore.removeAds.first()
             _enableDownloadContent.value = dataStore.enableDownloadContent.first()
+            _enableCopyToClipboard.value = dataStore.enableCopyToClipboard.first()
             _desktopLayout.value = dataStore.desktopLayout.first()
             _immersiveMode.value = dataStore.immersiveMode.first()
             _stickyNavbar.value = dataStore.stickyNavbar.first()
@@ -92,6 +96,7 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             Script(true, R.raw.scripts, "/scripts.js"), // always apply
             Script(removeAds.value, R.raw.adblock, "/adblock.js"),
             Script(enableDownloadContent.value, R.raw.download_content, "download_content.js"),
+            Script(enableCopyToClipboard.value, R.raw.copy_to_clipboard, "copy_to_clipboard.js"),
             Script(stickyNavbar.value, R.raw.sticky_navbar, "sticky_navbar.js"),
             Script(!pinchToZoom.value, R.raw.pinch_to_zoom, "pinch_to_zoom.js"),
             Script(amoledBlack.value, R.raw.amoled_black, "amoled_black.js"),
@@ -127,6 +132,13 @@ class NobookViewModel(application: Application) : AndroidViewModel(application) 
             dataStore.setEnableDownloadContent(enableDownloadContent)
         }
         _enableDownloadContent.value = enableDownloadContent
+    }
+
+    fun setEnableCopyToClipboard(enableCopyToClipboard: Boolean) {
+        viewModelScope.launch {
+            dataStore.setEnableCopyToClipboard(enableCopyToClipboard)
+        }
+        _enableCopyToClipboard.value = enableCopyToClipboard
     }
 
     fun setDesktopLayout(desktopLayout: Boolean) {
