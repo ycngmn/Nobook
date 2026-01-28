@@ -3,6 +3,7 @@
     <string name="apply_immediately">¿Aplicar inmediatamente?</string>
     <string name="remove_ads_title">Eliminar anuncios</string>
     <string name="download_content_title">Descargar contenido</string>
+    <string name="copy_to_clipboard_title">Copiar al portapapeles</string>
     <string name="desktop_layout_title">Diseño de escritorio</string>
     <string name="immersive_mode_title">Modo inmersivo</string>
     <string name="sticky_navbar_title">Barra de navegación fija</string>
@@ -15,6 +16,11 @@
     <string name="saved_to_downloads">Guardado en Descargas</string>
     <string name="download_failed_invalid_data">Descarga fallida: datos inválidos</string>
     <string name="failed_to_save_file">Error al guardar el archivo</string>
+    <string name="image_copied_to_clipboard">Imagen copiada al portapapeles</string>
+    <string name="copy_failed_invalid_data">Copia fallida: datos inválidos</string>
+    <string name="copy_failed_invalid_image">Copia fallida: imagen inválida</string>
+    <string name="failed_to_copy_image">Error al copiar la imagen</string>
+    <string name="clipboard_not_supported">Portapapeles no compatible en esta versión</string>
     <string name="suggested_posts">Publicaciones sugeridas</string>
     <string name="reels">Reels</string>
     <string name="stories">Stories</string>
@@ -28,5 +34,6 @@
     <string name="customize_feed">Mostrar u ocultar elementos</string>
     <string name="hide_sponsored_ads_from_your_feed">Ocultar anuncios patrocinados en el feed</string>
     <string name="enable_download_button_on_media_view">Activar botón de descarga en vista de medios</string>
+    <string name="enable_copy_to_clipboard_button_on_media_view">Activar botón de copiar al portapapeles en vista de medios</string>
     <string name="nobook_settings">Configuración de Nobook</string>
 </resources>
