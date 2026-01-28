@@ -57,9 +57,10 @@ class ClipboardBridge(private val context: Context) {
                     }
                 }
 
-                val imageFile = File(cacheDir, "clipboard_${System.currentTimeMillis()}.jpg")
+                // Save as PNG for maximum compatibility across apps
+                val imageFile = File(cacheDir, "clipboard_${System.currentTimeMillis()}.png")
                 FileOutputStream(imageFile).use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                 }
 
                 val contentUri: Uri = FileProvider.getUriForFile(
