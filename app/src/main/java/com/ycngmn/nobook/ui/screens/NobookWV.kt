@@ -38,6 +38,7 @@ import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.getDesktopUserAgent
 import com.ycngmn.nobook.utils.isAutoDesktop
+import com.ycngmn.nobook.utils.jsBridge.ClipboardBridge
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
@@ -228,6 +229,7 @@ fun NobookWebView(
                     "ThemeBridge"
                 )
                 addJavascriptInterface(DownloadBridge(context), "DownloadBridge")
+                addJavascriptInterface(ClipboardBridge(context), "ClipboardBridge")
 
                 setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
