@@ -330,6 +330,9 @@
     if (isInStoryOrReelView() && !isFeed()) {
       const mediaElement = getCurrentMediaElement();
 
+      // Always hide "Open in App" buttons
+      hideOpenAppButtons();
+
       if (mediaElement) {
         currentContentContainer = findContentContainer(mediaElement);
         btn.classList.add("visible");
@@ -357,6 +360,23 @@
     // Hide button if not in relevant view
     btn.classList.remove("visible");
     currentContentContainer = null;
+  };
+
+  const hideOpenAppButtons = (root = document) => {
+        // Find all div[role="button"] elements
+        const buttons = root.querySelectorAll('div[role="button"]');
+
+        buttons.forEach(button => {
+          // Check if it contains div.fl.ac with a span containing the 󱥬 symbol
+          const flAcDiv = button.querySelector('div.fl.ac');
+
+          if (flAcDiv) {
+            const span = flAcDiv.querySelector('span');
+            if (span && span.textContent.includes('󱥬')) {
+              button.style.display = 'none';
+            }
+          }
+        });
   };
 
   // Main processing function
