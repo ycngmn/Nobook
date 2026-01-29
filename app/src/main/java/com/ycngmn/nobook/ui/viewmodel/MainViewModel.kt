@@ -43,6 +43,7 @@ class MainViewModel(
             Script(true, R.raw.scripts, "scripts.js"), // always apply
             Script(config.removeAds, R.raw.adblock, "adblock.js"),
             Script(config.enableDownloadContent, R.raw.download_content, "download_content.js"),
+            Script(config.enableCopyToClipboard, R.raw.copy_to_clipboard, "copy_to_clipboard.js"),
             Script(config.stickyNavbar, R.raw.sticky_navbar, "sticky_navbar.js"),
             Script(!config.pinchToZoom, R.raw.pinch_to_zoom, "pinch_to_zoom.js"),
             Script(config.amoledBlack, R.raw.amoled_black, "amoled_black.js"),

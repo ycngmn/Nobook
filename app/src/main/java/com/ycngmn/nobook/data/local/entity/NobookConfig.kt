@@ -3,6 +3,7 @@ package com.ycngmn.nobook.data.local.entity
 data class NobookConfig(
     val removeAds: Boolean,
     val enableDownloadContent: Boolean,
+    val enableCopyToClipboard: Boolean,
     val desktopLayout: Boolean,
     val immersiveMode: Boolean,
     val stickyNavbar: Boolean,

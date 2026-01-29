@@ -3,6 +3,7 @@
     <string name="apply_immediately">Apply Immediately?</string>
     <string name="remove_ads_title">Remove ads</string>
     <string name="download_content_title">Download contents</string>
+    <string name="copy_to_clipboard_title">Copy to clipboard</string>
     <string name="desktop_layout_title">Desktop layout</string>
     <string name="immersive_mode_title">Immersive mode</string>
     <string name="sticky_navbar_title">Sticky Navbar</string>
@@ -15,6 +16,11 @@
     <string name="saved_to_downloads">Saved to Downloads</string>
     <string name="download_failed_invalid_data">Download failed: Invalid data</string>
     <string name="failed_to_save_file">Failed to save file</string>
+    <string name="image_copied_to_clipboard">Image copied to clipboard</string>
+    <string name="copy_failed_invalid_data">Copy failed: Invalid data</string>
+    <string name="copy_failed_invalid_image">Copy failed: Invalid image</string>
+    <string name="failed_to_copy_image">Failed to copy image</string>
+    <string name="clipboard_not_supported">Clipboard not supported on this version</string>
     <string name="suggested_posts">Suggested posts</string>
     <string name="reels">Reels</string>
     <string name="stories">Stories</string>
@@ -28,5 +34,6 @@
     <string name="customize_feed">Show or hide items</string>
     <string name="hide_sponsored_ads_from_your_feed">Hide sponsored ads from feed</string>
     <string name="enable_download_button_on_media_view">Enable download button on media view</string>
+    <string name="enable_copy_to_clipboard_button_on_media_view">Enable copy to clipboard button on media view</string>
     <string name="nobook_settings">Nobook settings</string>
 </resources>

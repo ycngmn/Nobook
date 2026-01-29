@@ -42,6 +42,7 @@ import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.getDesktopUserAgent
 import com.ycngmn.nobook.utils.isAutoDesktop
+import com.ycngmn.nobook.utils.jsBridge.ClipboardBridge
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
@@ -122,23 +123,28 @@ fun NobookWebView(
     var isLoading by rememberSaveable { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
+    val config = {
+        NobookConfig(
+            removeAds = settingsVM.removeAds.value,
+            enableDownloadContent = settingsVM.enableDownloadContent.value,
+            enableCopyToClipboard = settingsVM.enableCopyToClipboard.value,
+            desktopLayout = settingsVM.desktopLayout.value,
+            immersiveMode = settingsVM.immersiveMode.value,
+            stickyNavbar = settingsVM.stickyNavbar.value,
+            pinchToZoom = settingsVM.pinchToZoom.value,
+            amoledBlack = settingsVM.amoledBlack.value,
+            hideSuggested = settingsVM.hideSuggested.value,
+            hideReels = settingsVM.hideReels.value,
+            hideStories = settingsVM.hideStories.value,
+            hidePeopleYouMayKnow = settingsVM.hidePeopleYouMayKnow.value,
+            hideGroups = settingsVM.hideGroups.value
+        )
+    }
+
     val viewModel: MainViewModel = viewModel {
         MainViewModel(
             resources = resources,
-            config = NobookConfig(
-                removeAds = settingsVM.removeAds.value,
-                enableDownloadContent = settingsVM.enableDownloadContent.value,
-                desktopLayout = settingsVM.desktopLayout.value,
-                immersiveMode = settingsVM.immersiveMode.value,
-                stickyNavbar = settingsVM.stickyNavbar.value,
-                pinchToZoom = settingsVM.pinchToZoom.value,
-                amoledBlack = settingsVM.amoledBlack.value,
-                hideSuggested = settingsVM.hideSuggested.value,
-                hideReels = settingsVM.hideReels.value,
-                hideStories = settingsVM.hideStories.value,
-                hidePeopleYouMayKnow = settingsVM.hidePeopleYouMayKnow.value,
-                hideGroups = settingsVM.hideGroups.value
-            )
+            config = config()
         )
     }
 
@@ -199,23 +205,9 @@ fun NobookWebView(
                 setWindow(settingsVM.immersiveMode.value)
                 viewModel.refresh(
                     resources = resources,
-                    config = NobookConfig(
-                        removeAds = settingsVM.removeAds.value,
-                        enableDownloadContent = settingsVM.enableDownloadContent.value,
-                        desktopLayout = settingsVM.desktopLayout.value,
-                        immersiveMode = settingsVM.immersiveMode.value,
-                        stickyNavbar = settingsVM.stickyNavbar.value,
-                        pinchToZoom = settingsVM.pinchToZoom.value,
-                        amoledBlack = settingsVM.amoledBlack.value,
-                        hideSuggested = settingsVM.hideSuggested.value,
-                        hideReels = settingsVM.hideReels.value,
-                        hideStories = settingsVM.hideStories.value,
-                        hidePeopleYouMayKnow = settingsVM.hidePeopleYouMayKnow.value,
-                        hideGroups = settingsVM.hideGroups.value
-                    )
+                    config = config()
                 )
                 navigator.reload()
-                isLoading = true
             }
         )
     }
@@ -258,6 +250,7 @@ fun NobookWebView(
         platformWebViewParams = fileChooserWebViewParams(),
         captureBackPresses = false,
         onCreated = { webView ->
+
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
             cookieManager.setAcceptThirdPartyCookies(webView, true)
@@ -287,6 +280,10 @@ fun NobookWebView(
                 addJavascriptInterface(
                     DownloadBridge(context),
                     "DownloadBridge"
+                )
+                addJavascriptInterface(
+                    ClipboardBridge(context),
+                    "ClipboardBridge"
                 )
 
                 setLayerType(View.LAYER_TYPE_HARDWARE, null)

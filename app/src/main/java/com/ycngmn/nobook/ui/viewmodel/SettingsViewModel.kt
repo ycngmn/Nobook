@@ -25,6 +25,11 @@ class SettingsViewModel(
         initialValue = true,
         started = SharingStarted.WhileSubscribed()
     )
+    val enableCopyToClipboard = dataStore.enableCopyToClipboard.stateIn(
+        scope = viewModelScope,
+        initialValue = true,
+        started = SharingStarted.WhileSubscribed()
+    )
     val desktopLayout = dataStore.desktopLayout.stateIn(
         scope = viewModelScope,
         initialValue = false,
@@ -90,6 +95,12 @@ class SettingsViewModel(
     fun setEnableDownloadContent(enableDownloadContent: Boolean) {
         viewModelScope.launch {
             dataStore.setEnableDownloadContent(enableDownloadContent)
+        }
+    }
+
+    fun setEnableCopyToClipboard(enableCopyToClipboard: Boolean) {
+        viewModelScope.launch {
+            dataStore.setEnableDownloadContent(enableCopyToClipboard)
         }
     }
 

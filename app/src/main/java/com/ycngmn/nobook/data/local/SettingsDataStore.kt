@@ -14,6 +14,7 @@ class SettingsDataStore(private val context: Context) {
     private companion object {
         val REMOVE_ADS = booleanPreferencesKey("remove_ads")
         val ENABLE_DOWNLOAD_CONTENT = booleanPreferencesKey("enable_download_content")
+        val ENABLE_COPY_TO_CLIPBOARD = booleanPreferencesKey("enable_copy_to_clipboard")
         val DESKTOP_LAYOUT = booleanPreferencesKey("desktop_layout")
         val IMMERSIVE_MODE = booleanPreferencesKey("immersive_mode")
         val STICKY_NAVBAR = booleanPreferencesKey("sticky_navbar")
@@ -41,6 +42,11 @@ class SettingsDataStore(private val context: Context) {
     val enableDownloadContent = context.dataStore.data.map { it[ENABLE_DOWNLOAD_CONTENT] != false }
     suspend fun setEnableDownloadContent(enableDownloadContent: Boolean) {
         context.dataStore.edit { it[ENABLE_DOWNLOAD_CONTENT] = enableDownloadContent }
+    }
+
+    val enableCopyToClipboard = context.dataStore.data.map { it[ENABLE_COPY_TO_CLIPBOARD] != false }
+    suspend fun setEnableCopyToClipboard(enableCopyToClipboard: Boolean) {
+        context.dataStore.edit { it[ENABLE_COPY_TO_CLIPBOARD] = enableCopyToClipboard }
     }
 
     val desktopLayout = context.dataStore.data.map { it[DESKTOP_LAYOUT] == true }
