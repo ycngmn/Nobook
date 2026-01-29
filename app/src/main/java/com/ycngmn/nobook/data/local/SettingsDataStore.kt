@@ -1,4 +1,4 @@
-package com.ycngmn.nobook
+package com.ycngmn.nobook.data.local
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "nobook_prefs")
 
-class NobookDataStore(private val context: Context) {
+class SettingsDataStore(private val context: Context) {
     private companion object {
         val REMOVE_ADS = booleanPreferencesKey("remove_ads")
         val ENABLE_DOWNLOAD_CONTENT = booleanPreferencesKey("enable_download_content")
