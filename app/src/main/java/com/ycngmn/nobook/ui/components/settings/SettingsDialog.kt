@@ -23,12 +23,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,18 +38,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-import com.ycngmn.nobook.NobookViewModel
 import com.ycngmn.nobook.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDialog(
-    viewModel: NobookViewModel,
+    themeColor: Color,
     onDismiss: () -> Unit,
     onReload: () -> Unit
 ) {
-
-    val themeColor = viewModel.themeColor.collectAsState()
     val scrollState = rememberScrollState()
 
     Dialog(
@@ -64,7 +61,7 @@ fun SettingsDialog(
             topBar = {
                 Box(
                     Modifier
-                        .background(themeColor.value)
+                        .background(themeColor)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
@@ -95,9 +92,18 @@ fun SettingsDialog(
                     exit = fadeOut() + scaleOut()
                 ) {
                     ExtendedFloatingActionButton(
-                        onClick = { onReload(); onDismiss() },
-                        text = { Text(stringResource(R.string.apply_immediately)) },
-                        icon = { Icon(Icons.Default.Bolt, null) }
+                        onClick = {
+                            onReload()
+                            onDismiss()
+                        },
+                        text = {
+                            Text(
+                                stringResource(R.string.apply_immediately)
+                            )
+                        },
+                        icon = {
+                            Icon(Icons.Default.Bolt, null)
+                        }
                     )
                 }
             }
@@ -106,8 +112,7 @@ fun SettingsDialog(
                 modifier = Modifier
                     .padding(paddingValues)
                     .verticalScroll(scrollState)
-                    .padding(16.dp),
-                viewModel = viewModel
+                    .padding(16.dp)
             )
         }
 

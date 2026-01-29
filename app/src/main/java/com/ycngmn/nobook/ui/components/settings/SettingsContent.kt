@@ -48,15 +48,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
-import com.ycngmn.nobook.NobookViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.theme.FacebookBlue
+import com.ycngmn.nobook.ui.viewmodel.SettingsViewModel
 import com.ycngmn.nobook.utils.isAutoDesktop
 
 @Composable
 fun SettingsContent(
     modifier: Modifier,
-    viewModel: NobookViewModel
+    viewModel: SettingsViewModel = viewModel()
 ) {
     val context = LocalContext.current
     var isOpenDialog by rememberSaveable { mutableStateOf(false) }
@@ -173,7 +174,7 @@ fun SettingsContent(
 
 @Composable
 private fun HideOptionsDialog(
-    viewModel: NobookViewModel,
+    viewModel: SettingsViewModel,
     onDismiss: () -> Unit
 ) {
 
