@@ -134,7 +134,6 @@
     const url = window.location.href;
     if (
       url.includes("/stories/") ||
-      url.includes("/reel/") ||
       url.includes("/videos/") ||
       url.includes("/watch/?") ||
       url.includes("/photo") ||
