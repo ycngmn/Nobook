@@ -10,8 +10,8 @@ import io.ktor.http.HttpStatusCode
 const val SCRIPT_SRC = "https://raw.githubusercontent.com/ycngmn/Nobook/refs/heads/main/app/src/main/res/raw/"
 
 data class Script(
-    val condition: Boolean,
-    val scriptRes: Int,
+    val isEnabled: Boolean,
+    val resourceId: Int,
     val scriptTitle: String
 )
 
@@ -22,12 +22,12 @@ suspend fun fetchScripts(
 
     val httpClient = HttpClient(OkHttp)
     return buildString {
-        scripts.filter { it.condition }.forEach { script ->
+        scripts.filter { it.isEnabled }.forEach { script ->
             val content = runCatching {
                 val res = httpClient.get(SCRIPT_SRC + script.scriptTitle)
                 if (res.status == HttpStatusCode.OK) res.body() as String
                 else throw Exception("Couldn't fetch remote resource")
-            }.getOrElse { defaultResource(script.scriptRes) }
+            }.getOrElse { defaultResource(script.resourceId) }
             append(content)
         }
     }

@@ -33,9 +33,9 @@ import com.ycngmn.nobook.ui.theme.GoogleDark
 
 @Composable
 fun SplashLoading(progress: Float) {
-
     Column (
-        modifier = Modifier.background(GoogleDark)
+        modifier = Modifier
+            .background(GoogleDark)
             .fillMaxSize().zIndex(2F),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
