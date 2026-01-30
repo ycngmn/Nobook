@@ -62,36 +62,6 @@
     );
   };
 
-  // Create toast notification
-  const createToast = (message, duration = 3000) => {
-    const toast = document.createElement("div");
-    toast.textContent = message;
-    Object.assign(toast.style, {
-      position: "fixed",
-      bottom: "20px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      backgroundColor: "rgba(0, 0, 0, 0.7)",
-      color: "white",
-      padding: "8px 16px",
-      borderRadius: "20px",
-      zIndex: CONFIG.buttonZIndex,
-      fontFamily: "sans-serif",
-      fontSize: "14px"
-    });
-
-    document.body.appendChild(toast);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        if (document.body.contains(toast)) {
-          document.body.removeChild(toast);
-        }
-      }, duration);
-    }
-
-    return toast;
-  };
 
   // Find the appropriate container for the content
   const findContentContainer = (element) => {
@@ -134,7 +104,6 @@
     const url = window.location.href;
     if (
       url.includes("/stories/") ||
-      url.includes("/reel/") ||
       url.includes("/videos/") ||
       url.includes("/watch/?") ||
       url.includes("/photo") ||
@@ -155,16 +124,10 @@
   };
 
   // Copy image to clipboard
-  const copyImageToClipboard = (url, processingToast) => {
+  const copyImageToClipboard = (url) => {
     fetch(url)
       .then(response => response.blob())
       .then(blob => {
-        // Remove processing toast
-        if (document.body.contains(processingToast)) {
-          document.body.removeChild(processingToast);
-        }
-
-        // Use the Android WebView bridge if available
         if (window.ClipboardBridge && window.ClipboardBridge.copyImageToClipboard) {
           const reader = new FileReader();
           reader.onloadend = function() {
@@ -173,47 +136,37 @@
                 reader.result,
                 blob.type || "image/jpeg"
               );
-              createToast("Image copied to clipboard!");
             }
           };
           reader.readAsDataURL(blob);
         } else {
-          // Fallback for browsers that support Clipboard API
           try {
             navigator.clipboard.write([
               new ClipboardItem({
                 [blob.type]: blob
               })
             ]).then(() => {
-              createToast("Image copied to clipboard!");
+              // Success - bridge will show toast
             }).catch(err => {
               console.error("Clipboard API error:", err);
-              createToast("Failed to copy image");
             });
           } catch (err) {
             console.error("Clipboard not supported:", err);
-            createToast("Clipboard not supported");
           }
         }
       })
       .catch(err => {
-        if (document.body.contains(processingToast)) {
-          document.body.removeChild(processingToast);
-        }
         console.error("Error copying image:", err);
-        createToast("Failed to copy image");
       });
   };
 
   // Extract and copy image
   const extractAndCopyImage = () => {
-    const processingToast = createToast("Copying image...", 0);
-
     // Find current image element
     const imageElement = getCurrentImageElement();
 
     if (imageElement && imageElement.src && imageElement.src !== lastCopiedUrl) {
-      copyImageToClipboard(imageElement.src, processingToast);
+      copyImageToClipboard(imageElement.src);
       lastCopiedUrl = imageElement.src;
       return;
     }
@@ -240,7 +193,7 @@
       });
 
     if (images.length > 0) {
-      copyImageToClipboard(images[0].src, processingToast);
+      copyImageToClipboard(images[0].src);
       lastCopiedUrl = images[0].src;
       return;
     }
@@ -260,7 +213,7 @@
         const imageUrl = bgImage.replace(/^url\(['"](.+)['"]\)$/, "$1");
 
         if (imageUrl !== lastCopiedUrl) {
-          copyImageToClipboard(imageUrl, processingToast);
+          copyImageToClipboard(imageUrl);
           lastCopiedUrl = imageUrl;
           return;
         }
@@ -268,10 +221,6 @@
     }
 
     // Nothing found
-    if (document.body.contains(processingToast)) {
-      document.body.removeChild(processingToast);
-    }
-    createToast("No image found to copy");
     debugLog("No image content found to copy");
   };
 
