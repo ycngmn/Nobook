@@ -100,7 +100,7 @@ class SettingsViewModel(
 
     fun setEnableCopyToClipboard(enableCopyToClipboard: Boolean) {
         viewModelScope.launch {
-            dataStore.setEnableDownloadContent(enableCopyToClipboard)
+            dataStore.setEnableCopyToClipboard(enableCopyToClipboard)
         }
     }
 

@@ -36,4 +36,5 @@
     <string name="enable_download_button_on_media_view">Enable download button on media view</string>
     <string name="enable_copy_to_clipboard_button_on_media_view">Enable copy to clipboard button on media view</string>
     <string name="nobook_settings">Nobook settings</string>
+    <string name="not_supported">Not supported</string>
 </resources>

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.core.graphics.ColorUtils
+import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,7 +34,7 @@ import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.ycngmn.nobook.data.local.entity.NobookConfig
+import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.settings.SettingsDialog
 import com.ycngmn.nobook.ui.viewmodel.MainViewModel
@@ -61,13 +62,13 @@ fun NobookWebView(
     val state = rememberSaveableWebViewState(url)
     val navigator = rememberWebViewNavigator(
         requestInterceptor = ExternalRequestInterceptor {
-            val intent = Intent.parseUri(it, Intent.URI_INTENT_SCHEME)
+            val intent = Intent(Intent.ACTION_VIEW, it.toUri())
             runCatching {
                 context.startActivity(intent)
             }.onFailure {
                 Toast.makeText(
                     context,
-                    "Not supported",
+                    resources.getString(R.string.not_supported),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -123,28 +124,10 @@ fun NobookWebView(
     var isLoading by rememberSaveable { mutableStateOf(true) }
     val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
 
-    val config = {
-        NobookConfig(
-            removeAds = settingsVM.removeAds.value,
-            enableDownloadContent = settingsVM.enableDownloadContent.value,
-            enableCopyToClipboard = settingsVM.enableCopyToClipboard.value,
-            desktopLayout = settingsVM.desktopLayout.value,
-            immersiveMode = settingsVM.immersiveMode.value,
-            stickyNavbar = settingsVM.stickyNavbar.value,
-            pinchToZoom = settingsVM.pinchToZoom.value,
-            amoledBlack = settingsVM.amoledBlack.value,
-            hideSuggested = settingsVM.hideSuggested.value,
-            hideReels = settingsVM.hideReels.value,
-            hideStories = settingsVM.hideStories.value,
-            hidePeopleYouMayKnow = settingsVM.hidePeopleYouMayKnow.value,
-            hideGroups = settingsVM.hideGroups.value
-        )
-    }
-
     val viewModel: MainViewModel = viewModel {
         MainViewModel(
             resources = resources,
-            config = config()
+            settings = settingsVM
         )
     }
 
@@ -205,7 +188,7 @@ fun NobookWebView(
                 setWindow(settingsVM.immersiveMode.value)
                 viewModel.refresh(
                     resources = resources,
-                    config = config()
+                    settings = settingsVM
                 )
                 navigator.reload()
             }
