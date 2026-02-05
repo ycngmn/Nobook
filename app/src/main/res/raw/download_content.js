@@ -64,36 +64,6 @@
     );
   };
 
-  // Create toast notification
-  const createToast = (message, duration = 3000) => {
-    const toast = document.createElement("div");
-    toast.textContent = message;
-    Object.assign(toast.style, {
-      position: "fixed",
-      bottom: "20px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      backgroundColor: "rgba(0, 0, 0, 0.7)",
-      color: "white",
-      padding: "8px 16px",
-      borderRadius: "20px",
-      zIndex: CONFIG.buttonZIndex,
-      fontFamily: "sans-serif",
-      fontSize: "14px"
-    });
-
-    document.body.appendChild(toast);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        if (document.body.contains(toast)) {
-          document.body.removeChild(toast);
-        }
-      }, duration);
-    }
-
-    return toast;
-  };
 
   // Find the appropriate container for the content
   const findContentContainer = (element) => {
@@ -157,15 +127,10 @@
   };
 
   // Download media from URL
-  const downloadMedia = (url, processingToast) => {
+  const downloadMedia = (url) => {
     fetch(url)
       .then(response => response.blob())
       .then(blob => {
-        // Remove processing toast
-        if (document.body.contains(processingToast)) {
-          document.body.removeChild(processingToast);
-        }
-
         if (window.DownloadBridge && window.DownloadBridge.downloadBase64File) {
           const reader = new FileReader();
           reader.onloadend = function() {
@@ -180,22 +145,17 @@
         }
       })
       .catch(err => {
-        if (document.body.contains(processingToast)) {
-          document.body.removeChild(processingToast);
-        }
         console.error("Error downloading media:", err);
       });
   };
 
   // Extract and download videos or images
   const extractAndDownloadMedia = () => {
-    const processingToast = createToast("Download started...");
-
     // Find current media element
     const mediaElement = getCurrentMediaElement();
 
     if (mediaElement && mediaElement.src && mediaElement.src !== lastDownloadedUrl) {
-      downloadMedia(mediaElement.src, processingToast);
+      downloadMedia(mediaElement.src);
       lastDownloadedUrl = mediaElement.src;
       return;
     }
@@ -206,7 +166,7 @@
     // Find videos first
     const videoElement = container.querySelector("video:not([hidden])");
     if (videoElement && videoElement.src && videoElement.src !== lastDownloadedUrl) {
-      downloadMedia(videoElement.src, processingToast);
+      downloadMedia(videoElement.src);
       lastDownloadedUrl = videoElement.src;
       return;
     }
@@ -229,7 +189,7 @@
       });
 
     if (images.length > 0) {
-      downloadMedia(images[0].src, processingToast);
+      downloadMedia(images[0].src);
       lastDownloadedUrl = images[0].src;
       return;
     }
@@ -249,7 +209,7 @@
         const imageUrl = bgImage.replace(/^url\(['"](.+)['"]\)$/, "$1");
 
         if (imageUrl !== lastDownloadedUrl) {
-          downloadMedia(imageUrl, processingToast);
+          downloadMedia(imageUrl);
           lastDownloadedUrl = imageUrl;
           return;
         }
@@ -257,9 +217,6 @@
     }
 
     // Nothing found
-    if (document.body.contains(processingToast)) {
-      document.body.removeChild(processingToast);
-    }
     debugLog("No media content found to download");
   };
 
@@ -330,6 +287,9 @@
     if (isInStoryOrReelView() && !isFeed()) {
       const mediaElement = getCurrentMediaElement();
 
+      // Always hide "Open in App" buttons
+      hideOpenAppButtons();
+
       if (mediaElement) {
         currentContentContainer = findContentContainer(mediaElement);
         btn.classList.add("visible");
@@ -357,6 +317,23 @@
     // Hide button if not in relevant view
     btn.classList.remove("visible");
     currentContentContainer = null;
+  };
+
+  const hideOpenAppButtons = (root = document) => {
+        // Find all div[role="button"] elements
+        const buttons = root.querySelectorAll('div[role="button"]');
+
+        buttons.forEach(button => {
+          // Check if it contains div.fl.ac with a span containing the 󱥬 symbol
+          const flAcDiv = button.querySelector('div.fl.ac');
+
+          if (flAcDiv) {
+            const span = flAcDiv.querySelector('span');
+            if (span && span.textContent.includes('󱥬')) {
+              button.style.display = 'none';
+            }
+          }
+        });
   };
 
   // Main processing function
