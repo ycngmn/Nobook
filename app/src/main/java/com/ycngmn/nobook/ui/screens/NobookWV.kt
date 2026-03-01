@@ -39,14 +39,14 @@ import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.settings.SettingsDialog
 import com.ycngmn.nobook.ui.viewmodel.MainViewModel
 import com.ycngmn.nobook.ui.viewmodel.SettingsViewModel
+import com.ycngmn.nobook.utils.DESKTOP_USER_AGENT
 import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
-import com.ycngmn.nobook.utils.getDesktopUserAgent
-import com.ycngmn.nobook.utils.isAutoDesktop
 import com.ycngmn.nobook.utils.jsBridge.ClipboardBridge
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
+import com.ycngmn.nobook.utils.rememberAutoDesktop
 import com.ycngmn.nobook.utils.rememberImeHeight
 import kotlinx.coroutines.delay
 
@@ -61,8 +61,8 @@ fun NobookWebView(
 
     val state = rememberSaveableWebViewState(url)
     val navigator = rememberWebViewNavigator(
-        requestInterceptor = ExternalRequestInterceptor {
-            val intent = Intent(Intent.ACTION_VIEW, it.toUri())
+        requestInterceptor = ExternalRequestInterceptor { externalUrl ->
+            val intent = Intent(Intent.ACTION_VIEW, externalUrl.toUri())
             runCatching {
                 context.startActivity(intent)
             }.onFailure {
@@ -85,16 +85,20 @@ fun NobookWebView(
     // allow exiting while scrolling to top.
     var exitScroll by remember { mutableStateOf(false) }
     BackHandler {
-        if (exitScroll) activity?.finish()
-        else navigator.evaluateJavaScript("backHandlerNB();") {
-            val backHandled = it.removeSurrounding("\"")
-            when (backHandled) {
-                "false" -> {
-                    if (navigator.canGoBack) navigator.navigateBack()
-                    else activity?.finish()
+        if (exitScroll) {
+            activity?.finish()
+        } else {
+            navigator.evaluateJavaScript("backHandlerNB();") {
+                val backHandled = it.removeSurrounding("\"")
+                when (backHandled) {
+                    "false" -> {
+                        if (navigator.canGoBack) navigator.navigateBack()
+                        else activity?.finish()
+                    }
+
+                    "exit" -> activity?.finish()
+                    "scrolling" -> exitScroll = true
                 }
-                "exit" -> activity?.finish()
-                "scrolling" -> exitScroll = true
             }
         }
     }
@@ -108,7 +112,7 @@ fun NobookWebView(
 
     val isDesktop by settingsVM.desktopLayout.collectAsState()
     val isAutoRevert by settingsVM.isRevertDesktop.collectAsState()
-    val isAutoDesktop = isAutoDesktop()
+    val isAutoDesktop = rememberAutoDesktop()
 
     LaunchedEffect(Unit) {
         if (isAutoDesktop && !isDesktop) {
@@ -205,8 +209,9 @@ fun NobookWebView(
         )
     }
 
-    val userAgent = if (isDesktop) getDesktopUserAgent() else ""
-    LaunchedEffect(userAgent) {
+
+    LaunchedEffect(isDesktop) {
+        val userAgent = if (isDesktop) DESKTOP_USER_AGENT else ""
         state.nativeWebView.settings.userAgentString = userAgent
     }
 
@@ -240,7 +245,6 @@ fun NobookWebView(
             cookieManager.flush()
 
             state.webSettings.apply {
-                customUserAgentString = userAgent
                 isJavaScriptEnabled = true
 
                 androidWebSettings.apply {
