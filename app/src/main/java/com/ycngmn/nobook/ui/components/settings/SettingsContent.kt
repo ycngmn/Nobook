@@ -53,7 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ycngmn.nobook.R
 import com.ycngmn.nobook.ui.theme.FacebookBlue
 import com.ycngmn.nobook.ui.viewmodel.SettingsViewModel
-import com.ycngmn.nobook.utils.isAutoDesktop
+import com.ycngmn.nobook.utils.rememberAutoDesktop
 
 @Composable
 fun SettingsContent(
@@ -72,7 +72,7 @@ fun SettingsContent(
     val pinchToZoom = viewModel.pinchToZoom.collectAsState()
     val amoledBlack = viewModel.amoledBlack.collectAsState()
 
-    val isAutoDesktop = isAutoDesktop()
+    val isAutoDesktop = rememberAutoDesktop()
 
     Column(
         modifier = modifier,

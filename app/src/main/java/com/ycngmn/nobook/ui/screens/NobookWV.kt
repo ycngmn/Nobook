@@ -162,13 +162,24 @@ fun NobookWebView(
     val userScripts by viewModel.scripts
     val loadingState = state.loadingState
 
-    LaunchedEffect(loadingState, userScripts) {
+    LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
             userScripts?.let {
                 navigator.evaluateJavaScript(it) {
                     isLoading = false
+                    viewModel.clearScripts()
                 }
-                viewModel.clearScripts()
+            }
+        }
+    }
+
+    LaunchedEffect(userScripts) {
+        if (loadingState is LoadingState.Finished) {
+            userScripts?.let {
+                navigator.evaluateJavaScript(it) {
+                    isLoading = false
+                    viewModel.clearScripts()
+                }
             }
         }
     }
@@ -188,6 +199,7 @@ fun NobookWebView(
                 settingsToggle = false
             },
             onReload = {
+                isLoading = true
                 viewModel.setThemeColor(Color.Transparent)
                 setWindow(settingsVM.immersiveMode.value)
                 viewModel.refresh(
