@@ -92,10 +92,12 @@ fun NobookWebView(
                 val backHandled = it.removeSurrounding("\"")
                 when (backHandled) {
                     "false" -> {
-                        if (navigator.canGoBack) navigator.navigateBack()
-                        else activity?.finish()
+                        if (navigator.canGoBack) {
+                            navigator.navigateBack()
+                        } else {
+                            activity?.finish()
+                        }
                     }
-
                     "exit" -> activity?.finish()
                     "scrolling" -> exitScroll = true
                 }
@@ -155,6 +157,7 @@ fun NobookWebView(
         }
         isImmersiveMode = immersive
     }
+
     LaunchedEffect(isImmersiveMode, themeColor.value) {
         setWindow(isImmersiveMode)
     }
@@ -162,23 +165,11 @@ fun NobookWebView(
     val userScripts by viewModel.scripts
     val loadingState = state.loadingState
 
-    LaunchedEffect(loadingState) {
+    LaunchedEffect(loadingState, userScripts) {
         if (loadingState is LoadingState.Finished) {
-            userScripts?.let {
-                navigator.evaluateJavaScript(it) {
+            userScripts?.let { scripts ->
+                navigator.evaluateJavaScript(scripts) {
                     isLoading = false
-                    viewModel.clearScripts()
-                }
-            }
-        }
-    }
-
-    LaunchedEffect(userScripts) {
-        if (loadingState is LoadingState.Finished) {
-            userScripts?.let {
-                navigator.evaluateJavaScript(it) {
-                    isLoading = false
-                    viewModel.clearScripts()
                 }
             }
         }
