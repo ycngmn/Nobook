@@ -97,7 +97,7 @@
       "status": "in_progress",
       "priority": "high",
       "created_at": "2026-07-08T00:57:10.938951Z",
-      "updated_at": "2026-07-09T20:19:33.174674Z",
+      "updated_at": "2026-07-09T20:25:42.058786Z",
       "started_at": "2026-07-09T19:21:37.957215Z",
       "completed_at": null,
       "parent_id": null,
@@ -119,7 +119,7 @@
         {
           "body": "Add Gradle `bundleScripts` task to app/build.gradle: invokes `pnpm install` (first build only, cached via pnpm-lock) + `pnpm tsc --noEmit && esbuild` \u2192 emits to app/src/main/res/raw/*.js (overwriting shipped artifacts). Wire `preBuild.dependsOn(bundleScripts)`. Add .gitignore entry for generated res/raw/*.js if team prefers committing source only; otherwise commit both (TBD by team).",
           "id": "18c70110",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:28.589344Z"
         },
         {

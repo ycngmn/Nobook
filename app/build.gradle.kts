@@ -76,3 +76,36 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+// ─── TS bundling ────────────────────────────────────────────────────
+// Transpiles app/src/main/ts/*.ts -> app/src/main/res/raw/*.js (Phase 2.2).
+// Three chained Exec tasks (install / type-check / bundle); tsBundle runs
+// on every preBuild so res/raw stays in sync with ts sources. The chain is
+// a no-op until Phase 2.6 ports the first .ts file (esbuild.config.js prints
+// "No .ts source files to transpile." and exits 0 today).
+tasks.register<Exec>("tsInstall") {
+    group = "build"
+    description = "pnpm install app/src/main/ts deps (idempotent)"
+    workingDir = file("src/main/ts")
+    commandLine("pnpm", "install", "--no-frozen-lockfile", "--silent")
+}
+
+tasks.register<Exec>("tsTypeCheck") {
+    group = "verification"
+    description = "tsc --noEmit for app/src/main/ts"
+    workingDir = file("src/main/ts")
+    commandLine("node", "node_modules/typescript/bin/tsc", "--noEmit")
+    dependsOn("tsInstall")
+}
+
+tasks.register<Exec>("tsBundle") {
+    group = "build"
+    description = "Emit app/src/main/res/raw/*.js from app/src/main/ts/*.ts via esbuild"
+    workingDir = file("src/main/ts")
+    commandLine("node", "esbuild.config.js")
+    dependsOn("tsTypeCheck")
+}
+
+tasks.named("preBuild") {
+    dependsOn("tsBundle")
+}
