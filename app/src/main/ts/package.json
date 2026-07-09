@@ -1,0 +1,15 @@
+{
+  "name": "nobook-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.5.0",
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "tsc-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "esbuild": "^0.25.0"
+  }
+}
