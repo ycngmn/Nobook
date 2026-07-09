@@ -7,7 +7,7 @@
       "status": "in_progress",
       "priority": "high",
       "created_at": "2026-07-08T00:57:07.129852Z",
-      "updated_at": "2026-07-09T18:08:26.410404Z",
+      "updated_at": "2026-07-09T18:30:38.320597Z",
       "started_at": "2026-07-09T16:40:55.570222Z",
       "completed_at": null,
       "parent_id": null,
@@ -35,7 +35,7 @@
         {
           "body": "Add androidx.webkit feature gates in NobookWV.kt (all gated on WebViewFeature.isFeatureSupported): setBackForwardCacheEnabled(true), setOffscreenPreRaster(true), setAlgorithmicDarkeningAllowed(true), setRequestedWithHeaderOriginAllowList({facebook.com, messenger.com}), ExperimentalAsyncStartUp (STARTUP_FEATURE_SET_UI_THREAD_STARTUP_MODE), setRendererPriorityPolicy(RENDERER_PRIORITY_IMPORTANT, false) + setWebViewRenderProcessClient(onRenderProcessGone\u2192reload), setSafeBrowsingEnabled(false)",
           "id": "e11fee99",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:21.570219Z"
         },
         {

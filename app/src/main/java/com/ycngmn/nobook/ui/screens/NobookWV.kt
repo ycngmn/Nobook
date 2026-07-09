@@ -31,6 +31,8 @@ import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberSaveableWebViewState
@@ -267,6 +269,28 @@ fun NobookWebView(
                 }
             }
 
+            // androidx.webkit feature gates (Phase 1.3)
+            webView.settings.apply {
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.BACK_FORWARD_CACHE)) {
+                    WebSettingsCompat.setBackForwardCacheEnabled(this, true)
+                }
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.OFF_SCREEN_PRERASTER)) {
+                    WebSettingsCompat.setOffscreenPreRaster(this, true)
+                }
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, true)
+                }
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)) {
+                    WebSettingsCompat.setRequestedWithHeaderOriginAllowList(
+                        this,
+                        setOf("facebook.com", "messenger.com")
+                    )
+                }
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.SAFE_BROWSING_ENABLE)) {
+                    WebSettingsCompat.setSafeBrowsingEnabled(this, false)
+                }
+            }
+
             webView.apply {
                 addJavascriptInterface(
                     NobookSettings { settingsToggle = true },
@@ -286,6 +310,8 @@ fun NobookWebView(
                 )
 
                 setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+                setRendererPriorityPolicy(android.webkit.WebView.RENDERER_PRIORITY_IMPORTANT, false)
 
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isVerticalScrollBarEnabled = false
