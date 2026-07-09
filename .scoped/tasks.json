@@ -1,0 +1,528 @@
+{
+  "tasks": {
+    "1c301c66": {
+      "title": "Phase 1 \u2014 Foundation: androidx.webkit knobs, adblock-rust, pre-warm WebView",
+      "id": "1c301c66",
+      "description": "Pure-baseline native improvements; ships in current .js form. No TS dependency yet. Adds androidx.webkit:webkit:1.13.0, androidx.startup:startup-runtime:1.2.0, androidx.metrics.performance:performance-jankstats:1.0.0-beta02. Adds androidx.webkit feature gates (all gated on WebViewFeature.isFeatureSupported): setBackForwardCacheEnabled, setOffscreenPreRaster, setAlgorithmicDarkeningAllowed, setRequestedWithHeaderOriginAllowList({facebook.com, messenger.com}), ExperimentalAsyncStartUp, setRendererPriorityPolicy(RENDERER_PRIORITY_IMPORTANT, false), setSafeBrowsingEnabled false. Drops the SCRIPT_SRC GitHub-raw fetch from fetchScripts.kt:11 (all 12 .js files actually ship in res/raw/ already \u2014 emit packaged resource IDs via the existing fallbackContent lambda). Replaces adblock regex in ExternalRequestInterceptor.kt:18 with adblock-rust engine (bundle EasyList + EasyPrivacy + custom FB filter rules in assets/filters/; recommended path is to lift matan-h/AdblockAndroid JNI wrapper). Adds WebViewInitializer.kt as androidx.startup Initializer that pre-warms a hidden WebView navigating to m.facebook.com on app start. Adds \"Fast cold-launch\" opt-in toggle in SettingsViewModel.kt (default on). Verifies ExternalRequestInterceptor's existing regex still passes FB GraphQL endpoints to WebView post-adblock-rust integration.\n\nPriority justification: user explicitly chose safe-aggressive subset per (b5); Phase 1 ships visible improvements (no gray-screen on cold launch, no tab-switch buffer via bfcache, no scroll-jank from per-page GitHub-raw fetch) with no TS migration risk.\n\nSources: compressed block (b5) for the accepted-step enumeration; (b3) for adblock-rust engine + Android JNI wrappers; (b4) for androidx.webkit feature gates. URLs: https://github.com/brave/adblock-rust, https://github.com/matan-h/AdblockAndroid, https://developer.android.com/jetpack/androidx/releases/webkit, https://developer.android.com/topic/libraries/app-startup.",
+      "status": "pending",
+      "priority": "high",
+      "created_at": "2026-07-08T00:57:07.129852Z",
+      "updated_at": "2026-07-08T00:59:26.929316Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 1 sources \u2014 (b3) for adblock-rust engine + Android JNI wrappers: https://github.com/brave/adblock-rust, https://github.com/matan-h/AdblockAndroid, https://github.com/Bilal393/Adblock-Webview. (b4) for androidx.webkit feature gates (BACK_FORWARD_CACHE \u2192 instant back/forward nav; OFF_SCREEN_PRERASTER; REQUESTED_WITH_HEADER_ALLOWLIST \u2192 strips X-Requested-With for non-FB origins preventing fingerprinting by app package name; ExperimentalAsyncStartUp \u2192 boots WebView in parallel with app startup; setRendererPriorityPolicy prevents renderer-killed-by-OS zombie state; setSafeBrowsingEnabled false removes async Safe Browsing per-navigation check). (b5) for idea #8 pre-warm WebView in Application.onCreate via androidx.startup Initializer \u2014 the user explicitly kept this from the B-tier aggressive list. (b2) for the SCRIPT_SRC drop (per-page GitHub-raw network round-trip on main thread is ms-class jank; all 12 .js files ship in res/raw/ already per Glob). URLs: https://developer.android.com/jetpack/androidx/releases/webkit, https://developer.android.com/topic/libraries/app-startup, https://developer.android.com/jetpack/androidx/releases/metrics-performance. Priority justification: user explicitly chose safe-aggressive subset per (b5); Phase 1 ships visible improvements (no gray-screen cold-launch, no tab-switch buffer via bfcache, no scroll-jank from per-page GitHub-raw fetch) with NO TS migration risk. Phase 1 MUST ship before Phase 2 because Phase 2 introduces the TS toolchain and we want the baseline measurements captured in JS-form before introducing variables.",
+          "kind": "context",
+          "created_at": "2026-07-08T00:59:26.929291Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Add deps to app/build.gradle: androidx.webkit:webkit:1.13.0, androidx.startup:startup-runtime:1.2.0, androidx.metrics.performance:performance-jankstats:1.0.0-beta02",
+          "id": "c31fc7e8",
+          "done": false,
+          "created_at": "2026-07-08T00:59:20.356678Z"
+        },
+        {
+          "body": "Wire JankStats in NobookWV.kt to capture cold-launch + scroll + tab-switch traces; save as baselines/baseline_v1.txt",
+          "id": "f67dc105",
+          "done": false,
+          "created_at": "2026-07-08T00:59:20.642063Z"
+        },
+        {
+          "body": "Add androidx.webkit feature gates in NobookWV.kt (all gated on WebViewFeature.isFeatureSupported): setBackForwardCacheEnabled(true), setOffscreenPreRaster(true), setAlgorithmicDarkeningAllowed(true), setRequestedWithHeaderOriginAllowList({facebook.com, messenger.com}), ExperimentalAsyncStartUp (STARTUP_FEATURE_SET_UI_THREAD_STARTUP_MODE), setRendererPriorityPolicy(RENDERER_PRIORITY_IMPORTANT, false) + setWebViewRenderProcessClient(onRenderProcessGone\u2192reload), setSafeBrowsingEnabled(false)",
+          "id": "e11fee99",
+          "done": false,
+          "created_at": "2026-07-08T00:59:21.570219Z"
+        },
+        {
+          "body": "fetchScripts.kt:11 \u2014 drop SCRIPT_SRC GitHub-raw fetch; emit packaged res/raw/ resource IDs via existing fallbackContent lambda. Cache fetched scripts in-app per (b2) perf diagnosis.",
+          "id": "78f40be0",
+          "done": false,
+          "created_at": "2026-07-08T00:59:22.026308Z"
+        },
+        {
+          "body": "Replace adblock regex in ExternalRequestInterceptor.kt:18 with adblock-rust engine. Bundle EasyList + EasyPrivacy + custom FB filter rules in assets/filters/. Cold-load once at app startup. Recommended path: lift matan-h/AdblockAndroid JNI wrapper or roll thin filter.setupWebView + filter.shouldIntercept adapter per (b3).",
+          "id": "95e40940",
+          "done": false,
+          "created_at": "2026-07-08T00:59:22.602021Z"
+        },
+        {
+          "body": "Add WebViewInitializer.kt (androidx.startup.Initializer) that on app start pre-warms a hidden WebView navigating to m.facebook.com (or last-used page). Surface into NobookWV.kt when first composable asks for the WebView. Register Initializer in AndroidManifest.xml via androidx.startup InitializationProvider meta-data.",
+          "id": "6a5ecde7",
+          "done": false,
+          "created_at": "2026-07-08T00:59:23.112629Z"
+        },
+        {
+          "body": "Add 'Fast cold-launch' opt-in toggle in SettingsViewModel.kt (default on). When off, skip WebViewInitializer pre-warm (saves power on enabled devices).",
+          "id": "529fbe94",
+          "done": false,
+          "created_at": "2026-07-08T00:59:23.621912Z"
+        },
+        {
+          "body": "Verify ExternalRequestInterceptor's existing regex `https?://(?!(?:l|lm\\\\.)^[/]*(?:facebook|messenger)\\\\.com/.*` still passes FB GraphQL endpoints (graphQL, graphqlbatch, /api/graphql/) to the WebView after adblock-rust integration. Smoke test: load m.facebook.com, verify feed + stories render normally.",
+          "id": "86fa5bd7",
+          "done": false,
+          "created_at": "2026-07-08T00:59:24.334236Z"
+        }
+      ],
+      "scope_patterns": [
+        "app/build.gradle",
+        "app/src/main/AndroidManifest.xml",
+        "app/src/main/java/com/ycngmn/nobook/**/*.kt",
+        "baselines/**",
+        "app/src/main/assets/filters/**"
+      ]
+    },
+    "aedb860f": {
+      "title": "Phase 2 \u2014 TS Port Tooling: scaffolding, build task, type generation, bridges.d.ts",
+      "id": "aedb860f",
+      "description": "Plumbing-only phase. No user-visible logic changes. Sets up the TS toolchain that all subsequent phases author JS in.\n\nSets up app/src/main/ts/ source directory with package.json, tsconfig.json (strict mode true, ESNext module, ES2020 target, no emit), esbuild.config.js. Adds Gradle bundleScripts task that runs pnpm install (first build only, cached) + pnpm tsc --noEmit && esbuild and emits to app/src/main/res/raw/*.js. Wires preBuild.dependsOn(bundleScripts) so build never ships stale TS-compiled JS. Adds tsc --noEmit as a CI gate job (the canonical bridge-contract static catch). Installs json-schema-to-typescript dev dep; build task `gen-types` reads res/raw/*.json and emits app/src/main/ts/types/*.d.ts (graphql_ops.json \u2192 GraphQL literal union type, feed_schema.json \u2192 FeedStory interface, selectors.json \u2192 typed map of string constants). Authors app/src/main/ts/bridges.d.ts declaring the 4 JS-callable native interfaces mirroring the Kotlin @JavascriptInterface signatures exactly: SettingsBridge.onSettingsToggle(), ThemeBridge.onThemeColorChanged(string|null), DownloadBridge.downloadBase64File(base64, mimeType), ClipboardBridge.copyImageToClipboard(base64); plus window.backHandlerNB union (\"false\"|\"exit\"|\"scrolling\"|\"top\") and window._downloadBridgeInitialized. Transpiles existing 12 .js files in res/raw/ to .ts-in-source one at a time, NO logic change, esbuild transpile-only; CI gate byte-for-byte pre/post diff. Documents TS port rationale in CONTRIBUTING.md (three concrete wins: generated types from JSON schemas catch schema rotations as compile errors; typed bridge contracts catch Kotlin<->JS drift; tsc --noEmit is CI static catch without needing live FB).\n\nSources: compressed block (b7) codebase-discovery for the 4 bridge signatures (NobookWV.kt:91,264-276; scripts.js:120,301,340,350-357; jsBridge/NobookSettings.kt:9, jsBridge/ThemeChange.kt:10, jsBridge/DownloadBridge.kt, jsBridge/ClipboardBridge.kt). Tools: https://github.com/bcherny/json-schema-to-typescript, https://esbuild.github.io/.\n\nDecision rationale: TS won't make FB faster (TS compiles to JS, the jank is a design problem not a code-quality one per (b2) m0022). Worth doing for maintainability precisely because we're authoring ~5-6 new TS/JS files anyway. TS port is engineering analysis m0067.",
+      "status": "pending",
+      "priority": "high",
+      "created_at": "2026-07-08T00:57:10.938951Z",
+      "updated_at": "2026-07-08T00:59:35.142406Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 2 sources \u2014 TS port is engineering analysis m0067 (no external research source \u2014 this is the engineering recommendation based on existing TS ecosystem practices). (b7) codebase-discovery for the 4 bridge signatures via Glob/Grep/Read of NobookWV.kt:91 (backHandlerNB eval), NobookWV.kt:264-276 (4 addJavascriptInterface registrations), scripts.js:120 (backHandlerNB def), scripts.js:301 (SettingsBridge invoke), scripts.js:340 (ThemeBridge notify), scripts.js:350-357 (_downloadBridgeInitialized + DownloadBridge.downloadBase64File), jsBridge/NobookSettings.kt:9 (@JavascriptInterface onSettingsToggle), jsBridge/ThemeChange.kt:10 (@JavascriptInterface onThemeColorChanged), jsBridge/DownloadBridge.kt (@JavascriptInterface downloadBase64File), jsBridge/ClipboardBridge.kt (@JavascriptInterface copyImageToClipboard). Tools: https://github.com/bcherny/json-schema-to-typescript, https://esbuild.github.io/. Decision rationale: TS won't make FB faster (TS compiles to JS, jank is a design problem not a code-quality one per (b2) m0022). Worth doing for maintainability precisely because Phase 3-4 author ~5-6 new TS/JS files anyway. Cost: one new toolchain; ~10s incremental build; ~3min contributor onboarding (one pnpm install). HARD RULE in Phase 2.7: TS port is ONLY valuable if types are generated from JSON schemas; cosmetic typing of DOM globals is wasted effort.",
+          "kind": "context",
+          "created_at": "2026-07-08T00:59:35.142390Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Set up app/src/main/ts/ source dir with package.json, tsconfig.json (strict:true, ESNext module, ES2020 target, noEmit), esbuild.config.js. Add pnpm-lock.json.",
+          "id": "ef9383a7",
+          "done": false,
+          "created_at": "2026-07-08T00:59:27.895339Z"
+        },
+        {
+          "body": "Add Gradle `bundleScripts` task to app/build.gradle: invokes `pnpm install` (first build only, cached via pnpm-lock) + `pnpm tsc --noEmit && esbuild` \u2192 emits to app/src/main/res/raw/*.js (overwriting shipped artifacts). Wire `preBuild.dependsOn(bundleScripts)`. Add .gitignore entry for generated res/raw/*.js if team prefers committing source only; otherwise commit both (TBD by team).",
+          "id": "18c70110",
+          "done": false,
+          "created_at": "2026-07-08T00:59:28.589344Z"
+        },
+        {
+          "body": "Add `tsc --noEmit` CI check job in .github/workflows/ci.yml \u2014 canonical bridge-contract static catch. Fails fast on schema drift before Playwright runs.",
+          "id": "187fa30c",
+          "done": false,
+          "created_at": "2026-07-08T00:59:29.159806Z"
+        },
+        {
+          "body": "Install `json-schema-to-typescript` as dev dep. Add `gen-types` task: reads res/raw/{graphql_ops,selectors,feed_schema}.json, emits app/src/main/ts/types/{graphql_ops,selectors,feed_schema}.d.ts. graphql_ops.json \u2192 `type GraphQLOpName = \"PolarisFeed\" | \"MBKNNotifications\" | \"Messaging\" | \"Profile\"`; feed_schema.json \u2192 `interface FeedStory { mf_story_key: string; is_sponsored?: number; ... }`; selectors.json \u2192 typed map of string constants. Source: https://github.com/bcherny/json-schema-to-typescript",
+          "id": "7f047c28",
+          "done": false,
+          "created_at": "2026-07-08T00:59:30.077517Z"
+        },
+        {
+          "body": "Author app/src/main/ts/bridges.d.ts mirroring Kotlin @JavascriptInterface signatures (per (b7) codebase-discovery \u2014 NobookWV.kt:264-276, jsBridge/NobookSettings.kt:9, jsBridge/ThemeChange.kt:10, jsBridge/DownloadBridge.kt, jsBridge/ClipboardBridge.kt; scripts.js:120,301,340,350-357):\n\ninterface SettingsBridge { onSettingsToggle(): void; }\ninterface ThemeBridge { onThemeColorChanged(newColor: string | null): void; }\ninterface DownloadBridge { downloadBase64File(base64Data: string, mimeType: string): void; }\ninterface ClipboardBridge { copyImageToClipboard(base64Data: string): void; }\n\ndeclare global {\n  interface Window {\n    SettingsBridge?: SettingsBridge;\n    ThemeBridge?: ThemeBridge;\n    DownloadBridge?: DownloadBridge;\n    ClipboardBridge?: ClipboardBridge;\n    backHandlerNB?: () => \"false\" | \"exit\" | \"scrolling\" | \"top\";\n    _downloadBridgeInitialized?: boolean;\n  }\n}",
+          "id": "b8da3707",
+          "done": false,
+          "created_at": "2026-07-08T00:59:31.429071Z"
+        },
+        {
+          "body": "Safety migration: transpile existing 12 .js files in res/raw/ to .ts-in-source one at a time, NO logic change, esbuild transpile-only. CI gate: byte-for-byte pre/post diff of compiled output (modulo comments) before and after per file. Goal: replace JS source with TS source without breaking runtime before any new TS logic lands in Phase 3+.",
+          "id": "d75c2ce9",
+          "done": false,
+          "created_at": "2026-07-08T00:59:32.118027Z"
+        },
+        {
+          "body": "Document TS port rationale in CONTRIBUTING.md: the three concrete wins (1) generated types from JSON schemas catch schema rotations as compile errors not silent runtime 404s; (2) typed @JavascriptInterface bridge contracts catch Kotlin<->JS shape drift when adding new bridge methods; (3) tsc --noEmit is CI static catch without needing live FB. Add RULE: don't sprinkle any/HTMLElement types over document.querySelectorAll \u2014 types must be generated from res/raw/*.json schemas only; randomly typing FB's untyped bundle is guesswork that breaks with their next release anyway.",
+          "id": "6928fd0e",
+          "done": false,
+          "created_at": "2026-07-08T00:59:32.950613Z"
+        }
+      ],
+      "scope_patterns": [
+        "app/src/main/ts/**",
+        "package.json",
+        "tsconfig.json",
+        "esbuild.config.js",
+        "app/build.gradle",
+        ".github/workflows/**",
+        "CONTRIBUTING.md",
+        "app/src/main/res/raw/*.js"
+      ]
+    },
+    "7495f943": {
+      "title": "Phase 3 \u2014 Data-layer cosmetics + selector registry",
+      "id": "7495f943",
+      "description": "Decodes FB GraphQL schema from the FB APK and emits a registry, then authors feed_hydrate.ts to patch RelayPrefetchedStreamCache before React renders. Drops 5 hide_*.js.\n\nBuilds scripts/regenerate_gql_ops.py: CajuM FlatBuffers decode of com.facebook.katana.apk assets/graph_metadata.bin \u2192 app/src/main/res/raw/graphql_ops.json. Builds scripts/inspect_bundle.sh: capture HAR via desktop Chrome (mobile UA), pretty-print chunk sources, grep for IntersectionObserver(, RelayPrefetchedStreamCache, fb_api_req_friendly_name, data-sigil. Emits res/raw/selectors.json (canonical sigil/role names) + res/raw/feed_schema.json (data-ft sponsored-flag field name + mf_story_key field name + ad-credit markers). After regenerating JSON, runs pnpm gen-types (Phase 2.4 task) to refresh the .d.ts. Builds scripts/refresh_fb_metadata.sh as one-shot driver (redownload APK, decode graph_metadata.bin, capture HAR, diff selectors vs previous, regenerate all res/raw/*.json, commit + tag release; recommended quarterly cadence). Extends ExternalRequestInterceptor.kt with POST-body filter: parse fb_api_req_friendly_name from GraphQL POSTs; 404 anything not in graphql_ops.json allowlist (PolarisFeed, MBKNNotifications, Messaging, Profile). Authors app/src/main/ts/feed_hydrate.ts (compiled \u2192 res/raw/feed_hydrate.js; document_start injection): walks <script type=\"application/json\" data-content-len=\"\u2026\"> tags, finds entry where require[i][0] === \"RelayPrefetchedStreamCache\", descends to req[3][1].__bbox.result.data, mutates the data array per user toggles (removeAds, hide_suggested, hide_reels, hide_stories, hide_pymk, hide_groups). Injects via WebViewCompat.addDocumentStartJavaScriptCompat(view, '<...>', \"*\") NOT the existing evaluateJavaScript (page-finished) call. Updates MainViewModel.kt Script list (lines 42-53): removes hide_suggested.js, hide_reels.js, hide_stories.js, hide_pymk.js, hide_groups.js; adds feed_hydrate.js as always-on.\n\nSources: CajuM FlatBuffers https://cajum.github.io/fbgraphql/; AlterLab RelayPrefetchedStreamCache https://alterlab.io/blog/how-to-scrape-facebook-data-complete-guide-for-2026; dev.to/vhub data-ft https://dev.to/vhub_systems_ed5641f65d59/how-to-scrape-facebook-public-data-without-the-graph-api-in-2026-4ack. Compressed block (b7) for writeup-synthesis. Compressed block (b5) for Tier A1 (network-level GraphQL op-name filter).",
+      "status": "pending",
+      "priority": "high",
+      "created_at": "2026-07-08T00:57:14.934145Z",
+      "updated_at": "2026-07-08T00:59:45.237454Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 3 sources \u2014 (1) CajuM FlatBuffers decode pipeline https://cajum.github.io/fbgraphql/ \u2014 extracts `assets/graph_metadata.bin` from `com.facebook.katana.apk`, FlatBuffers-encoded, decoded via Python `CajuM/fb-graphql-schema` repo + flatc; emits every GraphQL type/field name; format survives 2019\u21922026; type names rotate but decode pipeline stable. (2) AlterLab RelayPrefetchedStreamCache pattern https://alterlab.io/blog/how-to-scrape-facebook-data-complete-guide-for-2026 \u2014 FB's initial GraphQL results embed in `<script type=\"application/json\" data-content-len=\"\u2026\">` tags; payload path `data.require[i][0] === \"RelayPrefetchedStreamCache\"` \u2192 `req[3][1].__bbox.result.data`. Lets hide-toggle cosmetics run BEFORE React renders. (3) dev.to/vhub confirms mobile web still ships `data-ft` JSON with `mf_story_key` + sponsored flag in 2026: https://dev.to/vhub_systems_ed5641f65d59/how-to-scrape-facebook-public-data-without-the-graph-api-in-2026-4ack. (b7) writeup-synthesis consolidated all of these. (b5) for Tier A1 decision (network-level GraphQL op-name filter at shouldInterceptRequest). Acceptance criteria: after Phase 3, scroll-stops at ~9 entries reduced (because the MutationObserver storm is gone and feed cosmetics work at the data layer instead). The remaining scroll-stops will be addressed by Phase 6's IntersectionObserver rootMargin override. Migration timeline: Phase 3.1 is the \u2190 CURRENT task when we begin implementation.",
+          "kind": "context",
+          "created_at": "2026-07-08T00:59:45.237441Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Build scripts/regenerate_gql_ops.py: CajuM FlatBuffers decode of com.facebook.katana.apk assets/graph_metadata.bin (extract APK via apktool d or unzip); emit app/src/main/res/raw/graphql_ops.json with authoritative op-name list. Use CajuM/fb-graphql-schema Python pipeline via flatc. Quarterly refresh cadence. Source: https://cajum.github.io/fbgraphql/",
+          "id": "4d3bf8a1",
+          "done": false,
+          "created_at": "2026-07-08T00:59:36.640602Z"
+        },
+        {
+          "body": "Build scripts/inspect_bundle.sh: capture HAR via desktop Chrome (mobile UA) on m.facebook.com, save HAR with content, pretty-print chunk sources via DevTools Sources {} button, grep output for `IntersectionObserver(`, `RelayPrefetchedStreamCache`, `fb_api_req_friendly_name`, `data-sigil` strings. Save to scripts/inspect_bundle_output.txt per capture.",
+          "id": "59122954",
+          "done": false,
+          "created_at": "2026-07-08T00:59:37.451289Z"
+        },
+        {
+          "body": "Emit app/src/main/res/raw/selectors.json (canonical sigil/role names \u2014 `data-sigil=\"feed\"` \u2192 `div[role=\"feed\"]`, etc., plus all the hide_* targets) + app/src/main/res/raw/feed_schema.json (`data-ft` sponsored-flag field name + `mf_story_key` field name + ad-credit markers for current FB release). Source: https://dev.to/vhub_systems_ed5641f65d59/how-to-scrape-facebook-public-data-without-the-graph-api-in-2026-4ack",
+          "id": "ef002f51",
+          "done": false,
+          "created_at": "2026-07-08T00:59:38.470582Z"
+        },
+        {
+          "body": "After step 3.3 emits the JSON files, run `pnpm gen-types` (Phase 2.4 task) to regenerate the .d.ts files consumed by feed_hydrate.ts and adblock-cosmetic.ts.",
+          "id": "4a79f006",
+          "done": false,
+          "created_at": "2026-07-08T00:59:38.980275Z"
+        },
+        {
+          "body": "Build scripts/refresh_fb_metadata.sh as one-shot driver: redownload APK from Play Store CDN or via apktool d, decode graph_metadata.bin via regenerate_gql_ops.py, capture HAR via inspect_bundle.sh, diff selectors vs previous release's `selectors.json`, regenerate all res/raw/*.json, run gen-types, commit + tag release. Recommended quarterly cadence per (b6) \u2014 FB deploys ~weekly; canonical selectors rotate ~quarterly.",
+          "id": "1935ef0e",
+          "done": false,
+          "created_at": "2026-07-08T00:59:39.699963Z"
+        },
+        {
+          "body": "Extend ExternalRequestInterceptor.kt POST-body filter: parse `fb_api_req_friendly_name` from GraphQL POST bodies (read request body via WebResourceRequest; for POST we need shouldInterceptRequest withRequestBody access \u2014 use WebViewCompat.shouldInterceptRequest with a custom callback if standard shouldInterceptRequest lacks body access; alternative: use a custom URLRequest sniffer via a small Kotlin coroutine dispatcher); 404 anything not in graphql_ops.json allowlist (PolarisFeed, MBKNNotifications, Messaging, Profile). All other ops (StoriesToast, MarketplaceFeedSurface, ReelsHomeSurface, GamingSurface, Ads, Sponsored ops) get 404'd at the network layer per (b5) Tier A1.",
+          "id": "6a54e3b1",
+          "done": false,
+          "created_at": "2026-07-08T00:59:40.846792Z"
+        },
+        {
+          "body": "Author app/src/main/ts/feed_hydrate.ts (compiled \u2192 res/raw/feed_hydrate.js; document_start injection): walk `<script type=\"application/json\" data-content-len=\"\u2026\">` tags; find entry where `require[i][0] === \"RelayPrefetchedStreamCache\"`; descend to `req[3][1].__bbox.result.data`; mutate the data array per user toggles (removeAds drops items where `is_sponsored === 1`; hide_suggested/hide_reels/hide_stories/hide_pymk/hide_groups drop items matching selectors per `selectors.json`). Inject via `WebViewCompat.addDocumentStartJavaScriptCompat(view, '<script>', \"*\")` NOT the existing evaluateJavaScript (page-finished) call. Source: https://alterlab.io/blog/how-to-scrape-facebook-data-complete-guide-for-2026",
+          "id": "1510a0ed",
+          "done": false,
+          "created_at": "2026-07-08T00:59:41.970749Z"
+        },
+        {
+          "body": "Update MainViewModel.kt Script list (lines 42-53): remove Script entries for hide_suggested.js, hide_reels.js, hide_stories.js, hide_pymk.js, hide_groups.js (5 entries deleted). Add `Script(true, R.raw.feed_hydrate, \"feed_hydrate.js\")` as always-on (replace `Script(true, R.raw.scripts, \"scripts.js\")` with feed_hydrate as the always-on data-layer patcher; scripts.js becomes trimmed scripts.ts handling only the residual bridge protocols per Phase 4.4).",
+          "id": "03c36b02",
+          "done": false,
+          "created_at": "2026-07-08T00:59:42.911637Z"
+        }
+      ],
+      "scope_patterns": [
+        "scripts/**",
+        "app/src/main/res/raw/{graphql_ops,selectors,feed_schema}.json",
+        "app/src/main/ts/feed_hydrate.ts",
+        "app/src/main/ts/types/**",
+        "app/src/main/java/com/ycngmn/nobook/utils/ExternalRequestInterceptor.kt",
+        "app/src/main/java/com/ycngmn/nobook/ui/viewmodel/MainViewModel.kt"
+      ]
+    },
+    "7d65839a": {
+      "title": "Phase 4 \u2014 Surviving DOM observer + CSS radix",
+      "id": "7d65839a",
+      "description": "Authors the minimum surviving DOM observer + one-shot CSS injection bundle; trims scripts.ts to bridge protocols only.\n\nAuthors app/src/main/ts/adblock-cosmetic.ts (compiled \u2192 res/raw/adblock-cosmetic.js): single scoped MutationObserver on div[role=feed] subtree:true, requestAnimationFrame-debounced, data-nb-hidden early-bail (pattern already used at adblock.js:113 per (b2)). Reads selectors from selectors.json + sponsored-flag field name from feed_schema.json. Replaces 60+ lang-suffix sponsored-blocker with one-line JSON.parse(node.dataset.ft).<sponsored-flag> dispatch.\n\nAuthors app/src/main/ts/cosmetic.ts (one-shot, run on onPageFinished): emits <style id=\"nb-cosmetic\"> with: global *, *::before, *::after, ::backdrop { animation: none !important; transition: none !important; scroll-behavior: auto !important; } (Tier A3); sticky_navbar rules; amoled_black rules; login-page download-button hide; tap-highlight color (-webkit-tap-highlight-color); loading-overlay restyle; desktop-mode third-button removal; user-select: text !important on feed-text elements (replaces scripts.js:181 span-scan).\n\nTrims scripts.ts: DELETE banner watcher (scripts.js:40), third-child remover (scripts.js:100), text-select span-scan (scripts.js:181 \u2014 replaced by CSS user-select: text), loading-overlay restyle (scripts.js:197 \u2014 replaced by CSS), bottom-banner hide (scripts.js:217 \u2014 replaced by CSS). RETAIN: window.backHandlerNB() definition (scripts.js:120, called by NobookWV.kt:91 reading back \"false\"|\"exit\"|\"scrolling\"|\"top\"); settings-button re-injector + window.SettingsBridge?.onSettingsToggle?.() call (scripts.js:301); window.ThemeBridge?.onThemeColorChanged?.() notify (scripts.js:340 \u2014 converted to Phase 4.5 one-shot); _downloadBridgeInitialized guard + download-button initializer (scripts.js:350-357 wraps FileReader.readAsDataURL(blob) + DownloadBridge.downloadBase64File(reader.result, blob.type) to preserve FB session cookies).\n\nAuthors app/src/main/ts/theme_color.ts (one-shot on onPageFinished): document.querySelector('meta[name=theme-color]')?.content \u2192 window.ThemeBridge?.onThemeColorChanged(content ?? \"null\"). Replaces the perpetual watcher at scripts.js:340. Threads into existing native sysbar tint plumbing (ThemeChange.kt:10 \u2192 setThemeColor \u2192 MainViewModel \u2192 NobookWV.kt:140 \u2192 setWindow).\n\nAudits copy_to_clipboard.ts for flexbox-order scrambling (Taprun 7-mechanism catalog). If confirmed, replaces textContent reads with RelayPrefetchedStreamCache.__bbox.result.data JSON .value field reads. Authors app/src/main/ts/lib/unscrambleByCssOrder.ts helper (10-line sort children by computed CSS order) as a fallback if hydration JSON isn't available.\n\nSources: compressed block (b2) for the root-cause body-subtree MutationObserver storm rationale; Taprun flexbox-order writeup https://taprun.dev/blog/facebook-anti-scraping-flexbox-order.html; compacted block (b7) codebase-discovery for scripts.ts survivors list (NobookWV.kt:91, scripts.js:120,301,340,350-357, jsBridge/NobookSettings.kt:9, jsBridge/ThemeChange.kt:10).\n\nDecision rationale: backHandlerNB + SettingsBridge/ThemeBridge/DownloadBridge wiring are JS<->native contract protocols, not cosmetics \u2014 they stay as code (just typed in TS). The base64 download-bridge pattern at scripts.js:350-357 wraps FileReader.readAsDataURL inside the FB session, preserving cookies; native URL-only DownloadManager flow would lose them.",
+      "status": "pending",
+      "priority": "high",
+      "created_at": "2026-07-08T00:57:26.718789Z",
+      "updated_at": "2026-07-08T00:59:54.789538Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 4 sources \u2014 (b2) for the root-cause body-subtree MutationObserver storm rationale (8+ observers each doing full-document querySelectorAll on every mutation is the scroll-jank cause). Taprun flexbox-order writeup https://taprun.dev/blog/facebook-anti-scraping-flexbox-order.html (7-mechanism catalog; mechanism #3 is flexbox-order scrambling of single-char author-name spans). (b7) codebase-discovery for scripts.ts survivors list \u2014 NobookWV.kt:91 (backHandlerNB eval), scripts.js:120 (backHandlerNB def, called from NobookWV.kt:91), scripts.js:301 (SettingsBridge.onSettingsToggle call \u2192 opens native SettingsDialog via NobookSettings.kt:9), scripts.js:340 (ThemeBridge.onThemeColorChanged notify \u2192 setThemeColor via ThemeChange.kt:10), scripts.js:350-357 (_downloadBridgeInitialized guard + DownloadBridge.downloadBase64File call wrapping FileReader.readAsDataURL(blob) inside the FB session to preserve cookies). jsBridge/NobookSettings.kt:9, jsBridge/ThemeChange.kt:10, jsBridge/DownloadBridge.kt, jsBridge/ClipboardBridge.kt. Decision rationale: backHandlerNB + SettingsBridge/ThemeBridge/DownloadBridge wiring are JS\u2194native contract protocols, not cosmetics \u2014 they STAY as code (just typed in TS via bridges.d.ts). The base64 download-bridge pattern at scripts.js:350-357 wraps FileReader.readAsDataURL inside the FB session, preserving cookies; native URL-only DownloadManager flow would lose them (Phase 5.3/5.4 confirms this correction). Phase 4 MUST come after Phase 3 because cosmetic.ts's CSS rules reference selectors from `selectors.json` (Phase 3.3), and adblock-cosmetic.ts's one-line `JSON.parse(node.dataset.ft)` reference uses the sponsored-flag field name from `feed_schema.json` (Phase 3.3). Phase 4 items count = 6; Current task moves here after Phase 3 finishes.",
+          "kind": "context",
+          "created_at": "2026-07-08T00:59:54.789522Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Author app/src/main/ts/adblock-cosmetic.ts: single scoped MutationObserver on `div[role=feed] subtree:true`, requestAnimationFrame-debounced, `data-nb-hidden` early-bail (pattern already used at adblock.js:113 per (b2)). Reads selectors from `selectors.json` + sponsored-flag field name from `feed_schema.json`. Only this observer survives the cutdown (instead of the 8+ body-subtree observers per (b2)).",
+          "id": "c833baba",
+          "done": false,
+          "created_at": "2026-07-08T00:59:46.480821Z"
+        },
+        {
+          "body": "Replace 60+ lang-suffix sponsored-blocker in conventional code path with one-line `JSON.parse(node.dataset.ft).<sponsored-flag>` dispatch. The field name comes from `feed_schema.json` (quarterly-refreshed). dev.to/vhub confirms mf_story_key is stable post ID; is_sponsored accessible via JSON.parse(node.dataset.ft).",
+          "id": "b63ddf22",
+          "done": false,
+          "created_at": "2026-07-08T00:59:47.050458Z"
+        },
+        {
+          "body": "Author app/src/main/ts/cosmetic.ts (one-shot, run on onPageFinished): emits `<style id=\"nb-cosmetic\">` with:\n(a) Tier A3 global animation/transition strip: `*, *::before, *::after, ::backdrop { animation: none !important; transition: none !important; scroll-behavior: auto !important; }`\n(b) sticky_navbar CSS rules\n(c) amoled_black CSS rules\n(d) login-page download-button hide\n(e) `-webkit-tap-highlight-color` rule\n(f) loading-overlay restyle\n(g) desktop-mode third-button removal\n(h) `user-select: text !important;` on feed-text elements (replaces scripts.js:181 span-scan)\nInject via `evaluateJavascript` once per onPageFinished. CSS preempts element rendering, so no observer firehose needed for any of these.",
+          "id": "453390e8",
+          "done": false,
+          "created_at": "2026-07-08T00:59:48.300022Z"
+        },
+        {
+          "body": "Trim scripts.ts per (b7) bridge-survivor findings:\n- DELETE: banner watcher (scripts.js:40), third-child remover (scripts.js:100), text-select span-scan (scripts.js:181 \u2192 replaced by CSS `user-select: text`), loading-overlay restyle (scripts.js:197 \u2192 replaced by CSS), bottom-banner hide (scripts.js:217 \u2192 replaced by CSS)\n- RETAIN (these are JS\u2194native contract protocols, must stay as code):\n  - `window.backHandlerNB()` definition (scripts.js:120) \u2014 called by NobookWV.kt:91 reading back a string in `{\"false\", \"exit\", \"scrolling\", \"top\"}`. Migrate to typed return per bridges.d.ts: `() => \"false\" | \"exit\" | \"scrolling\" | \"top\"`.\n  - Settings-button re-injector + `window.SettingsBridge?.onSettingsToggle?.()` call (scripts.js:301) \u2014 opens native Compose SettingsDialog via NobookSettings.kt:9\n  - `window.ThemeBridge?.onThemeColorChanged?.(meta?.content ?? \"null\")` notify (scripts.js:340) \u2014 converted to one-shot in Phase 4.5\n  - `_downloadBridgeInitialized` guard + download-button initializer (scripts.js:350-357) \u2014 wraps `FileReader.readAsDataURL(blob)` + `DownloadBridge.downloadBase64File(reader.result, blob.type)` to preserve FB-session cookies. Stays until Phase 5.4 review.",
+          "id": "607765d1",
+          "done": false,
+          "created_at": "2026-07-08T00:59:50.161326Z"
+        },
+        {
+          "body": "Author app/src/main/ts/theme_color.ts (one-shot on onPageFinished): `document.querySelector('meta[name=theme-color]')?.content` \u2192 `window.ThemeBridge?.onThemeColorChanged(content ?? \"null\")`. Replaces the perpetual notify at scripts.js:340. Threads into existing native sysbar tint plumbing: ThemeChange.kt:10 \u2192 setThemeColor \u2192 MainViewModel.kt:34 \u2192 NobookWV.kt:140 \u2192 setWindow sets isAppearanceLightStatusBars per luminance.",
+          "id": "8be7f071",
+          "done": false,
+          "created_at": "2026-07-08T00:59:50.856355Z"
+        },
+        {
+          "body": "Audit copy_to_clipboard.ts and any text-extraction code for flexbox-order scrambling (Taprun mechanism #3 of their 7-mechanism textContent-vs-visual mismatch catalog). FB splits author names into single-char spans  with scrambled CSS `order`; `textContent` reads scrambled. If confirmed, replace textContent reads with `RelayPrefetchedStreamCache.__bbox.result.data` JSON `.value` field reads (Taprun-safe). Author app/src/main/ts/lib/unscrambleByCssOrder.ts helper (10-line sort children by computed CSS `order`) as fallback if hydration JSON isn't available. Source: https://taprun.dev/blog/facebook-anti-scraping-flexbox-order.html",
+          "id": "8e89be0e",
+          "done": false,
+          "created_at": "2026-07-08T00:59:51.796357Z"
+        }
+      ],
+      "scope_patterns": [
+        "app/src/main/ts/adblock-cosmetic.ts",
+        "app/src/main/ts/cosmetic.ts",
+        "app/src/main/ts/scripts.ts",
+        "app/src/main/ts/theme_color.ts",
+        "app/src/main/ts/lib/**",
+        "app/src/main/ts/copy_to_clipboard.ts"
+      ]
+    },
+    "28a2b89d": {
+      "title": "Phase 5 \u2014 Native toggle migrations (KEEP base64 bridge pattern)",
+      "id": "28a2b89d",
+      "description": "Migrates pinch_to_zoom and desktop_layout to native (zero-JS); KEEPS the existing base64 ClipboardBridge / DownloadBridge pattern (corrects the v1 plan which proposed native URL-only flows that would lose FB-session cookies). Adds image-resolution downgrade via ExternalRequestInterceptor. Optional NativeMediaViewerActivity.\n\nDeletes pinch_to_zoom.ts; sets WebSettings.setBuiltInZoomControls(true) + setUseWideViewPort(true) in NobookWV.kt; INVERTS the gate in SettingsViewModel.kt (currently `!settings.pinchToZoom.value` per MainViewModel.kt:47, which iscounterintuitive \u2014 default behavior is to BLOCK pinch; the flip makes pinch enabled by default).\n\ndesktop_layout \u2192 ensures native setUserAgentString(DESKTOP_USER_AGENT) + setUseWideViewPort(true) path is in place (desktopUserAgent.kt:4-5 already provides the UA string constant).\n\nKEEPS base64 `jsBridge/ClipboardBridge.kt` @JavascriptInterface copyImageToClipboard(base64) pattern \u2014 does NOT rewrite as native Android ActionMode/ClipboardManager URL-only flow. Rationale: the existing pattern at scripts.js wraps FileReader.readAsDataURL(blob) inside the WebView's FB session, preserving FB-session cookies in the blob fetch. Replacement with native URL fetch would either lose cookie auth or require plumbing CookieManager into the native request, which is much more code than the existing pattern. The bridge stays; only the script-side activation logic changes (move from a perpetual MutationObserver to a tap/context-menu handler).\n\nKEEPS base64 `jsBridge/DownloadBridge.kt` @JavascriptInterface downloadBase64File(base64, mimeType) pattern \u2014 same rationale as above. The activation moves to a tap handler in download_content.ts; long-press \u2192 menu \u2192 \"Download\" path can additionally use Android's native ActionMode if we want a more native-feeling menu UI.\n\n(Optional) Authors NativeMediaViewerActivity.kt: Compose full-screen image/video viewer. When image is tapped in the WebView, JS bridge passes the (already-authenticated) blob to native \u2192 display via Compose Image; save via DownloadManager for actual downloads.\n\nExtends ExternalRequestInterceptor.kt for image-resolution downgrade (Tier B6): intercept FB image URLs (scontent-*.cdninstagram.com/...), allow only the smallest variant, 404 higher-res variants. Native media viewer loads full-res on tap via FB-session blob fetch via the existing bridge pattern.\n\nSources for KEEP-base64 decision: codebase-discovery via scripts.js:357, jsBridge/DownloadBridge.kt, jsBridge/ClipboardBridge.kt. Source for WebSettings docs: https://developer.android.com/reference/android/webkit/WebSettings#setBuiltInZoomControls(boolean). Source for image-res URL pattern: TBD via HAR inspection in Phase 3.2 (FB rotates stp= path params). Compressed block (b5) for Tier B6 image-resolution downgrade.",
+      "status": "pending",
+      "priority": "medium",
+      "created_at": "2026-07-08T00:57:37.564640Z",
+      "updated_at": "2026-07-08T01:00:48.024961Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 5 sources \u2014 (b7) codebase-discovery via scripts.js:357 (call site wrap), jsBridge/DownloadBridge.kt, jsBridge/ClipboardBridge.kt for KEEP pattern. WebSettings.setBuiltInZoomControls docs: https://developer.android.com/reference/android/webkit/WebSettings#setBuiltInZoomControls(boolean). Compressed block (b5) for Tier B6 image-resolution downgrade. Compressed block (b4) for the desktopLayout native path. Project memory human rule #5 for test commands. Decision rationale for KEEP-base64 (5.3/5.4): copy via FileReader.readAsDataURL preserves FB session cookies; switching to Android DownloadManager.Request(url) would lose those cookies or require plumbing CookieManager into the native request \u2014 much more code than the existing pattern. The base64 patterns are the right call. Phase 5 IS lower-priority than Phases 1-4 because nothing here is perf-critical; image-res downgrade is bandwidth improvement, pinch_to_zoom is UX clean-up, base64 bridges already work. Acceptance criteria: pinch to zoom toggles cleanly without script round-trip; image tap opens native media viewer (if Phase 5.5 done); feed image URLs reduced to smallest variant in network panel; no regression in download or copy-to-clipboard flows.",
+          "kind": "context",
+          "created_at": "2026-07-08T01:00:48.024945Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Delete pinch_to_zoom.ts; set `WebSettings.setBuiltInZoomControls(true)` + `setUseWideViewPort(true)` in NobookWV.kt; INVERT gate in SettingsViewModel.kt (currently `!settings.pinchToZoom.value` per MainViewModel.kt:47, which is counterintuitive \u2014 default behavior BLOCKS pinch; the flip makes pinch enabled by default). Source: https://developer.android.com/reference/android/webkit/WebSettings#setBuiltInZoomControls(boolean)",
+          "id": "51de865c",
+          "done": false,
+          "created_at": "2026-07-08T01:00:35.724432Z"
+        },
+        {
+          "body": "desktop_layout \u2192 ensure native `setUserAgentString(DESKTOP_USER_AGENT)` + `setUseWideViewPort(true)` path is in place. desktopUserAgent.kt:4-5 already provides the desktop UA string constant. Verify `NobookWV.kt:217` path uses settings equivalence (the line is `val userAgent = if (isDesktop) DESKTOP_USER_AGENT else \"\"`).",
+          "id": "fb7b5790",
+          "done": false,
+          "created_at": "2026-07-08T01:00:38.296114Z"
+        },
+        {
+          "body": "KEEP base64 `jsBridge/ClipboardBridge.kt` `@JavascriptInterface copyImageToClipboard(base64)` pattern. Do NOT rewrite as native Android `ActionMode`/`ClipboardManager` URL-only flow. Rationale: the existing pattern at `scripts.js` wraps `FileReader.readAsDataURL(blob)` inside the WebView's FB session, preserving FB-session cookies in the blob fetch. Replacement with native URL fetch would either lose cookie auth or require plumbing `CookieManager` into the native request, which is much more code than the existing pattern. The bridge stays; only the script-side activation logic changes (move from perpetual MutationObserver to a tap/context-menu handler). Per v2 plan correction vs v1 which proposed native URL-only flows.",
+          "id": "2b3a16bf",
+          "done": false,
+          "created_at": "2026-07-08T01:00:39.325861Z"
+        },
+        {
+          "body": "KEEP base64 `jsBridge/DownloadBridge.kt` `@JavascriptInterface downloadBase64File(base64, mimeType)` pattern. Same rationale as 5.3 \u2014 `FileReader.readAsDataURL(blob)` JS sequence at `scripts.js:357` preserves FB-session cookies; a native `DownloadManager.Request(url)` would not. The bridge stays. Activation moves to a tap handler in `download_content.ts`; long-press \u2192 menu \u2192 \"Download\" path can additionally use Android's native `ActionMode` if we want a more native-feeling menu UI.",
+          "id": "f1b41008",
+          "done": false,
+          "created_at": "2026-07-08T01:00:40.885634Z"
+        },
+        {
+          "body": "(Optional) Author `app/src/main/java/com/ycngmn/nobook/NativeMediaViewerActivity.kt`: Compose full-screen image / video viewer. When image is tapped in the WebView, JS bridge passes the (already-authenticated) blob to native \u2192 Compose Image displays; `DownloadManager` saves on user request. Tier B6 follow-on.",
+          "id": "c4195a58",
+          "done": false,
+          "created_at": "2026-07-08T01:00:42.084799Z"
+        },
+        {
+          "body": "Extend `ExternalRequestInterceptor.kt` for image-resolution downgrade (Tier B6): intercept FB image URLs (e.g. `scontent-*.cdninstagram.com/...?stp=...&oh=...` query-string pattern), allow only the smallest variant, 404 higher-res variants. Native media viewer (if Phase 5.5 done) loads full-res on tap via FB-session blob fetch via the existing bridge pattern.",
+          "id": "8c479d7a",
+          "done": false,
+          "created_at": "2026-07-08T01:00:44.832493Z"
+        }
+      ],
+      "scope_patterns": [
+        "app/src/main/java/com/ycngmn/nobook/ui/screens/NobookWV.kt",
+        "app/src/main/java/com/ycngmn/nobook/utils/ExternalRequestInterceptor.kt",
+        "app/src/main/java/com/ycngmn/nobook/NativeMediaViewerActivity.kt",
+        "app/src/main/ts/pinch_to_zoom.ts",
+        "app/src/main/ts/copy_to_clipboard.ts",
+        "app/src/main/ts/download_content.ts",
+        "app/src/main/ts/desktop_layout.ts",
+        "app/src/main/java/com/ycngmn/nobook/ui/viewmodel/SettingsViewModel.kt"
+      ]
+    },
+    "7eb9db2b": {
+      "title": "Phase 6 \u2014 Aggressive feed prefetch (IntersectionObserver rootMargin override)",
+      "id": "7eb9db2b",
+      "description": "Authors prefetch.ts to override IntersectionObserver globally with rootMargin \"300% 0px 300% 0px\", causing FB's own pager to fire 2-3 screens ahead \u2014 the direct fix for the user-reported \"FB stops me scrolling at ~9 entries\" symptom. Opt-in toggle (broadband cost ~1.5x on continuous scroll). Re-measures with JankStats vs Phase 1 baseline.\n\nAuthors app/src/main/ts/prefetch.ts (compiled \u2192 res/raw/prefetch.js): document_start IntersectionObserver override:\n(() => {\n  const Orig = window.IntersectionObserver;\n  if (!Orig) return;\n  window.IntersectionObserver = class extends Orig {\n    constructor(cb, options) {\n      const o = options ?? {};\n      if (!o.rootMargin || o.rootMargin === \"0px\" || o.rootMargin === \"\") {\n        o.rootMargin = \"300% 0px 300% 0px\";\n      }\n      super(cb, o);\n    }\n  };\n})();\nInjects via WebViewCompat.addDocumentStartJavaScriptCompat(view, \u2026, \"*\") \u2014 runs before FB's bundle constructs its own IOs.\n\nAdds opt-in setting \"Aggressive feed prefetch\" in SettingsViewModel.kt; default off (broadband cost ~1.5x on continuous scroll).\n\nRe-measures with JankStats (saved output as baselines/baseline_v2.txt); compares to baseline_v1.txt from Phase 1.2; documents deltas. Validates the reported \"scroll-stop at ~9 entries\" symptom is gone (target: seamless pagination to ~30+ entries before any hesitation).\n\nRuns full regression: verifies each of the 13 user-facing toggles functions identically. Uses AdblockTest.kt Playwright harness with refreshed selectors against live FB (assumes refresh_fb_metadata.sh has been run once).\n\nSources: compressed block (b6) for the IO rootMargin-override fix (m0041 \u2014 root cause: FB pager fires only when sentinel enters viewport, so user must wait for network round-trip at every page boundary; bigger rootMargin causes prefetch 2-3 screens ahead). androidx.webkit addDocumentStartJavaScriptCompat: https://developer.android.com/reference/androidx/webkit/WebViewCompat.\n\nTrade-off: bigger rootMargin prefetches more aggressively \u2192 ~1.5x bandwidth burst on continuous scroll. Opt-in mitigates. Combined with (b2) observer cleanup gets near-seamless scroll because main-thread jank was delaying QPL timing marks that gate pagination.\n\nAcceptance criteria: zero scroll-jank observing FB's React-rendered feed on the user's specific hardware through ~30 entries of continuous fast scrolling, with aggressive-feeds toggle on.",
+      "status": "pending",
+      "priority": "medium",
+      "created_at": "2026-07-08T00:57:44.114253Z",
+      "updated_at": "2026-07-08T01:00:59.265699Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 6 sources \u2014 (b6) for the IntersectionObserver rootMargin override fix (m0041 \u2014 root cause: FB pager fires only when sentinel enters viewport with default rootMargin \"0px\"; user must wait for network round-trip at every page boundary; bigger rootMargin causes prefetch 2-3 screens ahead so by the time user reaches bottom, posts are already loaded). androidx.webkit addDocumentStartJavaScriptCompat: https://developer.android.com/reference/androidx/webkit/WebViewCompat. Trade-off: bigger rootMargin prefetches more aggressively \u2192 ~1.5\u00d7 bandwidth burst on continuous scroll. Opt-in mitigates. Combined with (b2) observer cleanup gets near-seamless scroll because main-thread jank was delaying QPL timing marks that gate pagination. Acceptance criteria: zero scroll-jank observing FB's React-rendered feed on the user's specific hardware through ~30 entries of continuous fast scrolling, with aggressive-feeds toggle on.",
+          "kind": "context",
+          "created_at": "2026-07-08T01:00:59.265684Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Author `app/src/main/ts/prefetch.ts` (~15 lines): document_start IntersectionObserver override:\n```ts\n(() => {\n  const Orig = window.IntersectionObserver;\n  if (!Orig) return;\n  window.IntersectionObserver = class extends Orig {\n    constructor(cb: IntersectionObserverCallback, options?: IntersectionObserverInit) {\n      const o = options ?? {};\n      if (!o.rootMargin || o.rootMargin === \"0px\" || o.rootMargin === \"\") {\n        o.rootMargin = \"300% 0px 300% 0px\";\n      }\n      super(cb, o);\n    }\n  };\n})();\n```\nInject via `WebViewCompat.addDocumentStartJavaScriptCompat(view, \u2026, \"*\")` \u2014 runs before FB's bundle constructs its own IOs. Source: (b6) m0041 / https://developer.android.com/reference/androidx/webkit/WebViewCompat",
+          "id": "f981f5e1",
+          "done": false,
+          "created_at": "2026-07-08T01:00:52.424551Z"
+        },
+        {
+          "body": "Add opt-in setting \"Aggressive feed prefetch\" in SettingsViewModel.kt; default off (broadband cost ~1.5\u00d7 on continuous scroll). User opts in via SettingsDialog checkbox.",
+          "id": "67b13f25",
+          "done": false,
+          "created_at": "2026-07-08T01:00:52.805486Z"
+        },
+        {
+          "body": "Re-measure with JankStats (saved as `baselines/baseline_v2.txt`); compare to `baselines/baseline_v1.txt` from Phase 1.2; document deltas in `baselines/perf_report_v1.md`. Validate the reported \"scroll-stop at ~9 entries\" symptom is gone (target: seamless pagination to ~30+ entries before any hesitation).",
+          "id": "83b75419",
+          "done": false,
+          "created_at": "2026-07-08T01:00:53.429677Z"
+        },
+        {
+          "body": "Run full regression: verify each of the 13 user-facing toggles functions identically. Use `AdblockTest.kt` Playwright harness with refreshed selectors against live FB (assumes `refresh_fb_metadata.sh` has been run once and `generateAuth.kt` constants are filled via GH Actions secrets per Phase 7.4).",
+          "id": "7aa30888",
+          "done": false,
+          "created_at": "2026-07-08T01:00:56.538886Z"
+        }
+      ],
+      "scope_patterns": [
+        "app/src/main/ts/prefetch.ts",
+        "app/src/main/java/com/ycngmn/nobook/ui/viewmodel/SettingsViewModel.kt",
+        "baselines/**"
+      ]
+    },
+    "8af60769": {
+      "title": "Phase 7 \u2014 Refresh tooling + contributing docs",
+      "id": "8af60769",
+      "description": "Documents the quarterly refresh workflow, AGENTS.md hard rules, and wires AdblockTest.kt to CI via GitHub Actions secrets.\n\nDocuments refresh workflow in CONTRIBUTING.md: \u22653-monthly manual run of scripts/refresh_fb_metadata.sh against newest com.facebook.katana.apk. Step list: (a) pull newest FB APK from Play Store CDN or via apktool d, (b) run refresh_fb_metadata.sh (decodes graph_metadata.bin, captures HAR, diffs selectors vs previous, regenerates all res/raw/*.json), (c) `pnpm gen-types` to regenerate .d.ts, (d) `pnpm tsc --noEmit` to catch any TS-side drift, (e) commit + tag a minor release.\n\nAdds hard rule in AGENTS.md / CONTRIBUTING.md: NEVER bypass the WebView for FB GraphQL. Native HTTP trips Meta's behavioral ML (multi-signal TLS/JA3 fingerprint + mouse/scroll velocity + time-on-page accumulated per session). Snapshot feeder in Phase 8, ad probes in Phase 3.7's graphql filter, and the inspection scripts in Phase 3.5 ALL must reuse the WebView session cookies or be a no-op. Sources: Clura https://clura.ai/blog/facebook-scraper (Python ~78% block rate, Playwright ~31%, real Chrome ~8%; WebView session inherits the human session).\n\nDocuments test commands in AGENTS.md: ./gradlew spotlessApply, ./gradlew detekt, ./gradlew compileDebugKotlin, ./gradlew lintDebug (ordered; NEVER ./gradlew qualityCheck \u2014 too expensive for incremental work). For TS work: `pnpm install && pnpm tsc --noEmit && pnpm bundleScripts` before pushing. Per project memory human rule #5.\n\nWires AdblockTest.kt harness to the refresh workflow: refresh_fb_metadata.sh regenerates selectors + auth.json; CI runs AdblockTest.kt against live FB with fresh selector JSON to catch selector decay between releases. Refills generateAuth.kt constants via GitHub Actions secrets (FACEBOOK_USERNAME, FACEBOOK_PASSWORD).\n\nNote: project-memory human rule #5 says \"For this Android project, do not call loader work complete unless the actual OpenCode patch path has been exercised: download/extract or otherwise use a real OpenCode linux-arm64 binary, run build.py to produce a patched binary, and try a runtime check such as patched-opencode --version.\" This rule is about the OpenCode loader project, NOT the Nobook fork \u2014 different project. Apply only the test-command-ordering part here.\n\nFinal QC: re-measures perf vs Phase 1 baseline; verifies no FB feature regression (reels button, stories, marketplace, profile navigation, composer open/close, reactions, comments, share sheet).\n\nSources: codebase-discovery via AdblockTest.kt:54-55, generateAuth.kt, getAuthPath.kt, testExt.kt. Clura for behavioral-ML rule. Project memory human rule #5 for test command ordering.\n\nAcceptance criteria: CI runs tsc --noEmit + AdblockTest.kt on every refresh; no Phase 1-7 work deemed complete unless ./gradlew spotlessApply && ./gradlew detekt && ./gradlew compileDebugKotlin && ./gradlew lintDebug all pass cleanly.",
+      "status": "pending",
+      "priority": "medium",
+      "created_at": "2026-07-08T00:57:52.203975Z",
+      "updated_at": "2026-07-08T01:01:06.634612Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 7 sources \u2014 Clura behavioral ML https://clura.ai/blog/facebook-scraper. Project memory human rule #5 for test command ordering. (b7) codebase-discovery via `AdblockTest.kt:54-55` (Playwright JVM test that navigates facebook.com, fills royal-email/royal-pass from `src/test/resources/auth.json`, then evaluates `scripts.js` + `adblock.js` against the live page), `generateAuth.kt` (defines FACEBOOK_USERNAME/FACEBOOK_PASSWORD constants, currently empty), `getAuthPath.kt`, `testExt.kt`. Note: project-memory human rule \"do not call loader work complete unless...\" is about OpenCode loader project, not Nobook \u2014 apply only the test-command-ordering part. Acceptance criteria: CI runs `tsc --noEmit` + `AdblockTest.kt` on every refresh; no Phase 1-7 work deemed complete unless `./gradlew spotlessApply && ./gradlew detekt && ./gradlew compileDebugKotlin && ./gradlew lintDebug` all pass cleanly.",
+          "kind": "context",
+          "created_at": "2026-07-08T01:01:06.634029Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Document refresh workflow in CONTRIBUTING.md: \u22653-monthly manual run of `scripts/refresh_fb_metadata.sh` against newest `com.facebook.katana.apk`. Steps: (a) pull newest FB APK via Play Store CDN or `apktool d`, (b) run `refresh_fb_metadata.sh` (decodes `graph_metadata.bin`, captures HAR, diffs selectors vs previous, regenerates all `res/raw/*.json`), (c) `pnpm gen-types` to regenerate `.d.ts`, (d) `pnpm tsc --noEmit` to catch any TS-side drift, (e) commit + tag minor release.",
+          "id": "c581d54f",
+          "done": false,
+          "created_at": "2026-07-08T01:01:01.004741Z"
+        },
+        {
+          "body": "Add hard rule in AGENTS.md / CONTRIBUTING.md: NEVER bypass the WebView for FB GraphQL. Native HTTP trips Meta's behavioral ML (multi-signal TLS/JA3 fingerprint + mouse/scroll velocity + time-on-page accumulated per session). Snapshot feeder (Phase 8), ad probes (Phase 3.7's graphql filter), and inspection scripts (Phase 3.5) ALL must reuse the WebView session cookies or be a no-op. Source: https://clura.ai/blog/facebook-scraper (Python ~78% block rate, Playwright ~31%, real Chrome ~8%; WebView session inherits the human session).",
+          "id": "a9540813",
+          "done": false,
+          "created_at": "2026-07-08T01:01:02.552329Z"
+        },
+        {
+          "body": "Document test commands in AGENTS.md: `./gradlew spotlessApply`, `./gradlew detekt`, `./gradlew compileDebugKotlin`, `./gradlew lintDebug` (ordered; NEVER `./gradlew qualityCheck` \u2014 too expensive for incremental work). For TS work: `pnpm install && pnpm tsc --noEmit && pnpm bundleScripts` before pushing. Per project memory human rule #5.",
+          "id": "5cf900ef",
+          "done": false,
+          "created_at": "2026-07-08T01:01:03.268603Z"
+        },
+        {
+          "body": "Wire `AdblockTest.kt` harness to the refresh workflow: `refresh_fb_metadata.sh` regenerates selectors + `auth.json`; CI runs `AdblockTest.kt` against live FB with fresh selector JSON to catch selector decay between releases. Refill `generateAuth.kt` constants (FACEBOOK_USERNAME, FACEBOOK_PASSWORD) via GitHub Actions secrets. Harness already exists at `app/src/test/java/com/ycngmn/nobook/AdblockTest.kt:54-55`; just needs CI integration + auth wiring.",
+          "id": "c205041b",
+          "done": false,
+          "created_at": "2026-07-08T01:01:04.612229Z"
+        },
+        {
+          "body": "Final QC: re-measure perf vs Phase 1 baseline (save `baselines/baseline_v3.txt`); verify no FB feature regression (reels button, stories, marketplace, profile navigation, composer open/close, reactions, comments, share sheet, notifications, messaging). Manual QA passes through 13 user-facing toggles in SettingsDialog.",
+          "id": "e410bbea",
+          "done": false,
+          "created_at": "2026-07-08T01:01:05.141441Z"
+        }
+      ],
+      "scope_patterns": [
+        "CONTRIBUTING.md",
+        "AGENTS.md",
+        ".github/workflows/**",
+        "app/src/test/java/com/ycngmn/nobook/**",
+        "scripts/refresh_fb_metadata.sh"
+      ]
+    },
+    "8cf70947": {
+      "title": "Phase 8 (Optional Tier-C Unlock) \u2014 Snapshot-feed-from-last-run",
+      "id": "8cf70947",
+      "description": "DEFERRED. Only do this phase if Phase 1-7 finish and we want the additional cold-launch UX win. The RelayPrefetchedStreamCache pattern from (b7) AlterLab makes this concrete.\n\nPersists RelayPrefetchedStreamCache.__bbox.result.data JSON to app/cache/feed_snapshot.json on successful feed onPageFinished. Adds a new SnapshotBridge.persistFeed(json: String) @JavascriptInterface in the existing base64/JSON bridge pattern style. The script-side (in feed_hydrate.ts) hands the parsed hydration JSON to native after every successful feed load.\n\nOn cold launch while the pre-warm WebView (Phase 1.6 WebViewInitializer.kt) navigates: reads the snapshot, renders native Compose feed cards. Author names from hydration JSON .value field (Taprun-safe \u2014 never textContent, which Flexbox-order-scrambles per Taprun 7-mechanism catalog). Post IDs from .mf_story_key. Single screen or two screens worth of cards (~5-8).\n\nFades-over from Compose to live WebView on onPageFinished of the warming WebView. Accepts ~3-5s staleness for the instant render. NEVER issues native HTTP fetch to FB for refresh (per the behavioral-ML rule from Phase 7.2 \u2014 Clura TLS/JA3 fingerprint + behavior patterns would block the request).\n\nSources: compacted block (b7) writeup-synthesis for the RelayPrefetchedStreamCache pattern from AlterLab https://alterlab.io/blog/how-to-scrape-facebook-data-complete-guide-for-2026. Taprun-safe rule for author-name JSON.value vs textContent https://taprun.dev/blog/facebook-anti-scraping-flexbox-order.html. Compressed block (b5) for the original Tier-C snapshot idea.\n\nDecision rationale: persisting __bbox.result.data is a pure JSON read/write \u2014 no native HTTP request to FB. The WebView session is the only request path per behavioral-ML rule. Phase 8 is the high-leverage unlock on top of the Phase 1-7 foundation; was abstract in v1 plan, AlterLab pattern makes it concrete.\n\nAcceptance criteria: cold-launch begins rendering native Compose feed cards in <100ms from app-process start; fades smoothly to live WebView when onPageFinished fires; no behavioral-ML alerts triggered on the user's normal account after a week of use.",
+      "status": "pending",
+      "priority": "low",
+      "created_at": "2026-07-08T00:58:00.256240Z",
+      "updated_at": "2026-07-08T01:01:10.958147Z",
+      "started_at": null,
+      "completed_at": null,
+      "parent_id": null,
+      "commits": [],
+      "notes": [
+        {
+          "body": "Phase 8 sources \u2014 (b7) writeup-synthesis AlterLab pattern https://alterlab.io/blog/how-to-scrape-facebook-data-complete-guide-for-2026 for RelayPrefetchedStreamCache schema. Taprun-safe rule for author-name JSON.value vs textContent https://taprun.dev/blog/facebook-anti-scraping-flexbox-order.html. (b5) for the original Tier-C snapshot idea (deferred then as \"abstract in v1 plan; AlterLab pattern makes it concrete\"). Decision rationale: persisting __bbox.result.data is a pure JSON read/write \u2014 no native HTTP to FB. WebView session is the only request path per behavioral-ML rule (Phase 7.2). Phase 8 is the high-leverage unlock on top of the Phase 1-7 foundation. Acceptance criteria: cold-launch begins rendering native Compose feed cards in <100ms from app process start; fades smoothly to live WebView when onPageFinished fires; no behavioral-ML alerts on the user's normal account after a week of use. DEFERRABLE \u2014 only pursue if Phase 1-7 finish and we want the additional cold-launch UX win.",
+          "kind": "context",
+          "created_at": "2026-07-08T01:01:10.958128Z"
+        }
+      ],
+      "items": [
+        {
+          "body": "Persist `RelayPrefetchedStreamCache.__bbox.result.data` JSON to `app/cache/feed_snapshot.json` on successful feed `onPageFinished`. Add new `SnapshotBridge.persistFeed(json: String)` `@JavascriptInterface` in the existing base64/JSON bridge pattern style. Extend `feed_hydrate.ts` (from Phase 3.7) to hand the parsed hydration JSON to native after every successful feed load.",
+          "id": "7172ed10",
+          "done": false,
+          "created_at": "2026-07-08T01:01:08.042291Z"
+        },
+        {
+          "body": "On cold launch while the pre-warm WebView (Phase 1.6 `WebViewInitializer.kt`) navigates: read snapshot from `app/cache/feed_snapshot.json`, render native Compose feed cards in `SnapshotFeedActivity.kt` (new). Author names from hydration JSON `.value` field (Taprun-safe \u2014 NEVER textContent, which flexbox-order-scrambles per Taprun 7-mechanism catalog). Post IDs from `.mf_story_key`. Single screen or two screens worth of cards (~5-8).",
+          "id": "f0f02bcd",
+          "done": false,
+          "created_at": "2026-07-08T01:01:08.755709Z"
+        },
+        {
+          "body": "Fade-over from Compose to live WebView on `onPageFinished` of the warming WebView. Accept ~3-5 s staleness for the instant render. NEVER issue native HTTP fetch to FB for refresh (per behavioral-ML rule from Phase 7.2 \u2014 Clura TLS/JA3 fingerprint + behavior patterns would block the request).",
+          "id": "0821d318",
+          "done": false,
+          "created_at": "2026-07-08T01:01:09.406895Z"
+        }
+      ],
+      "scope_patterns": [
+        "app/src/main/java/com/ycngmn/nobook/utils/jsBridge/SnapshotBridge.kt",
+        "app/cache/feed_snapshot.json",
+        "app/src/main/java/com/ycngmn/nobook/SnapshotFeedActivity.kt",
+        "app/src/main/ts/feed_hydrate.ts"
+      ]
+    }
+  },
+  "version": "1.0",
+  "current_task_id": null,
+  "queue": [
+    "1c301c66"
+  ]
+}
