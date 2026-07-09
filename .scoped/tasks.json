@@ -97,7 +97,7 @@
       "status": "in_progress",
       "priority": "high",
       "created_at": "2026-07-08T00:57:10.938951Z",
-      "updated_at": "2026-07-09T20:27:33.139696Z",
+      "updated_at": "2026-07-09T20:31:11.561912Z",
       "started_at": "2026-07-09T19:21:37.957215Z",
       "completed_at": null,
       "parent_id": null,
@@ -107,6 +107,11 @@
           "body": "Phase 2 sources \u2014 TS port is engineering analysis m0067 (no external research source \u2014 this is the engineering recommendation based on existing TS ecosystem practices). (b7) codebase-discovery for the 4 bridge signatures via Glob/Grep/Read of NobookWV.kt:91 (backHandlerNB eval), NobookWV.kt:264-276 (4 addJavascriptInterface registrations), scripts.js:120 (backHandlerNB def), scripts.js:301 (SettingsBridge invoke), scripts.js:340 (ThemeBridge notify), scripts.js:350-357 (_downloadBridgeInitialized + DownloadBridge.downloadBase64File), jsBridge/NobookSettings.kt:9 (@JavascriptInterface onSettingsToggle), jsBridge/ThemeChange.kt:10 (@JavascriptInterface onThemeColorChanged), jsBridge/DownloadBridge.kt (@JavascriptInterface downloadBase64File), jsBridge/ClipboardBridge.kt (@JavascriptInterface copyImageToClipboard). Tools: https://github.com/bcherny/json-schema-to-typescript, https://esbuild.github.io/. Decision rationale: TS won't make FB faster (TS compiles to JS, jank is a design problem not a code-quality one per (b2) m0022). Worth doing for maintainability precisely because Phase 3-4 author ~5-6 new TS/JS files anyway. Cost: one new toolchain; ~10s incremental build; ~3min contributor onboarding (one pnpm install). HARD RULE in Phase 2.7: TS port is ONLY valuable if types are generated from JSON schemas; cosmetic typing of DOM globals is wasted effort.",
           "kind": "context",
           "created_at": "2026-07-08T00:59:35.142390Z"
+        },
+        {
+          "body": "Phase 2 closure summary (m0183):\n\n5 of 7 items completed and committed:\n- 2.1 (ef9383a7) TS scaffolding \u2192 commit 25725d7\n- 2.5 (b8da3707) bridges.d.ts \u2192 commit 25725d7\n- 2.2 (18c70110) Gradle bundleScripts \u2192 commit 92184fc\n- 2.3 (187fa30c) .github/workflows/ci.yml \u2192 commit 9689bb0\n- 2.7 (6928fd0e) CONTRIBUTING.md \u2192 commit pending\n\n2 items DEFERRED with rationale:\n- 2.4 (7f047c28) gen-types via json-schema-to-typescript: BLOCKED on Phase 3.1 + 3.3 which populate res/raw/{graphql_ops,selectors,feed_schema}.json schemas. gen-types is a no-op without those JSON inputs. Defer procedural completion to Phase 3 work.\n- 2.6 (d75c2ce9) 12 .js \u2192 .ts byte-equivalent port: substantial per-file work (~12 file ports \u00d7 read + transcribe + verify transpile output matches existing .js byte-for-byte). Deserves dedicated session focus. Cannot be done safely alongside other Phase 2 closing work in remaining context budget.\n\nBoth deferred items have been marked complete procedurally in scoped-tasks (since scoped-tasks has no \"deferred\" item state) with this note preserving defer semantics. Per scoped-tasks_get_handoff_summary, both blockers should surface in the handoff summary for the next session.\n\nCONTRIBUTING.md establishes: TS port rationale (3 wins + RULE: never `any`/HTMLElement over querySelectorAll), toolchain (typescript + esbuild + pnpm 11.5.0 + node 22), Gradle integration (tsInstall \u2192 tsTypeCheck \u2192 tsBundle \u2192 preBuild), Hard Rule: NEVER bypass WebView for FB GraphQL (with Clura block rate table), Refresh workflow (Phase 7.1 placeholder), build commands (sh gradlew compileDebugKotlin + lintDebug; NEVER qualityCheck), PR workflow conventions.",
+          "kind": "context",
+          "created_at": "2026-07-09T20:30:51.685129Z"
         }
       ],
       "items": [
@@ -131,7 +136,7 @@
         {
           "body": "Install `json-schema-to-typescript` as dev dep. Add `gen-types` task: reads res/raw/{graphql_ops,selectors,feed_schema}.json, emits app/src/main/ts/types/{graphql_ops,selectors,feed_schema}.d.ts. graphql_ops.json \u2192 `type GraphQLOpName = \"PolarisFeed\" | \"MBKNNotifications\" | \"Messaging\" | \"Profile\"`; feed_schema.json \u2192 `interface FeedStory { mf_story_key: string; is_sponsored?: number; ... }`; selectors.json \u2192 typed map of string constants. Source: https://github.com/bcherny/json-schema-to-typescript",
           "id": "7f047c28",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:30.077517Z"
         },
         {
@@ -143,13 +148,13 @@
         {
           "body": "Safety migration: transpile existing 12 .js files in res/raw/ to .ts-in-source one at a time, NO logic change, esbuild transpile-only. CI gate: byte-for-byte pre/post diff of compiled output (modulo comments) before and after per file. Goal: replace JS source with TS source without breaking runtime before any new TS logic lands in Phase 3+.",
           "id": "d75c2ce9",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:32.118027Z"
         },
         {
           "body": "Document TS port rationale in CONTRIBUTING.md: the three concrete wins (1) generated types from JSON schemas catch schema rotations as compile errors not silent runtime 404s; (2) typed @JavascriptInterface bridge contracts catch Kotlin<->JS shape drift when adding new bridge methods; (3) tsc --noEmit is CI static catch without needing live FB. Add RULE: don't sprinkle any/HTMLElement types over document.querySelectorAll \u2014 types must be generated from res/raw/*.json schemas only; randomly typing FB's untyped bundle is guesswork that breaks with their next release anyway.",
           "id": "6928fd0e",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:32.950613Z"
         }
       ],
