@@ -8,6 +8,7 @@ import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.AMOLED_BLACK
 import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.DESKTOP_LAYOUT
 import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.ENABLE_COPY_TO_CLIPBOARD
 import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.ENABLE_DOWNLOAD_CONTENT
+import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.FAST_COLD_LAUNCH
 import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.HIDE_GROUPS
 import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.HIDE_PEOPLE_YOU_MAY_KNOW
 import com.ycngmn.nobook.data.local.SettingsDataStore.Companion.HIDE_REELS
@@ -102,6 +103,11 @@ class SettingsViewModel(
         initialValue = false,
         started = SharingStarted.WhileSubscribed()
     )
+    val fastColdLaunch = dataStore.fastColdLaunch.stateIn(
+        scope = viewModelScope,
+        initialValue = initialPrefs[FAST_COLD_LAUNCH] ?: true,
+        started = SharingStarted.WhileSubscribed()
+    )
 
     fun setRemoveAds(removeAds: Boolean) {
         viewModelScope.launch {
@@ -184,6 +190,12 @@ class SettingsViewModel(
     fun setRevertDesktop(revertDesktop: Boolean) {
         viewModelScope.launch {
             dataStore.setRevertDesktop(revertDesktop)
+        }
+    }
+
+    fun setFastColdLaunch(fastColdLaunch: Boolean) {
+        viewModelScope.launch {
+            dataStore.setFastColdLaunch(fastColdLaunch)
         }
     }
 }

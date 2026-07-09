@@ -7,7 +7,7 @@
       "status": "in_progress",
       "priority": "high",
       "created_at": "2026-07-08T00:57:07.129852Z",
-      "updated_at": "2026-07-09T18:35:44.386453Z",
+      "updated_at": "2026-07-09T19:16:57.699555Z",
       "started_at": "2026-07-09T16:40:55.570222Z",
       "completed_at": null,
       "parent_id": null,
@@ -17,6 +17,11 @@
           "body": "Phase 1 sources \u2014 (b3) for adblock-rust engine + Android JNI wrappers: https://github.com/brave/adblock-rust, https://github.com/matan-h/AdblockAndroid, https://github.com/Bilal393/Adblock-Webview. (b4) for androidx.webkit feature gates (BACK_FORWARD_CACHE \u2192 instant back/forward nav; OFF_SCREEN_PRERASTER; REQUESTED_WITH_HEADER_ALLOWLIST \u2192 strips X-Requested-With for non-FB origins preventing fingerprinting by app package name; ExperimentalAsyncStartUp \u2192 boots WebView in parallel with app startup; setRendererPriorityPolicy prevents renderer-killed-by-OS zombie state; setSafeBrowsingEnabled false removes async Safe Browsing per-navigation check). (b5) for idea #8 pre-warm WebView in Application.onCreate via androidx.startup Initializer \u2014 the user explicitly kept this from the B-tier aggressive list. (b2) for the SCRIPT_SRC drop (per-page GitHub-raw network round-trip on main thread is ms-class jank; all 12 .js files ship in res/raw/ already per Glob). URLs: https://developer.android.com/jetpack/androidx/releases/webkit, https://developer.android.com/topic/libraries/app-startup, https://developer.android.com/jetpack/androidx/releases/metrics-performance. Priority justification: user explicitly chose safe-aggressive subset per (b5); Phase 1 ships visible improvements (no gray-screen cold-launch, no tab-switch buffer via bfcache, no scroll-jank from per-page GitHub-raw fetch) with NO TS migration risk. Phase 1 MUST ship before Phase 2 because Phase 2 introduces the TS toolchain and we want the baseline measurements captured in JS-form before introducing variables.",
           "kind": "context",
           "created_at": "2026-07-08T00:59:26.929291Z"
+        },
+        {
+          "body": "DEFER item 1.5 (`95e40940`) to a dedicated session \u2014 needs design choice between three paths:\n(a) Lift `matan-h/AdblockAndroid` JNI wrapper via git submodule + NDK build chain (multi-day iteration; gets the Rust engine in-cell).\n(b) Roll pure-Kotlin regex matcher reading filter rules from `assets/filters/easylist_basic.txt` (~200-line Kotlin class; doable in single session but still requires careful EasyList rule-format parsing + cosmetic-rule stripping step).\n(c) Integrate Brave `adblock-rust` crate via cargo-ndk + pre-built AAR workflow (multi-day; most capable engine but most setup friction).\n\nExisting ExternalRequestInterceptor.kt:18 regex is the HOST ALLOWLIST (allows facebook/messenger main frames; off-loads everything else to ACTION_VIEW intent) \u2014 it is NOT an adblock filter. Plan item framing of \"replace the adblock regex\" was loose; real NativeAdblock would sit ALONGSIDE the existing interceptor (in a wrapper or stacked interceptor chain). Sponsored feed cards delivered via organic GraphQL cannot be network-blocked \u2014 their cosmetic-blocking fate is Phase 3 (`data-ft` JSON parsing per dev.to/vhub research; see (b7)).\n\nRevisit after Phase 1.6-1.8 land. Plan v2 update if needed to correct the \"replace\" wording.",
+          "kind": "blocker",
+          "created_at": "2026-07-09T19:05:17.786998Z"
         }
       ],
       "items": [
@@ -53,13 +58,13 @@
         {
           "body": "Add WebViewInitializer.kt (androidx.startup.Initializer) that on app start pre-warms a hidden WebView navigating to m.facebook.com (or last-used page). Surface into NobookWV.kt when first composable asks for the WebView. Register Initializer in AndroidManifest.xml via androidx.startup InitializationProvider meta-data.",
           "id": "6a5ecde7",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:23.112629Z"
         },
         {
           "body": "Add 'Fast cold-launch' opt-in toggle in SettingsViewModel.kt (default on). When off, skip WebViewInitializer pre-warm (saves power on enabled devices).",
           "id": "529fbe94",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:23.621912Z"
         },
         {

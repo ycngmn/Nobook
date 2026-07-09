@@ -26,6 +26,7 @@ class SettingsDataStore(private val context: Context) {
         val HIDE_PEOPLE_YOU_MAY_KNOW = booleanPreferencesKey("hide_people_you_may_know")
         val HIDE_GROUPS = booleanPreferencesKey("hide_groups")
         val isRevertDesktop = booleanPreferencesKey("is_revert_desktop")
+        val FAST_COLD_LAUNCH = booleanPreferencesKey("fast_cold_launch")
     }
 
     val prefs = context.dataStore.data
@@ -98,5 +99,10 @@ class SettingsDataStore(private val context: Context) {
     val hideGroups = context.dataStore.data.map { it[HIDE_GROUPS] ?: false }
     suspend fun setHideGroups(hideGroups: Boolean) {
         context.dataStore.edit { it[HIDE_GROUPS] = hideGroups }
+    }
+
+    val fastColdLaunch = context.dataStore.data.map { it[FAST_COLD_LAUNCH] ?: true }
+    suspend fun setFastColdLaunch(fastColdLaunch: Boolean) {
+        context.dataStore.edit { it[FAST_COLD_LAUNCH] = fastColdLaunch }
     }
 }
