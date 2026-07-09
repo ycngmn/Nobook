@@ -66,7 +66,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.startup.runtime)
-    implementation(libs.androidx.metrics.performance.jankstats)
+    implementation(libs.androidx.metrics.performance)
     testImplementation(libs.playwright)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

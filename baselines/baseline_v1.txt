@@ -1,0 +1,5 @@
+# Nobook perf baseline v1 — Phase 1 (before optimization)
+# To populate: adb logcat -s NobookJankStats:I > baselines/baseline_v1.txt
+# Per-line runtime format: HH:mm:ss.SSS,jank,<durationMs>,<frameStartNanos>
+# Capture scenarios: cold-launch + scroll 30 entries + back-forward tab-switch
+# Compare baseline_v1.txt vs baselines/baseline_v2.txt (post-Phase-6.3)

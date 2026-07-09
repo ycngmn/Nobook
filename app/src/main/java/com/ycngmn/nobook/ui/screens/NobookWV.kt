@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.ycngmn.nobook.R
+import com.ycngmn.nobook.perf.JankStatsTracker
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.settings.SettingsDialog
 import com.ycngmn.nobook.ui.viewmodel.MainViewModel
@@ -156,6 +158,13 @@ fun NobookWebView(
             windowInsetsController.isAppearanceLightNavigationBars = isLight
         }
         isImmersiveMode = immersive
+    }
+
+    DisposableEffect(activity) {
+        val detach = activity?.let { JankStatsTracker.attach(it) }
+        onDispose {
+            detach?.invoke()
+        }
     }
 
     LaunchedEffect(isImmersiveMode, themeColor.value) {
