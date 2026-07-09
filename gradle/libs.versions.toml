@@ -15,6 +15,9 @@ composeBom = "2026.03.00"
 material3 = "1.5.0-alpha15"
 materialIconsCore = "1.7.8"
 playwright = "1.58.0"
+webkit = "1.13.0"
+startupRuntime = "1.2.0"
+jankstats = "1.0.0-beta02"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsCore" }
@@ -39,6 +42,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorClientOkhttp" }
 playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
+androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
+androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
+androidx-metrics-performance-jankstats = { module = "androidx.metrics.performance:performance-jankstats", version.ref = "jankstats" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

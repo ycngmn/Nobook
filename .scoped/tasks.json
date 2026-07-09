@@ -4,11 +4,11 @@
       "title": "Phase 1 \u2014 Foundation: androidx.webkit knobs, adblock-rust, pre-warm WebView",
       "id": "1c301c66",
       "description": "Pure-baseline native improvements; ships in current .js form. No TS dependency yet. Adds androidx.webkit:webkit:1.13.0, androidx.startup:startup-runtime:1.2.0, androidx.metrics.performance:performance-jankstats:1.0.0-beta02. Adds androidx.webkit feature gates (all gated on WebViewFeature.isFeatureSupported): setBackForwardCacheEnabled, setOffscreenPreRaster, setAlgorithmicDarkeningAllowed, setRequestedWithHeaderOriginAllowList({facebook.com, messenger.com}), ExperimentalAsyncStartUp, setRendererPriorityPolicy(RENDERER_PRIORITY_IMPORTANT, false), setSafeBrowsingEnabled false. Drops the SCRIPT_SRC GitHub-raw fetch from fetchScripts.kt:11 (all 12 .js files actually ship in res/raw/ already \u2014 emit packaged resource IDs via the existing fallbackContent lambda). Replaces adblock regex in ExternalRequestInterceptor.kt:18 with adblock-rust engine (bundle EasyList + EasyPrivacy + custom FB filter rules in assets/filters/; recommended path is to lift matan-h/AdblockAndroid JNI wrapper). Adds WebViewInitializer.kt as androidx.startup Initializer that pre-warms a hidden WebView navigating to m.facebook.com on app start. Adds \"Fast cold-launch\" opt-in toggle in SettingsViewModel.kt (default on). Verifies ExternalRequestInterceptor's existing regex still passes FB GraphQL endpoints to WebView post-adblock-rust integration.\n\nPriority justification: user explicitly chose safe-aggressive subset per (b5); Phase 1 ships visible improvements (no gray-screen on cold launch, no tab-switch buffer via bfcache, no scroll-jank from per-page GitHub-raw fetch) with no TS migration risk.\n\nSources: compressed block (b5) for the accepted-step enumeration; (b3) for adblock-rust engine + Android JNI wrappers; (b4) for androidx.webkit feature gates. URLs: https://github.com/brave/adblock-rust, https://github.com/matan-h/AdblockAndroid, https://developer.android.com/jetpack/androidx/releases/webkit, https://developer.android.com/topic/libraries/app-startup.",
-      "status": "pending",
+      "status": "in_progress",
       "priority": "high",
       "created_at": "2026-07-08T00:57:07.129852Z",
-      "updated_at": "2026-07-08T00:59:26.929316Z",
-      "started_at": null,
+      "updated_at": "2026-07-09T17:19:53.261377Z",
+      "started_at": "2026-07-09T16:40:55.570222Z",
       "completed_at": null,
       "parent_id": null,
       "commits": [],
@@ -23,7 +23,7 @@
         {
           "body": "Add deps to app/build.gradle: androidx.webkit:webkit:1.13.0, androidx.startup:startup-runtime:1.2.0, androidx.metrics.performance:performance-jankstats:1.0.0-beta02",
           "id": "c31fc7e8",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:20.356678Z"
         },
         {
@@ -70,11 +70,14 @@
         }
       ],
       "scope_patterns": [
-        "app/build.gradle",
+        "app/build.gradle.kts",
         "app/src/main/AndroidManifest.xml",
         "app/src/main/java/com/ycngmn/nobook/**/*.kt",
         "baselines/**",
-        "app/src/main/assets/filters/**"
+        "app/src/main/assets/filters/**",
+        "app/proguard-rules.pro",
+        ".gitignore",
+        ".scoped/**"
       ]
     },
     "aedb860f": {
@@ -521,8 +524,6 @@
     }
   },
   "version": "1.0",
-  "current_task_id": null,
-  "queue": [
-    "1c301c66"
-  ]
+  "current_task_id": "1c301c66",
+  "queue": []
 }
