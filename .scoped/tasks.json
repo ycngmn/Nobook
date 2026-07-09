@@ -97,7 +97,7 @@
       "status": "in_progress",
       "priority": "high",
       "created_at": "2026-07-08T00:57:10.938951Z",
-      "updated_at": "2026-07-09T20:25:42.058786Z",
+      "updated_at": "2026-07-09T20:27:33.139696Z",
       "started_at": "2026-07-09T19:21:37.957215Z",
       "completed_at": null,
       "parent_id": null,
@@ -125,7 +125,7 @@
         {
           "body": "Add `tsc --noEmit` CI check job in .github/workflows/ci.yml \u2014 canonical bridge-contract static catch. Fails fast on schema drift before Playwright runs.",
           "id": "187fa30c",
-          "done": false,
+          "done": true,
           "created_at": "2026-07-08T00:59:29.159806Z"
         },
         {
