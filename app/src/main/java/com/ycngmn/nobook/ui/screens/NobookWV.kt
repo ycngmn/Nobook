@@ -49,7 +49,17 @@ import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import com.ycngmn.nobook.utils.rememberAutoDesktop
 import com.ycngmn.nobook.utils.rememberImeHeight
 import kotlinx.coroutines.delay
+import com.ycngmn.nobook.utils.AntiReloadInjector
 
+override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+    super.onPageStarted(view, url, favicon)
+    AntiReloadInjector.inject(view.context, view, url?.let { Uri.parse(it).host })
+}
+
+override fun onPageFinished(view: WebView, url: String?) {
+    super.onPageFinished(view, url)
+    AntiReloadInjector.inject(view.context, view, url?.let { Uri.parse(it).host })
+}
 @Composable
 fun NobookWebView(
     url: String,
