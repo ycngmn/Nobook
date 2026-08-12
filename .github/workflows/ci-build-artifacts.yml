@@ -1,0 +1,53 @@
+name: CI Build Artifacts (Debug)
+
+# Complements create-release.yml (which only runs on tag push v*.*.*).
+# This workflow builds a debug APK on every push/PR so contributors can
+# smoke-test changes (e.g. the anti-reload / Material You additions)
+# without needing a signed release build.
+
+on:
+  push:
+    branches: [ "main", "feature/**" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  debug-build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - run: chmod +x gradlew
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Locate debug APK
+        id: apk
+        run: |
+          APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          echo "apk_path=$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nobook-debug-apk
+          path: ${{ steps.apk.outputs.apk_path }}
+          retention-days: 14
