@@ -34,11 +34,23 @@ jobs:
       - name: Set up Keystore
         run: |
           mkdir -p $RUNNER_TEMP/keystores
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > $RUNNER_TEMP/keystores/keystore.jks
-          if [ ! -f $RUNNER_TEMP/keystores/keystore.jks ]; then
-            echo "Failed to decode keystore file"
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 --decode > $RUNNER_TEMP/keystores/keystore.jks
+          if [ ! -s $RUNNER_TEMP/keystores/keystore.jks ]; then
+            echo "Failed to decode keystore file (file rong hoac khong ton tai)"
             exit 1
           fi
+
+      - name: Verify Keystore Integrity
+        run: |
+          keytool -list \
+            -keystore $RUNNER_TEMP/keystores/keystore.jks \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}" || {
+            echo "LOI: khong doc duoc keystore."
+            echo "Kiem tra secret KEYSTORE_BASE64 (phai la base64 THUAN, khong -----BEGIN/END-----, khong xuong dong)"
+            echo "va KEYSTORE_PASSWORD / KEY_ALIAS co dung khong."
+            exit 1
+          }
 
       - name: Sign APK
         run: |
