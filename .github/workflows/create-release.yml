@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -111,8 +111,8 @@ jobs:
       - name: Rename APK for Release
         run: |
           TAG_NAME="${{ github.event.inputs.release_tag || github.ref_name }}"
-          mv app-release.apk "Nobook_${TAG_NAME}.apk"
-          if [ ! -f "Nobook_${TAG_NAME}.apk" ]; then
+          mv app-release.apk "NoBook_${TAG_NAME}.apk"
+          if [ ! -f "NoBook_${TAG_NAME}.apk" ]; then
             echo "Failed to rename APK"
             exit 1
           fi
@@ -130,5 +130,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
-          files: Nobook_${{ github.event.inputs.release_tag || github.ref_name }}.apk
+          files: NoBook_${{ github.event.inputs.release_tag || github.ref_name }}.apk
           body_path: CHANGE.txt
