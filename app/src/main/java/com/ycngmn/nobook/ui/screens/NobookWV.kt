@@ -1,6 +1,7 @@
 package com.ycngmn.nobook.ui.screens
 
 import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.webkit.CookieManager
 import android.widget.Toast
@@ -94,6 +95,34 @@ private const val ANTI_RELOAD_SCRIPT = """
 })();
 """
 
+private val ECOMMERCE_HOSTS = listOf(
+    "shopee.vn", "shp.ee",
+    "lazada.vn", "s.lazada.vn"
+)
+
+private val AFFILIATE_PARAM_PREFIXES = listOf("aff_", "utm_", "af_")
+private val AFFILIATE_PARAM_EXACT = setOf("sub_id", "smtt", "is_from_signup", "fbclid", "ttclid", "gclid", "msclkid")
+
+private fun isEcommerceLink(url: String): Boolean {
+    return ECOMMERCE_HOSTS.any { host -> url.contains(host, ignoreCase = true) }
+}
+
+private fun sanitizeTrackingParams(url: String): String {
+    return runCatching {
+        val uri = Uri.parse(url)
+        val builder = uri.buildUpon().clearQuery()
+        for (paramName in uri.queryParameterNames) {
+            val lower = paramName.lowercase()
+            val isTrackingParam = AFFILIATE_PARAM_PREFIXES.any { lower.startsWith(it) } ||
+                AFFILIATE_PARAM_EXACT.contains(lower)
+            if (!isTrackingParam) {
+                builder.appendQueryParameter(paramName, uri.getQueryParameter(paramName))
+            }
+        }
+        builder.build().toString()
+    }.getOrDefault(url)
+}
+
 @Composable
 fun NobookWebView(
     url: String,
@@ -106,7 +135,8 @@ fun NobookWebView(
     val state = rememberSaveableWebViewState(url)
     val navigator = rememberWebViewNavigator(
         requestInterceptor = ExternalRequestInterceptor { externalUrl ->
-            val intent = Intent(Intent.ACTION_VIEW, externalUrl.toUri())
+            val cleanUrl = sanitizeTrackingParams(externalUrl)
+            val intent = Intent(Intent.ACTION_VIEW, cleanUrl.toUri())
             runCatching {
                 context.startActivity(intent)
             }.onFailure {
