@@ -125,7 +125,8 @@ private fun isBlockedSite(url: String): Boolean {
 
 private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 /*
- * Script to add download buttons for stories, stories highlights and reels on Facebook
+ * Script to add a global download button for any visible video/image on
+ * Facebook (feed, stories, reels, highlights, photo viewer).
  * Original Author: @YeiversonYurgaky
  */
 (function() {
@@ -147,7 +148,8 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"] img[src*="fbcdn"]',
       'div[data-pagelet="Story"] video',
       'div[aria-label*="reel"] video',
-      'div[data-pagelet="ProfilePhoto"] img[src*="fbcdn"]'
+      'div[data-pagelet="ProfilePhoto"] img[src*="fbcdn"]',
+      'div[role="article"] video:not([hidden])'
     ],
     containers: [
       'div[role="dialog"]',
@@ -158,7 +160,8 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"]',
       'div[data-pagelet="ProfilePhoto"]',
       'div[aria-label*="photo"]',
-      'div[data-pagelet*="ProfileAppSection"]'
+      'div[data-pagelet*="ProfileAppSection"]',
+      'div[role="article"]'
     ],
     storyIndicators: [
       'div[data-sigil="story-viewer"]',
@@ -179,9 +182,9 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
   const isElementVisible = (element) => {
     const rect = element.getBoundingClientRect();
     return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+      rect.width > 0 && rect.height > 0 &&
+      rect.bottom > 0 && rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right > 0 && rect.left < (window.innerWidth || document.documentElement.clientWidth)
     );
   };
 
@@ -207,7 +210,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       document.querySelectorAll('video:not([hidden]), img[src*="fbcdn"]:not([width="16"]):not([hidden])')
     ).find(el => {
       const rect = el.getBoundingClientRect();
-      return isElementVisible(el) && rect.width > 150 && rect.height > 150 && el.src;
+      return isElementVisible(el) && rect.width > 100 && rect.height > 100 && el.src;
     });
   };
 
@@ -420,30 +423,31 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     let btn = document.getElementById(DOWNLOAD_BTN_ID);
     if (!btn) btn = createDownloadButton();
 
-    if (isInStoryOrReelView() && !isFeed()) {
-      const mediaElement = getCurrentMediaElement();
-      hideOpenAppButtons();
+    hideOpenAppButtons();
 
-      if (mediaElement) {
-        currentContentContainer = findContentContainer(mediaElement);
-        btn.classList.add("visible");
-        return;
-      }
+    // Show the download button for ANY visible video/image on screen,
+    // not just inside a Story/Reel/Photo dialog. This covers normal
+    // inline videos in the newsfeed as well.
+    const mediaElement = getCurrentMediaElement();
+    if (mediaElement) {
+      currentContentContainer = findContentContainer(mediaElement);
+      btn.classList.add("visible");
+      return;
+    }
 
-      const highlightedStoryContainer = document.querySelector(
-        'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"]'
+    const highlightedStoryContainer = document.querySelector(
+      'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"]'
+    );
+
+    if (highlightedStoryContainer) {
+      const mediaInHighlight = highlightedStoryContainer.querySelector(
+        'video, img[src*="fbcdn"]'
       );
 
-      if (highlightedStoryContainer) {
-        const mediaInHighlight = highlightedStoryContainer.querySelector(
-          'video, img[src*="fbcdn"]'
-        );
-
-        if (mediaInHighlight && isElementVisible(mediaInHighlight)) {
-          currentContentContainer = highlightedStoryContainer;
-          btn.classList.add("visible");
-          return;
-        }
+      if (mediaInHighlight && isElementVisible(mediaInHighlight)) {
+        currentContentContainer = highlightedStoryContainer;
+        btn.classList.add("visible");
+        return;
       }
     }
 
@@ -483,6 +487,16 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       attributes: true,
       attributeFilter: ["src", "style", "class"]
     });
+
+    // Also re-check periodically to catch lazily-loaded feed videos that
+    // don't trigger a MutationObserver attribute change (e.g. autoplay src
+    // set after intersection).
+    setInterval(processPage, 1000);
+
+    // React to scroll, since Facebook lazy-loads/unloads feed videos.
+    window.addEventListener("scroll", () => {
+      requestAnimationFrame(processPage);
+    }, { passive: true });
   };
 
   if (document.readyState === "loading") {
