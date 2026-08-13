@@ -114,6 +114,15 @@ private fun sanitizeTrackingParams(url: String): String {
     }.getOrDefault(url)
 }
 
+private val DEFAULT_SITE_BLOCKLIST = setOf<String>(
+    // Them domain (khong can http/https) vao day de mo rong blocklist tuy chinh.
+)
+
+private fun isBlockedSite(url: String): Boolean {
+    if (DEFAULT_SITE_BLOCKLIST.isEmpty()) return false
+    return DEFAULT_SITE_BLOCKLIST.any { blocked -> url.contains(blocked, ignoreCase = true) }
+}
+
 private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 /*
  * Script to add download buttons for stories, stories highlights and reels on Facebook
@@ -484,6 +493,88 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 })();
 """
 
+private const val UX_EXTRAS_SCRIPT = """
+/*
+ * UX extras: hide "get the app" banners, add native video controls,
+ * simple double-click-to-zoom image magnifier.
+ */
+(function () {
+  try {
+    if (window.__nobookUxExtrasActive) return;
+    window.__nobookUxExtrasActive = true;
+
+    var hideAppBanners = function () {
+      document.querySelectorAll('div[role="button"]').forEach(function (btn) {
+        var label = (btn.getAttribute('aria-label') || btn.textContent || '').toLowerCase();
+        if (label.indexOf('use app') !== -1 || label.indexOf('get app') !== -1 ||
+            label.indexOf('open in app') !== -1 || label.indexOf('mo trong app') !== -1 ||
+            label.indexOf('tai app') !== -1) {
+          var container = btn.closest('div[role="dialog"]') || btn.parentElement;
+          if (container) container.style.display = 'none';
+        }
+      });
+      document.querySelectorAll('a[href*="itunes.apple.com"], a[href*="play.google.com/store"]').forEach(function (a) {
+        var wrap = a.closest('div[role="dialog"]') || a.parentElement;
+        if (wrap) wrap.style.display = 'none';
+      });
+    };
+
+    var addVideoControls = function () {
+      document.querySelectorAll('video').forEach(function (v) {
+        if (!v.hasAttribute('controls')) {
+          v.setAttribute('controls', 'controls');
+          v.controls = true;
+        }
+      });
+    };
+
+    var MAGNIFIER_ID = 'nobook-image-magnifier-overlay';
+    var closeMagnifier = function () {
+      var el = document.getElementById(MAGNIFIER_ID);
+      if (el) el.remove();
+    };
+    var openMagnifier = function (src) {
+      closeMagnifier();
+      var overlay = document.createElement('div');
+      overlay.id = MAGNIFIER_ID;
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:999998;' +
+        'display:flex;align-items:center;justify-content:center;';
+      overlay.addEventListener('click', closeMagnifier);
+      var img = document.createElement('img');
+      img.src = src;
+      img.style.cssText = 'max-width:95%;max-height:95%;object-fit:contain;';
+      img.addEventListener('click', function (e) { e.stopPropagation(); });
+      overlay.appendChild(img);
+      document.body.appendChild(overlay);
+    };
+    var bindImageMagnifier = function () {
+      document.querySelectorAll('img[src*="fbcdn"]').forEach(function (img) {
+        if (img.dataset.nobookMagnifierBound) return;
+        img.dataset.nobookMagnifierBound = '1';
+        img.addEventListener('dblclick', function (e) {
+          e.preventDefault();
+          openMagnifier(img.currentSrc || img.src);
+        });
+      });
+    };
+
+    var runAll = function () {
+      hideAppBanners();
+      addVideoControls();
+      bindImageMagnifier();
+    };
+
+    runAll();
+    var observer = new MutationObserver(function () { runAll(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    console.info('[Nobook] UX extras active');
+  } catch (err) {
+    console.error('[Nobook] UX extras injection failed:', err);
+  }
+})();
+"""
+
 @Composable
 fun NobookWebView(
     url: String,
@@ -496,16 +587,24 @@ fun NobookWebView(
     val state = rememberSaveableWebViewState(url)
     val navigator = rememberWebViewNavigator(
         requestInterceptor = ExternalRequestInterceptor { externalUrl ->
-            val cleanUrl = sanitizeTrackingParams(externalUrl)
-            val intent = Intent(Intent.ACTION_VIEW, cleanUrl.toUri())
-            runCatching {
-                context.startActivity(intent)
-            }.onFailure {
+            if (isBlockedSite(externalUrl)) {
                 Toast.makeText(
                     context,
-                    resources.getString(R.string.not_supported),
+                    "Nobook: da chan link nay theo danh sach blocklist",
                     Toast.LENGTH_SHORT
                 ).show()
+            } else {
+                val cleanUrl = sanitizeTrackingParams(externalUrl)
+                val intent = Intent(Intent.ACTION_VIEW, cleanUrl.toUri())
+                runCatching {
+                    context.startActivity(intent)
+                }.onFailure {
+                    Toast.makeText(
+                        context,
+                        resources.getString(R.string.not_supported),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     )
@@ -619,6 +718,12 @@ fun NobookWebView(
     LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
             navigator.evaluateJavaScript(STORY_REEL_DOWNLOADER_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(UX_EXTRAS_SCRIPT) {}
         }
     }
 
