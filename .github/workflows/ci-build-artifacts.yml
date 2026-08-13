@@ -105,7 +105,21 @@ jobs:
           echo "unsigned_apk=$APK" >> "$GITHUB_OUTPUT"
 
       - name: Decode keystore from secret
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "${{ runner.temp }}/release.keystore"
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 -d > "${{ runner.temp }}/release.keystore"
+          ls -la "${{ runner.temp }}/release.keystore"
+
+      - name: Verify keystore integrity
+        run: |
+          keytool -list \
+            -keystore "${{ runner.temp }}/release.keystore" \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}" || {
+            echo "LOI: khong doc duoc keystore. Kiem tra lai secret KEYSTORE_BASE64"
+            echo "(phai la base64 THUAN, khong co -----BEGIN/END-----, khong xuong dong)"
+            echo "va secret KEYSTORE_PASSWORD / KEY_ALIAS co dung khong."
+            exit 1
+          }
 
       - name: Locate apksigner in Android SDK
         id: apksigner
