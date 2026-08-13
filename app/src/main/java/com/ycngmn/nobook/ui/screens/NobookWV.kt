@@ -575,6 +575,60 @@ private const val UX_EXTRAS_SCRIPT = """
 })();
 """
 
+private const val SPONSORED_VI_SCRIPT = """
+/*
+ * Vietnamese sponsored-post keyword filter, complements existing adblock.js.
+ * Hides post containers whose "Sponsored" label appears in Vietnamese.
+ */
+(function () {
+  try {
+    if (window.__nobookSponsoredViActive) return;
+    window.__nobookSponsoredViActive = true;
+
+    var VI_SPONSORED_KEYWORDS = [
+      'được tài trợ',
+      'duoc tai tro',
+      'noi dung duoc tai tro',
+      'nội dung được tài trợ'
+    ];
+
+    var normalize = function (text) {
+      return (text || '').toLowerCase();
+    };
+
+    var isSponsoredLabel = function (text) {
+      var norm = normalize(text);
+      return VI_SPONSORED_KEYWORDS.some(function (kw) { return norm.indexOf(kw) !== -1; });
+    };
+
+    var hideSponsoredPosts = function () {
+      var candidates = document.querySelectorAll(
+        'span, a[role="link"], div[aria-label]'
+      );
+      candidates.forEach(function (el) {
+        var label = el.getAttribute ? (el.getAttribute('aria-label') || '') : '';
+        var text = el.textContent || '';
+        if (isSponsoredLabel(label) || isSponsoredLabel(text)) {
+          var post = el.closest('div[role="article"]') ||
+                     el.closest('div[data-pagelet^="FeedUnit"]');
+          if (post) {
+            post.style.display = 'none';
+          }
+        }
+      });
+    };
+
+    hideSponsoredPosts();
+    var observer = new MutationObserver(function () { hideSponsoredPosts(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    console.info('[Nobook] Vietnamese sponsored-post filter active');
+  } catch (err) {
+    console.error('[Nobook] Vietnamese sponsored filter injection failed:', err);
+  }
+})();
+"""
+
 @Composable
 fun NobookWebView(
     url: String,
@@ -724,6 +778,12 @@ fun NobookWebView(
     LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
             navigator.evaluateJavaScript(UX_EXTRAS_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(SPONSORED_VI_SCRIPT) {}
         }
     }
 
