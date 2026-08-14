@@ -149,7 +149,11 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
  * Script to add a global download button for any visible video/image on
  * Facebook (feed, stories, reels, highlights, photo viewer). Falls back to
  * scanning the page's own embedded JSON for a real playable URL when the
- * <video> element uses a blob: src (MSE adaptive streaming).
+ * <video> element uses a blob: src (MSE adaptive streaming). Size checks use
+ * intrinsic media dimensions (videoWidth/naturalWidth) in addition to the
+ * rendered CSS rect, because Desktop layout mode renders Facebook at desktop
+ * CSS width inside a phone-sized viewport, shrinking on-screen rect sizes
+ * well below fixed pixel thresholds even though the media is fully visible.
  * Original Author: @YeiversonYurgaky
  */
 (function() {
@@ -202,6 +206,21 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 
   const debugLog = (...args) => CONFIG.debug && console.log("[ContentDownloader]", ...args);
 
+  const MIN_RENDERED_PX = 40;
+  const MIN_INTRINSIC_PX = 50;
+
+  const isLargeEnough = (element) => {
+    const rect = element.getBoundingClientRect();
+    if (rect.width > MIN_RENDERED_PX && rect.height > MIN_RENDERED_PX) return true;
+    if (element.tagName === "VIDEO") {
+      return (element.videoWidth || 0) > MIN_INTRINSIC_PX && (element.videoHeight || 0) > MIN_INTRINSIC_PX;
+    }
+    if (element.tagName === "IMG") {
+      return (element.naturalWidth || 0) > MIN_INTRINSIC_PX && (element.naturalHeight || 0) > MIN_INTRINSIC_PX;
+    }
+    return false;
+  };
+
   const isElementVisible = (element) => {
     const rect = element.getBoundingClientRect();
     return (
@@ -232,8 +251,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     return Array.from(
       document.querySelectorAll('video:not([hidden]), img[src*="fbcdn"]:not([width="16"]):not([hidden])')
     ).find(el => {
-      const rect = el.getBoundingClientRect();
-      return isElementVisible(el) && rect.width > 100 && rect.height > 100;
+      return isElementVisible(el) && isLargeEnough(el);
     });
   };
 
@@ -342,10 +360,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
         !img.src.includes("data:image") &&
         img.src !== lastDownloadedUrl
       )
-      .filter(img => {
-        const rect = img.getBoundingClientRect();
-        return rect.width >= 100 && rect.height >= 100 && isElementVisible(img);
-      })
+      .filter(img => isElementVisible(img) && isLargeEnough(img))
       .sort((a, b) => {
         const areaA = a.getBoundingClientRect().width * a.getBoundingClientRect().height;
         const areaB = b.getBoundingClientRect().width * b.getBoundingClientRect().height;
