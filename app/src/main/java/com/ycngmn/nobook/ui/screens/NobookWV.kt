@@ -136,6 +136,14 @@ private fun isMessengerAppDeepLink(url: String): Boolean {
         (lower.startsWith("market://details") && lower.contains("orca"))
 }
 
+private fun isMessengerWebPath(url: String): Boolean {
+    val lower = url.lowercase()
+    return lower.contains("messenger.com") ||
+        lower.contains("/messages/") ||
+        lower.contains("/messages?") ||
+        lower.contains("/direct/inbox")
+}
+
 private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 (function() {
   var HOLD_TO_REVEAL_MS = 5000;
@@ -146,6 +154,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
   var activeBtn = null;
   var hideTimer = null;
   var startX = 0, startY = 0;
+  var boundMediaEls = (typeof WeakSet !== "undefined") ? new WeakSet() : null;
 
   function isMediaEligible(el) {
     if (!el) return false;
@@ -297,14 +306,18 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     return e;
   }
 
-  function startHold(e) {
-    if (e.target && e.target.id === "nobook-contextual-downloader") return;
-    var target = findMediaTarget(e.target);
-    if (!target) return;
+  function beginHoldFor(target, e) {
     var p = getPoint(e);
     startX = p.clientX; startY = p.clientY;
     cancelHold();
     holdTimer = setTimeout(function() { showButtonFor(target); }, HOLD_TO_REVEAL_MS);
+  }
+
+  function startHold(e) {
+    if (e.target && e.target.id === "nobook-contextual-downloader") return;
+    var target = findMediaTarget(e.target);
+    if (!target) return;
+    beginHoldFor(target, e);
   }
 
   function handleMove(e) {
@@ -319,8 +332,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   }
 
-  // capture: true ensures this fires before Facebook's own bubble-phase
-  // gesture handlers can stopPropagation() and swallow the touch sequence.
+  // Document-level capture listeners: catch gestures that bubble/capture normally.
   document.addEventListener("touchstart", startHold, { passive: true, capture: true });
   document.addEventListener("touchend", cancelHold, { passive: true, capture: true });
   document.addEventListener("touchmove", handleMove, { passive: true, capture: true });
@@ -329,6 +341,29 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
   document.addEventListener("click", function(e) {
     if (activeBtn && e.target !== activeBtn) removeButton();
   }, true);
+
+  // Element-level listeners bound directly on each <video>/<img>: needed because
+  // native browser media controls (controls=true) render in a UA shadow root and
+  // can swallow touch input before it is observable at the document level.
+  function bindDirectListeners(el) {
+    if (!boundMediaEls) return;
+    if (boundMediaEls.has(el)) return;
+    boundMediaEls.add(el);
+    el.addEventListener("touchstart", function(e) { beginHoldFor(el, e); }, { passive: true, capture: true });
+    el.addEventListener("touchend", cancelHold, { passive: true, capture: true });
+    el.addEventListener("touchmove", handleMove, { passive: true, capture: true });
+    el.addEventListener("mousedown", function(e) { beginHoldFor(el, e); }, { capture: true });
+    el.addEventListener("mouseup", cancelHold, { capture: true });
+  }
+
+  function scanAndBind() {
+    document.querySelectorAll("video").forEach(bindDirectListeners);
+    document.querySelectorAll('img[src*="fbcdn"]').forEach(bindDirectListeners);
+  }
+
+  scanAndBind();
+  var bindObserver = new MutationObserver(function() { scanAndBind(); });
+  bindObserver.observe(document.body, { childList: true, subtree: true });
 
   console.info("[Nobook] Contextual media downloader active (hold 5s on photo/video)");
 })();
@@ -350,8 +385,6 @@ private const val MESSENGER_GUARD_SCRIPT = """
         (l.indexOf("play.google.com/store/apps/details") !== -1 && l.indexOf("com.facebook.orca") !== -1);
     }
 
-    // Capture phase on document runs before Facebook's own bubble-phase
-    // click handlers on the anchor/button, regardless of attach order.
     document.addEventListener("click", function (e) {
       var el = e.target;
       var link = el && el.closest ? el.closest("a[href]") : null;
@@ -858,6 +891,28 @@ fun NobookWebView(
         )
     }
 
+
+    var messengerDesktopUaApplied by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(state.lastLoadedUrl, isDesktop) {
+        val currentUrl = state.lastLoadedUrl ?: return@LaunchedEffect
+        if (isDesktop) {
+            // Global desktop layout already covers Messenger; nothing extra needed.
+            if (messengerDesktopUaApplied) messengerDesktopUaApplied = false
+            return@LaunchedEffect
+        }
+        val onMessengerPath = isMessengerWebPath(currentUrl)
+        if (onMessengerPath && !messengerDesktopUaApplied) {
+            // Facebook serves an "install the app" interstitial to mobile User-Agents
+            // for Messenger paths. Forcing a desktop UA (only for this navigation)
+            // makes Facebook return the real web Messenger UI instead.
+            messengerDesktopUaApplied = true
+            state.nativeWebView.settings.userAgentString = DESKTOP_USER_AGENT
+            navigator.reload()
+        } else if (!onMessengerPath && messengerDesktopUaApplied) {
+            messengerDesktopUaApplied = false
+            state.nativeWebView.settings.userAgentString = ""
+        }
+    }
 
     LaunchedEffect(isDesktop) {
         val userAgent = if (isDesktop) DESKTOP_USER_AGENT else ""
