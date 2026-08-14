@@ -10,6 +10,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,11 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
@@ -39,6 +42,7 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.ycngmn.nobook.R
+import com.ycngmn.nobook.ui.components.AiSidebarFab
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.settings.SettingsDialog
 import com.ycngmn.nobook.ui.viewmodel.MainViewModel
@@ -100,8 +104,12 @@ private const val ANTI_RELOAD_SCRIPT = """
 })();
 """
 
-private val AFFILIATE_PARAM_PREFIXES = listOf("aff_", "utm_", "af_")
-private val AFFILIATE_PARAM_EXACT = setOf("sub_id", "smtt", "is_from_signup", "fbclid", "ttclid", "gclid", "msclkid")
+private val AFFILIATE_PARAM_PREFIXES = listOf("aff_", "utm_", "af_", "deep_link_")
+private val AFFILIATE_PARAM_EXACT = setOf(
+    "sub_id", "smtt", "is_from_signup", "fbclid", "ttclid", "gclid", "msclkid",
+    "pid", "c", "businessId", "is_copy_url", "is_from_webapp", "sender_device",
+    "sender_web_id", "enter_method", "share_app_id", "share_link_id", "checksum"
+)
 
 private fun sanitizeTrackingParams(url: String): String {
     return runCatching {
@@ -154,6 +162,9 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
  * rendered CSS rect, because Desktop layout mode renders Facebook at desktop
  * CSS width inside a phone-sized viewport, shrinking on-screen rect sizes
  * well below fixed pixel thresholds even though the media is fully visible.
+ * Image downloads prefer the highest-resolution srcset candidate or the
+ * largest "image":{...,"width":..,"height":..} entry found in the page's own
+ * embedded JSON, instead of the (often downscaled) visible <img src>.
  * Original Author: @YeiversonYurgaky
  */
 (function() {
@@ -274,6 +285,54 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     return null;
   };
 
+  const extractOriginalImageUrlFromPage = () => {
+    try {
+      const html = document.documentElement.innerHTML;
+      let best = null;
+      let bestArea = -1;
+
+      const patternsOrdered = [
+        /"image":\{"height":(\d+),"uri":"([^"]+)","width":(\d+)\}/g,
+        /"image":\{"uri":"([^"]+)","width":(\d+),"height":(\d+)\}/g
+      ];
+
+      patternsOrdered.forEach((re, idx) => {
+        let m;
+        while ((m = re.exec(html)) !== null) {
+          let uri, w, h;
+          if (idx === 0) { h = parseInt(m[1], 10); uri = m[2]; w = parseInt(m[3], 10); }
+          else { uri = m[1]; w = parseInt(m[2], 10); h = parseInt(m[3], 10); }
+          const area = (w || 0) * (h || 0);
+          if (area > bestArea) { bestArea = area; best = uri; }
+        }
+      });
+
+      if (best) return best.replace(/\\\//g, '/').replace(/\\u0025/g, '%');
+    } catch (e) { /* ignore */ }
+    return null;
+  };
+
+  const getBestImageSource = (imgEl) => {
+    try {
+      if (imgEl.srcset) {
+        const candidates = imgEl.srcset.split(',')
+          .map(s => s.trim().split(/\s+/))
+          .filter(p => p[0]);
+        let best = null, bestW = -1;
+        candidates.forEach(([srcUrl, size]) => {
+          const w = parseInt((size || '').replace('w', ''), 10) || 0;
+          if (w > bestW) { bestW = w; best = srcUrl; }
+        });
+        if (best) return best;
+      }
+    } catch (e) { /* ignore */ }
+
+    const current = imgEl.currentSrc || imgEl.src;
+    const fromPage = extractOriginalImageUrlFromPage();
+    if (fromPage && fromPage !== current) return fromPage;
+    return current;
+  };
+
   const getBestVideoSource = (videoElement) => {
     try {
       const sources = Array.from(videoElement.querySelectorAll("source"))
@@ -339,8 +398,9 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     }
 
     if (mediaElement && mediaElement.src) {
-      downloadMedia(mediaElement.src);
-      lastDownloadedUrl = mediaElement.src;
+      const bestImgUrl = getBestImageSource(mediaElement);
+      downloadMedia(bestImgUrl);
+      lastDownloadedUrl = bestImgUrl;
       return;
     }
 
@@ -368,8 +428,9 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       });
 
     if (images.length > 0) {
-      downloadMedia(images[0].src);
-      lastDownloadedUrl = images[0].src;
+      const bestImgUrl = getBestImageSource(images[0]);
+      downloadMedia(bestImgUrl);
+      lastDownloadedUrl = bestImgUrl;
       return;
     }
 
@@ -391,7 +452,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       }
     }
 
-    const fallback = extractPlayableUrlFromPage();
+    const fallback = extractPlayableUrlFromPage() || extractOriginalImageUrlFromPage();
     if (fallback) {
       downloadMedia(fallback);
       lastDownloadedUrl = fallback;
@@ -601,6 +662,218 @@ private const val MESSENGER_GUARD_SCRIPT = """
     console.info("[Nobook] Messenger deep-link guard active");
   } catch (err) {
     console.error("[Nobook] Messenger guard injection failed:", err);
+  }
+})();
+"""
+
+private const val TEXT_SELECTION_SCRIPT = """
+(function () {
+  try {
+    if (window.__nobookTextSelectionActive) return;
+    window.__nobookTextSelectionActive = true;
+
+    var css = `
+      * { -webkit-user-select: text !important; user-select: text !important; }
+      *::selection { background: #3578E5 !important; color: #fff !important; }
+    `;
+    var style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+
+    document.addEventListener('contextmenu', function (e) { e.stopPropagation(); }, true);
+    document.addEventListener('selectstart', function (e) { e.stopPropagation(); }, true);
+
+    function copyToClipboard(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '0';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (e) {
+        console.error('[Nobook] Copy failed:', e);
+        return false;
+      }
+    }
+
+    function extractFormattedText(root) {
+      var BLOCK_TAGS = { DIV: 1, P: 1, LI: 1, UL: 1, OL: 1, SECTION: 1, ARTICLE: 1 };
+      var lines = [];
+      var current = '';
+      function walk(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          current += node.textContent;
+          return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        var tag = node.tagName;
+        if (tag === 'BR') { lines.push(current); current = ''; return; }
+        var isBlock = !!BLOCK_TAGS[tag];
+        if (isBlock && current.trim().length > 0) { lines.push(current); current = ''; }
+        for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+        if (isBlock) { if (current.trim().length > 0) lines.push(current); current = ''; }
+      }
+      walk(root);
+      if (current.trim().length > 0) lines.push(current);
+      return lines
+        .map(function (l) { return l.replace(/[ \t]+/g, ' ').trim(); })
+        .filter(function (l) { return l.length > 0; })
+        .join('\n\n');
+    }
+
+    function findMainTextContainer(start) {
+      var el = start;
+      while (el && el !== document.body) {
+        if (el.getAttribute && (el.getAttribute('data-ad-preview') === 'message' ||
+            el.getAttribute('data-ad-comet-preview') === 'message')) {
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    var COPY_ALL_ID = 'nobook-copy-all-btn';
+    var copyAllTimer = null;
+
+    function removeCopyAllButton() {
+      var el = document.getElementById(COPY_ALL_ID);
+      if (el) el.parentNode.removeChild(el);
+      if (copyAllTimer) { clearTimeout(copyAllTimer); copyAllTimer = null; }
+    }
+
+    function showCopyAllButton(targetEl) {
+      removeCopyAllButton();
+      var rect = targetEl.getBoundingClientRect();
+      var btn = document.createElement('button');
+      btn.id = COPY_ALL_ID;
+      btn.textContent = 'Copy toan bai (giu format)';
+      btn.style.position = 'fixed';
+      btn.style.top = Math.max(rect.top - 40, 8) + 'px';
+      btn.style.left = Math.max(rect.left, 8) + 'px';
+      btn.style.zIndex = '999999';
+      btn.style.padding = '8px 14px';
+      btn.style.borderRadius = '18px';
+      btn.style.border = 'none';
+      btn.style.backgroundColor = 'rgba(24,119,242,0.95)';
+      btn.style.color = '#fff';
+      btn.style.fontSize = '13px';
+      btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var text = extractFormattedText(targetEl);
+        copyToClipboard(text);
+        removeCopyAllButton();
+      });
+      document.body.appendChild(btn);
+      copyAllTimer = setTimeout(removeCopyAllButton, 5000);
+    }
+
+    document.addEventListener('dblclick', function (e) {
+      var container = findMainTextContainer(e.target) ||
+        (e.target.closest ? e.target.closest('div[role="article"]') : null);
+      if (container) showCopyAllButton(container);
+    });
+
+    var SEL_BTN_ID = 'nobook-copy-selection-btn';
+    var selTimer = null;
+
+    function removeSelectionButton() {
+      var el = document.getElementById(SEL_BTN_ID);
+      if (el) el.parentNode.removeChild(el);
+      if (selTimer) { clearTimeout(selTimer); selTimer = null; }
+    }
+
+    function showSelectionButton(rect, text) {
+      removeSelectionButton();
+      var btn = document.createElement('button');
+      btn.id = SEL_BTN_ID;
+      btn.textContent = 'Copy';
+      btn.style.position = 'fixed';
+      btn.style.top = Math.max(rect.top - 38, 8) + 'px';
+      btn.style.left = Math.max(rect.left, 8) + 'px';
+      btn.style.zIndex = '999999';
+      btn.style.padding = '6px 12px';
+      btn.style.borderRadius = '14px';
+      btn.style.border = 'none';
+      btn.style.backgroundColor = 'rgba(0,0,0,0.85)';
+      btn.style.color = '#fff';
+      btn.style.fontSize = '13px';
+      btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        copyToClipboard(text);
+        removeSelectionButton();
+      });
+      document.body.appendChild(btn);
+      selTimer = setTimeout(removeSelectionButton, 6000);
+    }
+
+    document.addEventListener('selectionchange', function () {
+      var sel = window.getSelection();
+      var text = sel ? sel.toString() : '';
+      if (text && text.trim().length > 0 && sel.rangeCount > 0) {
+        var rect = sel.getRangeAt(0).getBoundingClientRect();
+        if (rect.width > 0 || rect.height > 0) showSelectionButton(rect, text);
+      } else {
+        removeSelectionButton();
+      }
+    });
+
+    console.info('[Nobook] Text selection + copy-all (format-preserving) active');
+  } catch (err) {
+    console.error('[Nobook] Text selection injection failed:', err);
+  }
+})();
+"""
+
+private const val CONTRAST_GUARD_SCRIPT = """
+(function () {
+  try {
+    if (window.__nobookContrastGuardActive) return;
+    window.__nobookContrastGuardActive = true;
+
+    function luminance(rgb) {
+      var m = rgb.match(/\d+/g);
+      if (!m || m.length < 3) return null;
+      var r = m[0] / 255, g = m[1] / 255, b = m[2] / 255;
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    function fixLowContrast(root) {
+      var nodes = root.querySelectorAll('textarea, [contenteditable="true"], div, span, input');
+      nodes.forEach(function (el) {
+        try {
+          var cs = window.getComputedStyle(el);
+          var bg = cs.backgroundColor;
+          var color = cs.color;
+          if (bg === 'rgba(0, 0, 0, 0)') return;
+          var lb = luminance(bg);
+          var lc = luminance(color);
+          if (lb === null || lc === null) return;
+          if (Math.abs(lb - lc) < 0.12 && lb < 0.25) {
+            el.style.setProperty('color', '#ffffff', 'important');
+          }
+        } catch (e) { /* ignore per-node errors */ }
+      });
+    }
+
+    var run = function () { fixLowContrast(document.body); };
+    run();
+    var observer = new MutationObserver(function () { run(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+    var intervalId = setInterval(run, 1500);
+
+    console.info('[Nobook] Contrast guard active');
+  } catch (err) {
+    console.error('[Nobook] Contrast guard injection failed:', err);
   }
 })();
 """
@@ -1026,6 +1299,18 @@ fun NobookWebView(
 
     LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(TEXT_SELECTION_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(CONTRAST_GUARD_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
             navigator.evaluateJavaScript(UX_EXTRAS_SCRIPT) {}
         }
     }
@@ -1113,76 +1398,89 @@ fun NobookWebView(
     val barsInsets = WindowInsets.systemBars.asPaddingValues()
     val imeHeight = rememberImeHeight()
 
-    WebView(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(themeColor)
-            .then(
-                if (isImmersiveMode) {
-                    Modifier.padding(bottom = imeHeight)
-                } else {
-                    Modifier.padding(
-                        top = barsInsets.calculateTopPadding(),
-                        bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+    Box(modifier = Modifier.fillMaxSize()) {
+        WebView(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(themeColor)
+                .then(
+                    if (isImmersiveMode) {
+                        Modifier.padding(bottom = imeHeight)
+                    } else {
+                        Modifier.padding(
+                            top = barsInsets.calculateTopPadding(),
+                            bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+                        )
+                    }
+                ),
+            state = state,
+            navigator = navigator,
+            platformWebViewParams = fileChooserWebViewParams(),
+            captureBackPresses = false,
+            onCreated = { webView ->
+
+                android.webkit.WebView.setWebContentsDebuggingEnabled(true)
+
+                val cookieManager = CookieManager.getInstance()
+                cookieManager.setAcceptCookie(true)
+                cookieManager.setAcceptThirdPartyCookies(webView, true)
+                cookieManager.flush()
+
+                state.webSettings.apply {
+                    isJavaScriptEnabled = true
+
+                    androidWebSettings.apply {
+                        //isDebugInspectorInfoEnabled = true
+                        domStorageEnabled = true
+                        hideDefaultVideoPoster = true
+                        mediaPlaybackRequiresUserGesture = false
+                    }
+                }
+
+                webView.apply {
+                    addJavascriptInterface(
+                        NobookSettings { settingsToggle = true },
+                        "SettingsBridge"
                     )
-                }
-            ),
-        state = state,
-        navigator = navigator,
-        platformWebViewParams = fileChooserWebViewParams(),
-        captureBackPresses = false,
-        onCreated = { webView ->
+                    addJavascriptInterface(
+                        ThemeChange { viewModel.setThemeColor(Color(it)) },
+                        "ThemeBridge"
+                    )
+                    addJavascriptInterface(
+                        DownloadBridge(context),
+                        "DownloadBridge"
+                    )
+                    addJavascriptInterface(
+                        DownloadFolderBridge(context),
+                        "DownloadFolderBridge"
+                    )
+                    addJavascriptInterface(
+                        ClipboardBridge(context),
+                        "ClipboardBridge"
+                    )
 
-            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
+                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
-            val cookieManager = CookieManager.getInstance()
-            cookieManager.setAcceptCookie(true)
-            cookieManager.setAcceptThirdPartyCookies(webView, true)
-            cookieManager.flush()
+                    overScrollMode = View.OVER_SCROLL_NEVER
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
 
-            state.webSettings.apply {
-                isJavaScriptEnabled = true
-
-                androidWebSettings.apply {
-                    //isDebugInspectorInfoEnabled = true
-                    domStorageEnabled = true
-                    hideDefaultVideoPoster = true
-                    mediaPlaybackRequiresUserGesture = false
+                    settings.setSupportZoom(true)
+                    settings.builtInZoomControls = true
+                    settings.displayZoomControls = false
                 }
             }
+        )
 
-            webView.apply {
-                addJavascriptInterface(
-                    NobookSettings { settingsToggle = true },
-                    "SettingsBridge"
-                )
-                addJavascriptInterface(
-                    ThemeChange { viewModel.setThemeColor(Color(it)) },
-                    "ThemeBridge"
-                )
-                addJavascriptInterface(
-                    DownloadBridge(context),
-                    "DownloadBridge"
-                )
-                addJavascriptInterface(
-                    DownloadFolderBridge(context),
-                    "DownloadFolderBridge"
-                )
-                addJavascriptInterface(
-                    ClipboardBridge(context),
-                    "ClipboardBridge"
-                )
-
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-                overScrollMode = View.OVER_SCROLL_NEVER
-                isVerticalScrollBarEnabled = false
-                isHorizontalScrollBarEnabled = false
-
-                settings.setSupportZoom(true)
-                settings.builtInZoomControls = true
-                settings.displayZoomControls = false
-            }
+        if (!isLoading) {
+            AiSidebarFab(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        end = 16.dp,
+                        bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight) + 16.dp
+                    )
+            )
         }
-    )
+    }
 }
