@@ -235,6 +235,25 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     return false;
   };
 
+  const extractPlayableUrlFromPage = () => {
+    try {
+      const html = document.documentElement.innerHTML;
+      const patterns = [
+        /"browser_native_hd_url":"([^"]+)"/,
+        /"browser_native_sd_url":"([^"]+)"/,
+        /"playable_url_quality_hd":"([^"]+)"/,
+        /"playable_url":"([^"]+)"/
+      ];
+      for (const p of patterns) {
+        const m = html.match(p);
+        if (m && m[1]) {
+          return m[1].replace(/\\\//g, '/').replace(/\\u0025/g, '%');
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  };
+
   const getBestVideoSource = (videoElement) => {
     try {
       const sources = Array.from(videoElement.querySelectorAll("source"))
@@ -255,10 +274,19 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       }
     } catch (e) { /* fall through to default */ }
 
-    return videoElement.currentSrc || videoElement.src;
+    const candidate = videoElement.currentSrc || videoElement.src;
+    if (!candidate || candidate.indexOf("blob:") === 0) {
+      const fallback = extractPlayableUrlFromPage();
+      if (fallback) return fallback;
+    }
+    return candidate;
   };
 
   const downloadMedia = (url) => {
+    if (!url || url.indexOf("blob:") === 0) {
+      console.error("[Nobook] Cannot download blob/empty URL directly:", url);
+      return;
+    }
     fetch(url)
       .then(response => response.blob())
       .then(blob => {
@@ -283,11 +311,15 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
   const extractAndDownloadMedia = () => {
     const mediaElement = getCurrentMediaElement();
 
-    if (mediaElement && mediaElement.src && mediaElement.src !== lastDownloadedUrl) {
-      const bestUrl = mediaElement.tagName === "VIDEO"
-        ? getBestVideoSource(mediaElement)
-        : mediaElement.src;
+    if (mediaElement && mediaElement.tagName === "VIDEO") {
+      const bestUrl = getBestVideoSource(mediaElement);
       downloadMedia(bestUrl);
+      lastDownloadedUrl = bestUrl;
+      return;
+    }
+
+    if (mediaElement && mediaElement.src) {
+      downloadMedia(mediaElement.src);
       lastDownloadedUrl = mediaElement.src;
       return;
     }
@@ -295,9 +327,10 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     const container = currentContentContainer || document.body;
 
     const videoElement = container.querySelector("video:not([hidden])");
-    if (videoElement && videoElement.src && videoElement.src !== lastDownloadedUrl) {
-      downloadMedia(getBestVideoSource(videoElement));
-      lastDownloadedUrl = videoElement.src;
+    if (videoElement) {
+      const bestUrl = getBestVideoSource(videoElement);
+      downloadMedia(bestUrl);
+      lastDownloadedUrl = bestUrl;
       return;
     }
 
@@ -335,13 +368,17 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
         (bgImage.includes("fbcdn.net") || bgImage.includes("fbsbx.com"))
       ) {
         const imageUrl = bgImage.replace(/^url\(['"](.+)['"]\)$/, "$1");
-
-        if (imageUrl !== lastDownloadedUrl) {
-          downloadMedia(imageUrl);
-          lastDownloadedUrl = imageUrl;
-          return;
-        }
+        downloadMedia(imageUrl);
+        lastDownloadedUrl = imageUrl;
+        return;
       }
+    }
+
+    const fallback = extractPlayableUrlFromPage();
+    if (fallback) {
+      downloadMedia(fallback);
+      lastDownloadedUrl = fallback;
+      return;
     }
 
     debugLog("No media content found to download");
@@ -386,7 +423,6 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 
     btn.addEventListener("click", () => {
       currentContentContainer = null;
-      lastDownloadedUrl = null;
 
       const mediaElement = getCurrentMediaElement();
       if (mediaElement) {
@@ -395,6 +431,16 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 
       extractAndDownloadMedia();
     });
+
+    let pressTimer = null;
+    btn.addEventListener("touchstart", () => {
+      pressTimer = setTimeout(() => {
+        if (window.DownloadFolderBridge && window.DownloadFolderBridge.pickFolder) {
+          window.DownloadFolderBridge.pickFolder();
+        }
+      }, 700);
+    }, { passive: true });
+    btn.addEventListener("touchend", () => { if (pressTimer) clearTimeout(pressTimer); });
 
     document.body.appendChild(btn);
 
@@ -414,20 +460,12 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     });
   };
 
-  const isFeed = () => {
-    return document.querySelector('div[role="feed"]') !== null &&
-           !isInStoryOrReelView();
-  };
-
   const updateButtonVisibility = () => {
     let btn = document.getElementById(DOWNLOAD_BTN_ID);
     if (!btn) btn = createDownloadButton();
 
     hideOpenAppButtons();
 
-    // Show the download button for ANY visible video/image on screen,
-    // not just inside a Story/Reel/Photo dialog. This covers normal
-    // inline videos in the newsfeed as well.
     const mediaElement = getCurrentMediaElement();
     if (mediaElement) {
       currentContentContainer = findContentContainer(mediaElement);
@@ -488,12 +526,8 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       attributeFilter: ["src", "style", "class"]
     });
 
-    // Also re-check periodically to catch lazily-loaded feed videos that
-    // don't trigger a MutationObserver attribute change (e.g. autoplay src
-    // set after intersection).
     setInterval(processPage, 1000);
 
-    // React to scroll, since Facebook lazy-loads/unloads feed videos.
     window.addEventListener("scroll", () => {
       requestAnimationFrame(processPage);
     }, { passive: true });
@@ -639,6 +673,131 @@ private const val SPONSORED_VI_SCRIPT = """
     console.info('[Nobook] Vietnamese sponsored-post filter active');
   } catch (err) {
     console.error('[Nobook] Vietnamese sponsored filter injection failed:', err);
+  }
+})();
+"""
+
+private const val TOPIC_KEYWORD_FILTER_SCRIPT = """
+/*
+ * Topic keyword filter: hides feed posts whose text matches user-defined
+ * keywords/phrases (equivalent to FBPurity's "Text Filter"). Edit the
+ * KEYWORDS list below to add topics you want hidden from your feed.
+ */
+(function () {
+  try {
+    if (window.__nobookTopicFilterActive) return;
+    window.__nobookTopicFilterActive = true;
+
+    var KEYWORDS = [];
+
+    if (KEYWORDS.length === 0) {
+      console.info('[Nobook] Topic keyword filter loaded (no keywords configured)');
+      return;
+    }
+
+    var normalize = function (text) {
+      return (text || '').toLowerCase();
+    };
+
+    var matchesKeyword = function (text) {
+      var norm = normalize(text);
+      return KEYWORDS.some(function (kw) { return norm.indexOf(kw.toLowerCase()) !== -1; });
+    };
+
+    var filterFeed = function () {
+      document.querySelectorAll('div[role="article"]').forEach(function (post) {
+        if (post.dataset.nobookTopicChecked) return;
+        var text = post.innerText || '';
+        if (matchesKeyword(text)) {
+          post.style.display = 'none';
+        }
+        post.dataset.nobookTopicChecked = '1';
+      });
+    };
+
+    filterFeed();
+    var observer = new MutationObserver(function () { filterFeed(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    console.info('[Nobook] Topic keyword filter active (' + KEYWORDS.length + ' keywords)');
+  } catch (err) {
+    console.error('[Nobook] Topic keyword filter injection failed:', err);
+  }
+})();
+"""
+
+private const val NETWORK_SANITIZER_SCRIPT = """
+/*
+ * Client-side network/DOM sanitizer: removes sponsored-post UI elements
+ * and blocks known Facebook tracking/telemetry endpoints from within the
+ * page's own JS context (fetch/XHR patch). This runs entirely inside the
+ * WebView's JS engine -- it does NOT touch TLS/certificate validation and
+ * does NOT intercept native network traffic.
+ */
+(function () {
+  try {
+    if (window.__nobookNetworkSanitizerActive) return;
+    window.__nobookNetworkSanitizerActive = true;
+
+    var UI_SELECTORS_TO_REMOVE = [
+      '[aria-label="Sponsored"]',
+      '[data-testid="story-sponsored-label"]',
+      '[data-ad-comet-preview-id]',
+      '[data-adunit]',
+      '[data-sigil="m-feed-voice-subtitle"]',
+      'div[id^="ad_"]'
+    ];
+
+    var BLOCKED_NETWORK_PATTERNS = [
+      /an\.facebook\.com/,
+      /pixel\.facebook\.com/,
+      /graph\.facebook\.com\/v\d+\/\d+\/activities/,
+      /audience_network/
+    ];
+
+    var sanitizeDOM = function () {
+      UI_SELECTORS_TO_REMOVE.forEach(function (sel) {
+        try {
+          document.querySelectorAll(sel).forEach(function (el) {
+            var root = el.closest('div[role="article"]') || el.closest('[data-pagelet]') || el;
+            root.style.display = 'none';
+          });
+        } catch (e) { /* ignore selector errors */ }
+      });
+    };
+
+    var origXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url) {
+      for (var i = 0; i < BLOCKED_NETWORK_PATTERNS.length; i++) {
+        if (BLOCKED_NETWORK_PATTERNS[i].test(url)) {
+          console.info('[Nobook] Blocked tracking XHR:', url);
+          arguments[1] = 'about:blank';
+          break;
+        }
+      }
+      return origXhrOpen.apply(this, arguments);
+    };
+
+    var origFetch = window.fetch;
+    window.fetch = function (input, init) {
+      var url = (typeof input === 'string') ? input : (input && input.url) || '';
+      for (var i = 0; i < BLOCKED_NETWORK_PATTERNS.length; i++) {
+        if (BLOCKED_NETWORK_PATTERNS[i].test(url)) {
+          console.info('[Nobook] Blocked tracking fetch:', url);
+          return Promise.resolve(new Response('{}', { status: 200 }));
+        }
+      }
+      return origFetch.apply(window, arguments);
+    };
+
+    sanitizeDOM();
+    var observer = new MutationObserver(function () { sanitizeDOM(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+    setInterval(sanitizeDOM, 3000);
+
+    console.info('[Nobook] Network/DOM sanitizer active');
+  } catch (err) {
+    console.error('[Nobook] Network sanitizer injection failed:', err);
   }
 })();
 """
@@ -798,6 +957,18 @@ fun NobookWebView(
     LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
             navigator.evaluateJavaScript(SPONSORED_VI_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(TOPIC_KEYWORD_FILTER_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(NETWORK_SANITIZER_SCRIPT) {}
         }
     }
 
