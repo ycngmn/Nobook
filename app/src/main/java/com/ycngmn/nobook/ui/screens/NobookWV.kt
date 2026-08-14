@@ -721,6 +721,73 @@ private const val MESSENGER_GUARD_SCRIPT = """
 })();
 """
 
+private const val LINK_CLEANER_SCRIPT = """
+(function () {
+  try {
+    if (window.__nobookLinkCleanerActive) return;
+    window.__nobookLinkCleanerActive = true;
+
+    var FB_TRACKING_PARAMS = [
+      'fbclid', '__tn__', '__cft__', '__xts__', 'refid', 'ref', 'notif_t',
+      'notif_id', 'tn', 'hc_ref', 'eid', 'fref', 'source', 'source_id'
+    ];
+    var AFF_PREFIXES = ['utm_', 'aff_', 'af_'];
+
+    function unwrapFacebookRedirect(urlStr) {
+      try {
+        var u = new URL(urlStr, window.location.href);
+        if (/(^|\.)facebook\.com$/.test(u.hostname) && u.pathname === '/l.php') {
+          var target = u.searchParams.get('u');
+          if (target) return decodeURIComponent(target);
+        }
+      } catch (e) { /* ignore */ }
+      return urlStr;
+    }
+
+    function stripParams(urlStr) {
+      try {
+        var u = new URL(urlStr, window.location.href);
+        FB_TRACKING_PARAMS.forEach(function (p) { u.searchParams.delete(p); });
+        Array.from(u.searchParams.keys()).forEach(function (k) {
+          var lower = k.toLowerCase();
+          if (AFF_PREFIXES.some(function (pref) { return lower.indexOf(pref) === 0; })) {
+            u.searchParams.delete(k);
+          }
+        });
+        return u.toString();
+      } catch (e) {
+        return urlStr;
+      }
+    }
+
+    function cleanLink(a) {
+      if (!a.href) return;
+      var cleaned = unwrapFacebookRedirect(a.href);
+      cleaned = stripParams(cleaned);
+      if (cleaned !== a.href) {
+        try { a.href = cleaned; } catch (e) { /* ignore */ }
+      }
+    }
+
+    function scan() {
+      document.querySelectorAll('a[href]').forEach(function (a) {
+        if (a.dataset.nobookLinkCleaned) return;
+        cleanLink(a);
+        a.dataset.nobookLinkCleaned = '1';
+      });
+    }
+
+    scan();
+    var observer = new MutationObserver(function () { scan(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    console.info('[Nobook] Link cleaner active (FB tracking + affiliate params stripped from all links)');
+  } catch (err) {
+    console.error('[Nobook] Link cleaner injection failed:', err);
+  }
+})();
+"""
+
 private const val TEXT_SELECTION_SCRIPT = """
 (function () {
   try {
@@ -1368,6 +1435,12 @@ fun NobookWebView(
     LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
             navigator.evaluateJavaScript(MESSENGER_GUARD_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(LINK_CLEANER_SCRIPT) {}
         }
     }
 
