@@ -141,9 +141,11 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
   var HOLD_TO_REVEAL_MS = 5000;
   var BTN_LONGPRESS_MS = 700;
   var AUTO_HIDE_MS = 5000;
+  var MOVE_CANCEL_THRESHOLD_PX = 12;
   var holdTimer = null;
   var activeBtn = null;
   var hideTimer = null;
+  var startX = 0, startY = 0;
 
   function isMediaEligible(el) {
     if (!el) return false;
@@ -289,28 +291,90 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     hideTimer = setTimeout(removeButton, AUTO_HIDE_MS);
   }
 
+  function getPoint(e) {
+    if (e.touches && e.touches.length > 0) return e.touches[0];
+    if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0];
+    return e;
+  }
+
   function startHold(e) {
     if (e.target && e.target.id === "nobook-contextual-downloader") return;
     var target = findMediaTarget(e.target);
     if (!target) return;
+    var p = getPoint(e);
+    startX = p.clientX; startY = p.clientY;
     cancelHold();
     holdTimer = setTimeout(function() { showButtonFor(target); }, HOLD_TO_REVEAL_MS);
+  }
+
+  function handleMove(e) {
+    if (!holdTimer) return;
+    var p = getPoint(e);
+    var dx = Math.abs(p.clientX - startX);
+    var dy = Math.abs(p.clientY - startY);
+    if (dx > MOVE_CANCEL_THRESHOLD_PX || dy > MOVE_CANCEL_THRESHOLD_PX) cancelHold();
   }
 
   function cancelHold() {
     if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   }
 
-  document.addEventListener("touchstart", startHold, { passive: true });
-  document.addEventListener("touchend", cancelHold, { passive: true });
-  document.addEventListener("touchmove", cancelHold, { passive: true });
-  document.addEventListener("mousedown", startHold);
-  document.addEventListener("mouseup", cancelHold);
+  // capture: true ensures this fires before Facebook's own bubble-phase
+  // gesture handlers can stopPropagation() and swallow the touch sequence.
+  document.addEventListener("touchstart", startHold, { passive: true, capture: true });
+  document.addEventListener("touchend", cancelHold, { passive: true, capture: true });
+  document.addEventListener("touchmove", handleMove, { passive: true, capture: true });
+  document.addEventListener("mousedown", startHold, { capture: true });
+  document.addEventListener("mouseup", cancelHold, { capture: true });
   document.addEventListener("click", function(e) {
     if (activeBtn && e.target !== activeBtn) removeButton();
   }, true);
 
   console.info("[Nobook] Contextual media downloader active (hold 5s on photo/video)");
+})();
+"""
+
+private const val MESSENGER_GUARD_SCRIPT = """
+(function () {
+  try {
+    if (window.__nobookMessengerGuardActive) return;
+    window.__nobookMessengerGuardActive = true;
+
+    function isMessengerDeepLink(url) {
+      if (!url) return false;
+      var l = String(url).toLowerCase();
+      return l.indexOf("fb-messenger://") === 0 ||
+        (l.indexOf("intent://") === 0 && l.indexOf("messenger") !== -1) ||
+        l.indexOf("com.facebook.orca") !== -1 ||
+        (l.indexOf("market://details") === 0 && l.indexOf("orca") !== -1) ||
+        (l.indexOf("play.google.com/store/apps/details") !== -1 && l.indexOf("com.facebook.orca") !== -1);
+    }
+
+    // Capture phase on document runs before Facebook's own bubble-phase
+    // click handlers on the anchor/button, regardless of attach order.
+    document.addEventListener("click", function (e) {
+      var el = e.target;
+      var link = el && el.closest ? el.closest("a[href]") : null;
+      if (link && isMessengerDeepLink(link.href)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      }
+    }, true);
+
+    var origOpen = window.open;
+    window.open = function (url) {
+      if (isMessengerDeepLink(url)) {
+        console.info("[Nobook] Blocked window.open to Messenger deep link:", url);
+        return null;
+      }
+      return origOpen.apply(window, arguments);
+    };
+
+    console.info("[Nobook] Messenger deep-link guard active");
+  } catch (err) {
+    console.error("[Nobook] Messenger guard injection failed:", err);
+  }
 })();
 """
 
@@ -724,6 +788,12 @@ fun NobookWebView(
     LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
             navigator.evaluateJavaScript(STORY_REEL_DOWNLOADER_SCRIPT) {}
+        }
+    }
+
+    LaunchedEffect(loadingState) {
+        if (loadingState is LoadingState.Finished) {
+            navigator.evaluateJavaScript(MESSENGER_GUARD_SCRIPT) {}
         }
     }
 
