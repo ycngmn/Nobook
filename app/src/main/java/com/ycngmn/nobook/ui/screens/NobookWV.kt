@@ -10,7 +10,6 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,13 +24,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
@@ -42,7 +39,6 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.ycngmn.nobook.R
-import com.ycngmn.nobook.ui.components.AiSidebarFab
 import com.ycngmn.nobook.ui.components.NetworkErrorDialog
 import com.ycngmn.nobook.ui.components.settings.SettingsDialog
 import com.ycngmn.nobook.ui.viewmodel.MainViewModel
@@ -1476,89 +1472,76 @@ fun NobookWebView(
     val barsInsets = WindowInsets.systemBars.asPaddingValues()
     val imeHeight = rememberImeHeight()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        WebView(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(themeColor)
-                .then(
-                    if (isImmersiveMode) {
-                        Modifier.padding(bottom = imeHeight)
-                    } else {
-                        Modifier.padding(
-                            top = barsInsets.calculateTopPadding(),
-                            bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
-                        )
-                    }
-                ),
-            state = state,
-            navigator = navigator,
-            platformWebViewParams = fileChooserWebViewParams(),
-            captureBackPresses = false,
-            onCreated = { webView ->
-
-                android.webkit.WebView.setWebContentsDebuggingEnabled(true)
-
-                val cookieManager = CookieManager.getInstance()
-                cookieManager.setAcceptCookie(true)
-                cookieManager.setAcceptThirdPartyCookies(webView, true)
-                cookieManager.flush()
-
-                state.webSettings.apply {
-                    isJavaScriptEnabled = true
-
-                    androidWebSettings.apply {
-                        //isDebugInspectorInfoEnabled = true
-                        domStorageEnabled = true
-                        hideDefaultVideoPoster = true
-                        mediaPlaybackRequiresUserGesture = false
-                    }
+    WebView(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(themeColor)
+            .then(
+                if (isImmersiveMode) {
+                    Modifier.padding(bottom = imeHeight)
+                } else {
+                    Modifier.padding(
+                        top = barsInsets.calculateTopPadding(),
+                        bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
+                    )
                 }
+            ),
+        state = state,
+        navigator = navigator,
+        platformWebViewParams = fileChooserWebViewParams(),
+        captureBackPresses = false,
+        onCreated = { webView ->
 
-                webView.apply {
-                    addJavascriptInterface(
-                        NobookSettings { settingsToggle = true },
-                        "SettingsBridge"
-                    )
-                    addJavascriptInterface(
-                        ThemeChange { viewModel.setThemeColor(Color(it)) },
-                        "ThemeBridge"
-                    )
-                    addJavascriptInterface(
-                        DownloadBridge(context),
-                        "DownloadBridge"
-                    )
-                    addJavascriptInterface(
-                        DownloadFolderBridge(context),
-                        "DownloadFolderBridge"
-                    )
-                    addJavascriptInterface(
-                        ClipboardBridge(context),
-                        "ClipboardBridge"
-                    )
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
 
-                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            val cookieManager = CookieManager.getInstance()
+            cookieManager.setAcceptCookie(true)
+            cookieManager.setAcceptThirdPartyCookies(webView, true)
+            cookieManager.flush()
 
-                    overScrollMode = View.OVER_SCROLL_NEVER
-                    isVerticalScrollBarEnabled = false
-                    isHorizontalScrollBarEnabled = false
+            state.webSettings.apply {
+                isJavaScriptEnabled = true
 
-                    settings.setSupportZoom(true)
-                    settings.builtInZoomControls = true
-                    settings.displayZoomControls = false
+                androidWebSettings.apply {
+                    //isDebugInspectorInfoEnabled = true
+                    domStorageEnabled = true
+                    hideDefaultVideoPoster = true
+                    mediaPlaybackRequiresUserGesture = false
                 }
             }
-        )
 
-        if (!isLoading) {
-            AiSidebarFab(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(
-                        end = 16.dp,
-                        bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight) + 16.dp
-                    )
-            )
+            webView.apply {
+                addJavascriptInterface(
+                    NobookSettings { settingsToggle = true },
+                    "SettingsBridge"
+                )
+                addJavascriptInterface(
+                    ThemeChange { viewModel.setThemeColor(Color(it)) },
+                    "ThemeBridge"
+                )
+                addJavascriptInterface(
+                    DownloadBridge(context),
+                    "DownloadBridge"
+                )
+                addJavascriptInterface(
+                    DownloadFolderBridge(context),
+                    "DownloadFolderBridge"
+                )
+                addJavascriptInterface(
+                    ClipboardBridge(context),
+                    "ClipboardBridge"
+                )
+
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+                overScrollMode = View.OVER_SCROLL_NEVER
+                isVerticalScrollBarEnabled = false
+                isHorizontalScrollBarEnabled = false
+
+                settings.setSupportZoom(true)
+                settings.builtInZoomControls = true
+                settings.displayZoomControls = false
+            }
         }
-    }
+    )
 }
