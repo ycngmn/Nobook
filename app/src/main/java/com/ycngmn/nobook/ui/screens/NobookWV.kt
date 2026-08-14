@@ -58,7 +58,13 @@ import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import com.ycngmn.nobook.utils.rememberAutoDesktop
 import com.ycngmn.nobook.utils.rememberImeHeight
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 
 private const val ANTI_RELOAD_SCRIPT = """
 (function () {
@@ -125,6 +131,59 @@ private fun sanitizeTrackingParams(url: String): String {
         }
         builder.build().toString()
     }.getOrDefault(url)
+}
+
+private val MONETIZED_SHORTLINK_HOSTS = setOf(
+    "s.shopee.vn", "shope.ee", "vn.shp.ee", "shp.ee",
+    "s.lazada.vn", "s.lazada.com", "lzd.co",
+    "vt.tiktok.com", "vm.tiktok.com"
+)
+
+/**
+ * True if [url]'s host is a known Shopee/Lazada/TikTok short-link redirector.
+ * These embed the affiliate/tracking code directly in the URL *path*
+ * (e.g. s.shopee.vn/AbCd1234), so stripping query params alone does not
+ * remove the monetized attribution -- the short code itself must be
+ * resolved server-side to discover the real destination.
+ */
+private fun isMonetizedShortLink(url: String): Boolean {
+    return runCatching {
+        val host = Uri.parse(url).host?.lowercase() ?: return false
+        MONETIZED_SHORTLINK_HOSTS.any { host == it || host.endsWith(".$it") }
+    }.getOrDefault(false)
+}
+
+/**
+ * Follows HTTP redirects (HEAD requests, no cookies/session attached) up to
+ * [maxHops] times to discover the true final destination of a short link,
+ * fully removing any affiliate/tracking code embedded in the short path.
+ * Must be called off the main thread.
+ */
+private fun resolveFinalUrl(startUrl: String, maxHops: Int = 5): String {
+    var current = startUrl
+    repeat(maxHops) {
+        val resolved = runCatching {
+            val conn = (URL(current).openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = false
+                requestMethod = "HEAD"
+                connectTimeout = 4000
+                readTimeout = 4000
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 10)")
+            }
+            val code = conn.responseCode
+            val location = conn.getHeaderField("Location")
+            conn.disconnect()
+            if (code in 300..399 && !location.isNullOrBlank()) {
+                if (location.startsWith("http", ignoreCase = true)) location
+                else Uri.parse(current).buildUpon().encodedPath(location).build().toString()
+            } else {
+                null
+            }
+        }.getOrNull()
+        if (resolved == null) return current
+        current = resolved
+    }
+    return current
 }
 
 private val DEFAULT_SITE_BLOCKLIST = setOf<String>(
@@ -1165,15 +1224,34 @@ fun NobookWebView(
                 ).show()
             } else {
                 val cleanUrl = sanitizeTrackingParams(externalUrl)
-                val intent = Intent(Intent.ACTION_VIEW, cleanUrl.toUri())
-                runCatching {
-                    context.startActivity(intent)
-                }.onFailure {
-                    Toast.makeText(
-                        context,
-                        resources.getString(R.string.not_supported),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                if (isMonetizedShortLink(cleanUrl)) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val resolved = runCatching { resolveFinalUrl(cleanUrl) }.getOrDefault(cleanUrl)
+                        val finalUrl = sanitizeTrackingParams(resolved)
+                        withContext(Dispatchers.Main) {
+                            val intent = Intent(Intent.ACTION_VIEW, finalUrl.toUri())
+                            runCatching {
+                                context.startActivity(intent)
+                            }.onFailure {
+                                Toast.makeText(
+                                    context,
+                                    resources.getString(R.string.not_supported),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                } else {
+                    val intent = Intent(Intent.ACTION_VIEW, cleanUrl.toUri())
+                    runCatching {
+                        context.startActivity(intent)
+                    }.onFailure {
+                        Toast.makeText(
+                            context,
+                            resources.getString(R.string.not_supported),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         }
