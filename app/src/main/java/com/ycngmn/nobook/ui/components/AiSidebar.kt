@@ -1,6 +1,7 @@
 package com.ycngmn.nobook.ui.components
 
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,13 +18,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -371,7 +371,6 @@ private fun AiChatContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AiSettingsDialog(
     provider: AiProvider,
@@ -383,7 +382,6 @@ private fun AiSettingsDialog(
     onSave: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
     var localModel by remember(model) { mutableStateOf(model) }
     var localKey by remember(apiKey) { mutableStateOf(apiKey) }
 
@@ -393,27 +391,27 @@ private fun AiSettingsDialog(
         text = {
             Column {
                 Text("Nha cung cap", style = MaterialTheme.typography.labelMedium)
-                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-                    OutlinedTextField(
-                        value = provider.label,
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    androidx.compose.material3.ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        AiProvider.values().forEach { p ->
-                            DropdownMenuItem(
-                                text = { Text(p.label) },
+                Column {
+                    AiProvider.values().forEach { p ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onProviderChange(p)
+                                    localModel = defaultModelFor(p)
+                                    onModelChange(defaultModelFor(p))
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = provider == p,
                                 onClick = {
                                     onProviderChange(p)
                                     localModel = defaultModelFor(p)
                                     onModelChange(defaultModelFor(p))
-                                    expanded = false
                                 }
                             )
+                            Text(p.label)
                         }
                     }
                 }
