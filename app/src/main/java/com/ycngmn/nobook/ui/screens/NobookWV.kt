@@ -145,227 +145,406 @@ private fun isMessengerWebPath(url: String): Boolean {
 }
 
 private const val STORY_REEL_DOWNLOADER_SCRIPT = """
+/*
+ * Script to add a global download button for any visible video/image on
+ * Facebook (feed, stories, reels, highlights, photo viewer). Falls back to
+ * scanning the page's own embedded JSON for a real playable URL when the
+ * <video> element uses a blob: src (MSE adaptive streaming).
+ * Original Author: @YeiversonYurgaky
+ */
 (function() {
-  var HOLD_TO_REVEAL_MS = 5000;
-  var BTN_LONGPRESS_MS = 700;
-  var AUTO_HIDE_MS = 5000;
-  var MOVE_CANCEL_THRESHOLD_PX = 12;
-  var holdTimer = null;
-  var activeBtn = null;
-  var hideTimer = null;
-  var startX = 0, startY = 0;
-  var boundMediaEls = (typeof WeakSet !== "undefined") ? new WeakSet() : null;
+  const CONFIG = {
+    buttonZIndex: 999999,
+    debug: false
+  };
 
-  function isMediaEligible(el) {
-    if (!el) return false;
-    if (el.tagName === "VIDEO") return true;
-    if (el.tagName === "IMG" && el.src && el.src.indexOf("fbcdn") !== -1) return true;
-    return false;
-  }
+  let isProcessing = false;
+  let currentContentContainer = null;
+  let lastDownloadedUrl = null;
+  const DOWNLOAD_BTN_ID = "nobook-global-downloader";
 
-  function findMediaTarget(start) {
-    var node = start;
-    while (node && node !== document.body) {
-      if (isMediaEligible(node)) return node;
-      if (node.querySelector) {
-        var v = node.querySelector("video");
-        if (v) return v;
-        var img = node.querySelector('img[src*="fbcdn"]');
-        if (img) return img;
-      }
-      node = node.parentElement;
+  const SELECTORS = {
+    mediaElements: [
+      'div[role="dialog"] video:not([hidden])',
+      'div[role="dialog"] img[src*="fbcdn"]:not([width="16"]):not([hidden])',
+      'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"] video',
+      'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"] img[src*="fbcdn"]',
+      'div[data-pagelet="Story"] video',
+      'div[aria-label*="reel"] video',
+      'div[data-pagelet="ProfilePhoto"] img[src*="fbcdn"]',
+      'div[role="article"] video:not([hidden])'
+    ],
+    containers: [
+      'div[role="dialog"]',
+      'div[data-pagelet="Story"]',
+      'div[aria-label*="story"]',
+      '.story-viewer',
+      '.story_viewer',
+      'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"]',
+      'div[data-pagelet="ProfilePhoto"]',
+      'div[aria-label*="photo"]',
+      'div[data-pagelet*="ProfileAppSection"]',
+      'div[role="article"]'
+    ],
+    storyIndicators: [
+      'div[data-sigil="story-viewer"]',
+      'div[data-sigil="story-popup-header"]',
+      'div[data-sigil="story-tray-item"]',
+      ".story_body_container",
+      ".story_viewer",
+      ".story-container",
+      'div[aria-label*="highlight"]',
+      'div[aria-label*="Highlight"]',
+      'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"]',
+      'div[data-pagelet="ProfilePhoto"]'
+    ]
+  };
+
+  const debugLog = (...args) => CONFIG.debug && console.log("[ContentDownloader]", ...args);
+
+  const isElementVisible = (element) => {
+    const rect = element.getBoundingClientRect();
+    return (
+      rect.width > 0 && rect.height > 0 &&
+      rect.bottom > 0 && rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right > 0 && rect.left < (window.innerWidth || document.documentElement.clientWidth)
+    );
+  };
+
+  const findContentContainer = (element) => {
+    if (!element) return null;
+    for (const selector of SELECTORS.containers) {
+      const container = element.closest(selector);
+      if (container) return container;
     }
-    return null;
-  }
+    return element.parentElement;
+  };
 
-  function extractPlayableUrlFromPage() {
+  const getCurrentMediaElement = () => {
+    for (const selector of SELECTORS.mediaElements) {
+      const elements = document.querySelectorAll(selector);
+      for (const element of elements) {
+        if (isElementVisible(element) && (element.src || element.tagName === "VIDEO")) {
+          return element;
+        }
+      }
+    }
+    return Array.from(
+      document.querySelectorAll('video:not([hidden]), img[src*="fbcdn"]:not([width="16"]):not([hidden])')
+    ).find(el => {
+      const rect = el.getBoundingClientRect();
+      return isElementVisible(el) && rect.width > 100 && rect.height > 100;
+    });
+  };
+
+  const extractPlayableUrlFromPage = () => {
     try {
-      var html = document.documentElement.innerHTML;
-      var patterns = [
+      const html = document.documentElement.innerHTML;
+      const patterns = [
         /"browser_native_hd_url":"([^"]+)"/,
         /"browser_native_sd_url":"([^"]+)"/,
         /"playable_url_quality_hd":"([^"]+)"/,
         /"playable_url":"([^"]+)"/
       ];
-      for (var i = 0; i < patterns.length; i++) {
-        var m = html.match(patterns[i]);
+      for (const p of patterns) {
+        const m = html.match(p);
         if (m && m[1]) {
-          return m[1].split("\\/").join("/").split("\\u0025").join("%");
+          return m[1].replace(/\\\//g, '/').replace(/\\u0025/g, '%');
         }
       }
-    } catch (e) {}
+    } catch (e) { /* ignore */ }
     return null;
-  }
+  };
 
-  function getBestVideoSource(videoElement) {
+  const getBestVideoSource = (videoElement) => {
     try {
-      var sourceEls = videoElement.querySelectorAll("source");
-      var best = null, bestScore = -1;
-      for (var i = 0; i < sourceEls.length; i++) {
-        var s = sourceEls[i];
-        if (!s.src) continue;
-        var width = parseInt(s.getAttribute("data-width") || s.getAttribute("width") || "0", 10);
-        var bm = s.src.match(/[?&](?:br|bitrate|vencode_tag)=(\d+)/);
-        var score = width || (bm ? parseInt(bm[1], 10) : 0);
-        if (score > bestScore) { bestScore = score; best = s.src; }
+      const sources = Array.from(videoElement.querySelectorAll("source"))
+        .map(s => ({
+          url: s.src,
+          width: parseInt(s.getAttribute("data-width") || s.getAttribute("width") || "0", 10),
+          bitrateMatch: (s.src.match(/[?&](?:br|bitrate|vencode_tag)=(\d+)/) || [])[1]
+        }))
+        .filter(s => s.url);
+
+      if (sources.length > 0) {
+        sources.sort((a, b) => {
+          const scoreA = a.width || parseInt(a.bitrateMatch || "0", 10);
+          const scoreB = b.width || parseInt(b.bitrateMatch || "0", 10);
+          return scoreB - scoreA;
+        });
+        if (sources[0].width || sources[0].bitrateMatch) return sources[0].url;
       }
-      if (best) return best;
-    } catch (e) {}
-    var candidate = videoElement.currentSrc || videoElement.src;
+    } catch (e) { /* fall through to default */ }
+
+    const candidate = videoElement.currentSrc || videoElement.src;
     if (!candidate || candidate.indexOf("blob:") === 0) {
-      var fb = extractPlayableUrlFromPage();
-      if (fb) return fb;
+      const fallback = extractPlayableUrlFromPage();
+      if (fallback) return fallback;
     }
     return candidate;
-  }
+  };
 
-  function downloadMedia(url) {
+  const downloadMedia = (url) => {
     if (!url || url.indexOf("blob:") === 0) {
       console.error("[Nobook] Cannot download blob/empty URL directly:", url);
       return;
     }
-    fetch(url).then(function(r) { return r.blob(); }).then(function(blob) {
-      if (window.DownloadBridge && window.DownloadBridge.downloadBase64File) {
-        var reader = new FileReader();
-        reader.onloadend = function() {
-          if (reader.result) {
-            window.DownloadBridge.downloadBase64File(reader.result, blob.type || "image/jpeg");
-          }
-        };
-        reader.readAsDataURL(blob);
-      }
-    }).catch(function(err) { console.error("Error downloading media:", err); });
-  }
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        if (window.DownloadBridge && window.DownloadBridge.downloadBase64File) {
+          const reader = new FileReader();
+          reader.onloadend = function() {
+            if (reader.result) {
+              window.DownloadBridge.downloadBase64File(
+                reader.result,
+                blob.type || "image/jpeg"
+              );
+            }
+          };
+          reader.readAsDataURL(blob);
+        }
+      })
+      .catch(err => {
+        console.error("Error downloading media:", err);
+      });
+  };
 
-  function downloadFromElement(mediaEl) {
-    if (!mediaEl) return;
-    if (mediaEl.tagName === "VIDEO") {
-      downloadMedia(getBestVideoSource(mediaEl));
-    } else if (mediaEl.src) {
-      downloadMedia(mediaEl.src);
-    } else {
-      var fb = extractPlayableUrlFromPage();
-      if (fb) downloadMedia(fb);
+  const extractAndDownloadMedia = () => {
+    const mediaElement = getCurrentMediaElement();
+
+    if (mediaElement && mediaElement.tagName === "VIDEO") {
+      const bestUrl = getBestVideoSource(mediaElement);
+      downloadMedia(bestUrl);
+      lastDownloadedUrl = bestUrl;
+      return;
     }
-  }
 
-  function removeButton() {
-    if (activeBtn) { activeBtn.parentNode.removeChild(activeBtn); activeBtn = null; }
-    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-  }
+    if (mediaElement && mediaElement.src) {
+      downloadMedia(mediaElement.src);
+      lastDownloadedUrl = mediaElement.src;
+      return;
+    }
 
-  function showButtonFor(mediaEl) {
-    removeButton();
-    var rect = mediaEl.getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) return;
-    var btn = document.createElement("button");
-    btn.id = "nobook-contextual-downloader";
-    var top = Math.max(rect.top + 8, 8);
-    var left = Math.min(Math.max(rect.right - 48, 8), window.innerWidth - 48);
-    btn.style.position = "fixed";
-    btn.style.top = top + "px";
-    btn.style.left = left + "px";
-    btn.style.width = "42px";
-    btn.style.height = "42px";
-    btn.style.borderRadius = "50%";
-    btn.style.border = "none";
-    btn.style.zIndex = "999999";
-    btn.style.backgroundColor = "rgba(0,0,0,0.75)";
-    btn.style.color = "white";
-    btn.style.fontSize = "20px";
-    btn.style.boxShadow = "0 2px 6px rgba(0,0,0,0.4)";
-    btn.textContent = "\u2B07";
-    btn.setAttribute("aria-label", "Tai xuong (giu de chon thu muc luu)");
+    const container = currentContentContainer || document.body;
 
-    var btnPressTimer = null;
-    btn.addEventListener("click", function() {
-      downloadFromElement(mediaEl);
-      removeButton();
+    const videoElement = container.querySelector("video:not([hidden])");
+    if (videoElement) {
+      const bestUrl = getBestVideoSource(videoElement);
+      downloadMedia(bestUrl);
+      lastDownloadedUrl = bestUrl;
+      return;
+    }
+
+    const images = Array.from(container.querySelectorAll("img"))
+      .filter(img =>
+        img.src &&
+        !img.src.includes("data:image") &&
+        img.src !== lastDownloadedUrl
+      )
+      .filter(img => {
+        const rect = img.getBoundingClientRect();
+        return rect.width >= 100 && rect.height >= 100 && isElementVisible(img);
+      })
+      .sort((a, b) => {
+        const areaA = a.getBoundingClientRect().width * a.getBoundingClientRect().height;
+        const areaB = b.getBoundingClientRect().width * b.getBoundingClientRect().height;
+        return areaB - areaA;
+      });
+
+    if (images.length > 0) {
+      downloadMedia(images[0].src);
+      lastDownloadedUrl = images[0].src;
+      return;
+    }
+
+    const backgroundElements = Array.from(container.querySelectorAll("*"));
+
+    for (const el of backgroundElements) {
+      const style = window.getComputedStyle(el);
+      const bgImage = style.backgroundImage;
+
+      if (
+        bgImage &&
+        bgImage !== "none" &&
+        (bgImage.includes("fbcdn.net") || bgImage.includes("fbsbx.com"))
+      ) {
+        const imageUrl = bgImage.replace(/^url\(['"](.+)['"]\)$/, "$1");
+        downloadMedia(imageUrl);
+        lastDownloadedUrl = imageUrl;
+        return;
+      }
+    }
+
+    const fallback = extractPlayableUrlFromPage();
+    if (fallback) {
+      downloadMedia(fallback);
+      lastDownloadedUrl = fallback;
+      return;
+    }
+
+    debugLog("No media content found to download");
+  };
+
+  const createDownloadButton = () => {
+    const css = `
+      #${'$'}{DOWNLOAD_BTN_ID} {
+        position: fixed;
+        top: 70px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 50%;
+        z-index: ${'$'}{CONFIG.buttonZIndex};
+        border: none;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        cursor: pointer;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 960 960" fill="white"><path d="M480,640L280,440L336,384L440,488L440,160L520,160L520,488L624,384L680,440L480,640ZM240,800Q207,800 183.5,776.5Q160,753 160,720L160,600L240,600L240,720Q240,720 240,720Q240,720 240,720L720,720Q720,720 720,720Q720,720 720,720L720,600L800,600L800,720Q800,753 776.5,776.5Q753,800 720,800L240,800Z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 24px;
+      }
+      #${'$'}{DOWNLOAD_BTN_ID}.visible {
+        display: flex !important;
+      }
+    `;
+
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.appendChild(style);
+
+    const btn = document.createElement("button");
+    btn.id = DOWNLOAD_BTN_ID;
+    btn.setAttribute("aria-label", "Download content (giu de chon thu muc luu)");
+
+    btn.addEventListener("click", () => {
+      currentContentContainer = null;
+      const mediaElement = getCurrentMediaElement();
+      if (mediaElement) {
+        currentContentContainer = findContentContainer(mediaElement);
+      }
+      extractAndDownloadMedia();
     });
-    function startBtnLongPress() {
-      btnPressTimer = setTimeout(function() {
+
+    let pressTimer = null;
+    let longPressTriggered = false;
+    const startPress = () => {
+      longPressTriggered = false;
+      pressTimer = setTimeout(() => {
+        longPressTriggered = true;
         if (window.DownloadFolderBridge && window.DownloadFolderBridge.pickFolder) {
           window.DownloadFolderBridge.pickFolder();
         }
-      }, BTN_LONGPRESS_MS);
-    }
-    function endBtnLongPress() { if (btnPressTimer) clearTimeout(btnPressTimer); }
-    btn.addEventListener("touchstart", startBtnLongPress, { passive: true });
-    btn.addEventListener("touchend", endBtnLongPress);
-    btn.addEventListener("mousedown", startBtnLongPress);
-    btn.addEventListener("mouseup", endBtnLongPress);
+      }, 700);
+    };
+    const endPress = () => { if (pressTimer) clearTimeout(pressTimer); };
+    btn.addEventListener("touchstart", startPress, { passive: true });
+    btn.addEventListener("touchend", endPress);
+    btn.addEventListener("mousedown", startPress);
+    btn.addEventListener("mouseup", endPress);
 
     document.body.appendChild(btn);
-    activeBtn = btn;
-    hideTimer = setTimeout(removeButton, AUTO_HIDE_MS);
+
+    return btn;
+  };
+
+  const hideOpenAppButtons = (root = document) => {
+    const buttons = root.querySelectorAll('div[role="button"]');
+    buttons.forEach(button => {
+      const flAcDiv = button.querySelector('div.fl.ac');
+      if (flAcDiv) {
+        const span = flAcDiv.querySelector('span');
+        if (span && span.textContent.includes('\u{F196C}')) {
+          button.style.display = 'none';
+        }
+      }
+    });
+  };
+
+  const updateButtonVisibility = () => {
+    let btn = document.getElementById(DOWNLOAD_BTN_ID);
+    if (!btn) btn = createDownloadButton();
+
+    hideOpenAppButtons();
+
+    const mediaElement = getCurrentMediaElement();
+    if (mediaElement) {
+      currentContentContainer = findContentContainer(mediaElement);
+      btn.classList.add("visible");
+      return;
+    }
+
+    const highlightedStoryContainer = document.querySelector(
+      'div.x1ey2m1c.x9f619.xds687c.x17qophe.x10l6tqk.x13vifvy[role="presentation"]'
+    );
+
+    if (highlightedStoryContainer) {
+      const mediaInHighlight = highlightedStoryContainer.querySelector(
+        'video, img[src*="fbcdn"]'
+      );
+
+      if (mediaInHighlight && isElementVisible(mediaInHighlight)) {
+        currentContentContainer = highlightedStoryContainer;
+        btn.classList.add("visible");
+        return;
+      }
+    }
+
+    btn.classList.remove("visible");
+    currentContentContainer = null;
+  };
+
+  const processPage = () => {
+    if (isProcessing) return;
+    isProcessing = true;
+    try {
+      updateButtonVisibility();
+    } finally {
+      isProcessing = false;
+    }
+  };
+
+  const init = () => {
+    currentContentContainer = null;
+    lastDownloadedUrl = null;
+    processPage();
+
+    const observer = new MutationObserver(mutations => {
+      const hasRelevantChanges = mutations.some(
+        mutation =>
+          (mutation.type === "childList" && mutation.addedNodes.length > 0) ||
+          (mutation.type === "attributes" &&
+            (mutation.target.tagName === "VIDEO" ||
+             mutation.target.tagName === "IMG"))
+      );
+      if (hasRelevantChanges) processPage();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src", "style", "class"]
+    });
+
+    setInterval(processPage, 1000);
+
+    window.addEventListener("scroll", () => {
+      requestAnimationFrame(processPage);
+    }, { passive: true });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
-
-  function getPoint(e) {
-    if (e.touches && e.touches.length > 0) return e.touches[0];
-    if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0];
-    return e;
-  }
-
-  function beginHoldFor(target, e) {
-    var p = getPoint(e);
-    startX = p.clientX; startY = p.clientY;
-    cancelHold();
-    holdTimer = setTimeout(function() { showButtonFor(target); }, HOLD_TO_REVEAL_MS);
-  }
-
-  function startHold(e) {
-    if (e.target && e.target.id === "nobook-contextual-downloader") return;
-    var target = findMediaTarget(e.target);
-    if (!target) return;
-    beginHoldFor(target, e);
-  }
-
-  function handleMove(e) {
-    if (!holdTimer) return;
-    var p = getPoint(e);
-    var dx = Math.abs(p.clientX - startX);
-    var dy = Math.abs(p.clientY - startY);
-    if (dx > MOVE_CANCEL_THRESHOLD_PX || dy > MOVE_CANCEL_THRESHOLD_PX) cancelHold();
-  }
-
-  function cancelHold() {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-  }
-
-  // Document-level capture listeners: catch gestures that bubble/capture normally.
-  document.addEventListener("touchstart", startHold, { passive: true, capture: true });
-  document.addEventListener("touchend", cancelHold, { passive: true, capture: true });
-  document.addEventListener("touchmove", handleMove, { passive: true, capture: true });
-  document.addEventListener("mousedown", startHold, { capture: true });
-  document.addEventListener("mouseup", cancelHold, { capture: true });
-  document.addEventListener("click", function(e) {
-    if (activeBtn && e.target !== activeBtn) removeButton();
-  }, true);
-
-  // Element-level listeners bound directly on each <video>/<img>: needed because
-  // native browser media controls (controls=true) render in a UA shadow root and
-  // can swallow touch input before it is observable at the document level.
-  function bindDirectListeners(el) {
-    if (!boundMediaEls) return;
-    if (boundMediaEls.has(el)) return;
-    boundMediaEls.add(el);
-    el.addEventListener("touchstart", function(e) { beginHoldFor(el, e); }, { passive: true, capture: true });
-    el.addEventListener("touchend", cancelHold, { passive: true, capture: true });
-    el.addEventListener("touchmove", handleMove, { passive: true, capture: true });
-    el.addEventListener("mousedown", function(e) { beginHoldFor(el, e); }, { capture: true });
-    el.addEventListener("mouseup", cancelHold, { capture: true });
-  }
-
-  function scanAndBind() {
-    document.querySelectorAll("video").forEach(bindDirectListeners);
-    document.querySelectorAll('img[src*="fbcdn"]').forEach(bindDirectListeners);
-  }
-
-  scanAndBind();
-  var bindObserver = new MutationObserver(function() { scanAndBind(); });
-  bindObserver.observe(document.body, { childList: true, subtree: true });
-
-  console.info("[Nobook] Contextual media downloader active (hold 5s on photo/video)");
 })();
 """
 
@@ -896,15 +1075,11 @@ fun NobookWebView(
     LaunchedEffect(state.lastLoadedUrl, isDesktop) {
         val currentUrl = state.lastLoadedUrl ?: return@LaunchedEffect
         if (isDesktop) {
-            // Global desktop layout already covers Messenger; nothing extra needed.
             if (messengerDesktopUaApplied) messengerDesktopUaApplied = false
             return@LaunchedEffect
         }
         val onMessengerPath = isMessengerWebPath(currentUrl)
         if (onMessengerPath && !messengerDesktopUaApplied) {
-            // Facebook serves an "install the app" interstitial to mobile User-Agents
-            // for Messenger paths. Forcing a desktop UA (only for this navigation)
-            // makes Facebook return the real web Messenger UI instead.
             messengerDesktopUaApplied = true
             state.nativeWebView.settings.userAgentString = DESKTOP_USER_AGENT
             navigator.reload()
@@ -942,6 +1117,8 @@ fun NobookWebView(
         platformWebViewParams = fileChooserWebViewParams(),
         captureBackPresses = false,
         onCreated = { webView ->
+
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
 
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
