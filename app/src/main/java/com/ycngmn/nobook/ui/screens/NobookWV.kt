@@ -969,19 +969,37 @@ private const val CONTRAST_GUARD_SCRIPT = """
       return 0.2126 * r + 0.7152 * g + 0.0722 * b;
     }
 
+    function getEffectiveBg(el) {
+      var node = el;
+      var depth = 0;
+      while (node && depth < 8) {
+        var bg = window.getComputedStyle(node).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+        node = node.parentElement;
+        depth++;
+      }
+      return null;
+    }
+
     function fixLowContrast(root) {
-      var nodes = root.querySelectorAll('textarea, [contenteditable="true"], div, span, input');
+      var nodes = root.querySelectorAll('textarea, input, [contenteditable], div, span');
       nodes.forEach(function (el) {
         try {
           var cs = window.getComputedStyle(el);
-          var bg = cs.backgroundColor;
           var color = cs.color;
-          if (bg === 'rgba(0, 0, 0, 0)') return;
-          var lb = luminance(bg);
           var lc = luminance(color);
-          if (lb === null || lc === null) return;
-          if (Math.abs(lb - lc) < 0.12 && lb < 0.25) {
+          if (lc === null) return;
+
+          var isEditable = el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.hasAttribute('contenteditable');
+          var bg = isEditable ? getEffectiveBg(el) : cs.backgroundColor;
+          if (!bg || bg === 'rgba(0, 0, 0, 0)') return;
+
+          var lb = luminance(bg);
+          if (lb === null) return;
+
+          if (Math.abs(lb - lc) < 0.15 && lb < 0.3) {
             el.style.setProperty('color', '#ffffff', 'important');
+            el.style.setProperty('caret-color', '#ffffff', 'important');
           }
         } catch (e) { /* ignore per-node errors */ }
       });
@@ -991,7 +1009,7 @@ private const val CONTRAST_GUARD_SCRIPT = """
     run();
     var observer = new MutationObserver(function () { run(); });
     observer.observe(document.body, { childList: true, subtree: true });
-    var intervalId = setInterval(run, 1500);
+    var intervalId = setInterval(run, 1000);
 
     console.info('[Nobook] Contrast guard active');
   } catch (err) {
