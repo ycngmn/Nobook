@@ -20,7 +20,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -401,12 +400,11 @@ private fun AiSettingsDialog(
                         readOnly = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    ExposedDropdownMenuDefaults.let { }
                     androidx.compose.material3.ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        AiProvider.entries.forEach { p ->
+                        AiProvider.values().forEach { p ->
                             DropdownMenuItem(
                                 text = { Text(p.label) },
                                 onClick = {
