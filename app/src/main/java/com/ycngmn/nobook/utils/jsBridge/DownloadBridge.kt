@@ -4,8 +4,10 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Base64
 import android.webkit.JavascriptInterface
@@ -17,6 +19,30 @@ import java.io.File
 import java.io.FileOutputStream
 
 class DownloadBridge(private val context: Context) {
+
+    private fun getCustomFolderUri(): Uri? {
+        val stored = context.getSharedPreferences("nobook_prefs", Context.MODE_PRIVATE)
+            .getString("download_folder_uri", null) ?: return null
+        return runCatching { Uri.parse(stored) }.getOrNull()
+    }
+
+    private fun saveToCustomFolder(
+        folderUri: Uri,
+        fileName: String,
+        mimeType: String,
+        data: ByteArray
+    ): Boolean {
+        return runCatching {
+            val docId = DocumentsContract.getTreeDocumentId(folderUri)
+            val dirUri = DocumentsContract.buildDocumentUriUsingTree(folderUri, docId)
+            val newFileUri = DocumentsContract.createDocument(
+                context.contentResolver, dirUri, mimeType, fileName
+            ) ?: return false
+            context.contentResolver.openOutputStream(newFileUri)?.use { it.write(data) }
+            true
+        }.getOrDefault(false)
+    }
+
     @JavascriptInterface
     fun downloadBase64File(base64Data: String, mimeType: String) {
         runCatching {
@@ -31,37 +57,42 @@ class DownloadBridge(private val context: Context) {
 
             val data = Base64.decode(base64Data.split(",")[1], Base64.DEFAULT)
 
-            // Determine if it's an image or video
             val isImage = mimeType.startsWith("image/")
             val isVideo = mimeType.startsWith("video/")
 
             val (finalData, finalMimeType, extension) = when {
                 isImage -> {
-                    // Convert images to PNG for maximum compatibility
                     val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
                     if (bitmap != null) {
                         val outputStream = ByteArrayOutputStream()
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                         Triple(outputStream.toByteArray(), "image/png", "png")
                     } else {
-                        // If bitmap decoding fails, use original data
                         val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
                         Triple(data, mimeType, ext)
                     }
                 }
                 isVideo -> {
-                    // Keep videos as-is
                     val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "mp4"
                     Triple(data, mimeType, ext)
                 }
                 else -> {
-                    // Unknown type, keep as-is
                     val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
                     Triple(data, mimeType, ext)
                 }
             }
 
             val fileName = "${System.currentTimeMillis()}.$extension"
+
+            val customFolder = getCustomFolderUri()
+            if (customFolder != null && saveToCustomFolder(customFolder, fileName, finalMimeType, finalData)) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.saved_to_downloads),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val contentValues = ContentValues().apply {

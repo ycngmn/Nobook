@@ -7,6 +7,8 @@ import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +48,8 @@ import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.jsBridge.ClipboardBridge
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
+import com.ycngmn.nobook.utils.jsBridge.DownloadFolderBridge
+import com.ycngmn.nobook.utils.jsBridge.DownloadFolderPicker
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import com.ycngmn.nobook.utils.rememberAutoDesktop
@@ -126,7 +131,9 @@ private fun isBlockedSite(url: String): Boolean {
 private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 /*
  * Script to add a global download button for any visible video/image on
- * Facebook (feed, stories, reels, highlights, photo viewer).
+ * Facebook (feed, stories, reels, highlights, photo viewer). Falls back to
+ * scanning the page's own embedded JSON for a real playable URL when the
+ * <video> element uses a blob: src (MSE adaptive streaming).
  * Original Author: @YeiversonYurgaky
  */
 (function() {
@@ -201,7 +208,7 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
     for (const selector of SELECTORS.mediaElements) {
       const elements = document.querySelectorAll(selector);
       for (const element of elements) {
-        if (isElementVisible(element) && element.src) {
+        if (isElementVisible(element) && (element.src || element.tagName === "VIDEO")) {
           return element;
         }
       }
@@ -210,29 +217,8 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
       document.querySelectorAll('video:not([hidden]), img[src*="fbcdn"]:not([width="16"]):not([hidden])')
     ).find(el => {
       const rect = el.getBoundingClientRect();
-      return isElementVisible(el) && rect.width > 100 && rect.height > 100 && el.src;
+      return isElementVisible(el) && rect.width > 100 && rect.height > 100;
     });
-  };
-
-  const isInStoryOrReelView = () => {
-    const url = window.location.href;
-    if (
-      url.includes("/stories/") ||
-      url.includes("/reel/") ||
-      url.includes("/videos/") ||
-      url.includes("/watch/?") ||
-      url.includes("/photo") ||
-      url.includes("/photos/") ||
-      url.includes("/highlights/")
-    ) {
-      return true;
-    }
-    for (const selector of SELECTORS.storyIndicators) {
-      if (document.querySelector(selector)) {
-        return true;
-      }
-    }
-    return false;
   };
 
   const extractPlayableUrlFromPage = () => {
@@ -419,28 +405,33 @@ private const val STORY_REEL_DOWNLOADER_SCRIPT = """
 
     const btn = document.createElement("button");
     btn.id = DOWNLOAD_BTN_ID;
-    btn.setAttribute("aria-label", "Download content");
+    btn.setAttribute("aria-label", "Download content (giu de chon thu muc luu)");
 
     btn.addEventListener("click", () => {
       currentContentContainer = null;
-
       const mediaElement = getCurrentMediaElement();
       if (mediaElement) {
         currentContentContainer = findContentContainer(mediaElement);
       }
-
       extractAndDownloadMedia();
     });
 
     let pressTimer = null;
-    btn.addEventListener("touchstart", () => {
+    let longPressTriggered = false;
+    const startPress = () => {
+      longPressTriggered = false;
       pressTimer = setTimeout(() => {
+        longPressTriggered = true;
         if (window.DownloadFolderBridge && window.DownloadFolderBridge.pickFolder) {
           window.DownloadFolderBridge.pickFolder();
         }
       }, 700);
-    }, { passive: true });
-    btn.addEventListener("touchend", () => { if (pressTimer) clearTimeout(pressTimer); });
+    };
+    const endPress = () => { if (pressTimer) clearTimeout(pressTimer); };
+    btn.addEventListener("touchstart", startPress, { passive: true });
+    btn.addEventListener("touchend", endPress);
+    btn.addEventListener("mousedown", startPress);
+    btn.addEventListener("mouseup", endPress);
 
     document.body.appendChild(btn);
 
@@ -811,6 +802,29 @@ fun NobookWebView(
     val activity = LocalActivity.current
     val resources = LocalResources.current
 
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            }
+            context.getSharedPreferences("nobook_prefs", android.content.Context.MODE_PRIVATE)
+                .edit()
+                .putString("download_folder_uri", uri.toString())
+                .apply()
+            Toast.makeText(context, "Da chon thu muc luu tai xuong moi", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        DownloadFolderPicker.onPickRequested = { folderPickerLauncher.launch(null) }
+        onDispose { DownloadFolderPicker.onPickRequested = null }
+    }
+
     val state = rememberSaveableWebViewState(url)
     val navigator = rememberWebViewNavigator(
         requestInterceptor = ExternalRequestInterceptor { externalUrl ->
@@ -1067,6 +1081,10 @@ fun NobookWebView(
                 addJavascriptInterface(
                     DownloadBridge(context),
                     "DownloadBridge"
+                )
+                addJavascriptInterface(
+                    DownloadFolderBridge(context),
+                    "DownloadFolderBridge"
                 )
                 addJavascriptInterface(
                     ClipboardBridge(context),
