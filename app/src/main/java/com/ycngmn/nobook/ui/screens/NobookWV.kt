@@ -1,11 +1,14 @@
 package com.ycngmn.nobook.ui.screens
 
 import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +33,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
@@ -44,248 +51,144 @@ import com.ycngmn.nobook.utils.ExternalRequestInterceptor
 import com.ycngmn.nobook.utils.fileChooserWebViewParams
 import com.ycngmn.nobook.utils.jsBridge.ClipboardBridge
 import com.ycngmn.nobook.utils.jsBridge.DownloadBridge
+import com.ycngmn.nobook.utils.jsBridge.DownloadFolderBridge
+import com.ycngmn.nobook.utils.jsBridge.DownloadFolderPicker
 import com.ycngmn.nobook.utils.jsBridge.NobookSettings
 import com.ycngmn.nobook.utils.jsBridge.ThemeChange
 import com.ycngmn.nobook.utils.rememberAutoDesktop
 import com.ycngmn.nobook.utils.rememberImeHeight
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
+
+private const val ANTI_RELOAD_SCRIPT = """
+(function () {
+  try {
+    if (window.__nobookAntiReloadActive) return;
+    window.__nobookAntiReloadActive = true;
+    var defineAlways = function (obj, prop, value) {
+      try { Object.defineProperty(obj, prop, { configurable: true, get: function () { return value; } }); } catch (e) {}
+    };
+    defineAlways(document, "visibilityState", "visible");
+    defineAlways(document, "hidden", false);
+    defineAlways(document, "webkitVisibilityState", "visible");
+    defineAlways(document, "webkitHidden", false);
+    var blocked = ["visibilitychange", "webkitvisibilitychange", "blur", "pagehide", "freeze"];
+    var origAdd = EventTarget.prototype.addEventListener;
+    var origDispatch = EventTarget.prototype.dispatchEvent;
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
+      if (blocked.indexOf(type) !== -1) return;
+      return origAdd.call(this, type, listener, options);
+    };
+    EventTarget.prototype.dispatchEvent = function (evt) {
+      if (evt && blocked.indexOf(evt.type) !== -1) return true;
+      return origDispatch.call(this, evt);
+    };
+    window.onblur = null;
+    window.onpagehide = null;
+    document.onvisibilitychange = null;
+    Object.defineProperty(document, "hasFocus", { configurable: true, value: function () { return true; } });
+    console.info("[Nobook] Anti-Reload guard active");
+  } catch (err) {
+    console.error("[Nobook] Anti-Reload injection failed:", err);
+  }
+})();
+"""
+
+private const val PERFORMANCE_OPTIMIZATION_SCRIPT = """
+(function () {
+  try {
+    if (window.__nobookPerformanceOptActive) return;
+    window.__nobookPerformanceOptActive = true;
+    var CULL_CSS = `div[role="article"], div[data-pagelet^="FeedUnit"] { content-visibility: auto; contain-intrinsic-size: 600px 400px; }`;
+    var style = document.createElement('style');
+    style.setAttribute('data-nobook-perf', '1');
+    style.textContent = CULL_CSS;
+    document.head.appendChild(style);
+    var observedVideos = new WeakSet();
+    var handleIntersections = function (entries) {
+      entries.forEach(function (entry) {
+        var video = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio > 0.25) {
+          if (video.hasAttribute('data-nobook-paused')) {
+            video.removeAttribute('data-nobook-paused');
+            video.preload = 'auto';
+            if (video.dataset.nobookWasPlaying === '1') {
+              var p = video.play();
+              if (p && typeof p.catch === 'function') p.catch(function () {});
+            }
+          }
+        } else {
+          if (!video.paused) { video.dataset.nobookWasPlaying = '1'; video.pause(); } else { video.dataset.nobookWasPlaying = '0'; }
+          video.setAttribute('data-nobook-paused', '1');
+          video.preload = 'none';
+        }
+      });
+    };
+    var io = new IntersectionObserver(handleIntersections, { root: null, rootMargin: '200px 0px', threshold: [0, 0.25, 0.5] });
+    var observeVideos = function () {
+      document.querySelectorAll('video').forEach(function (v) {
+        if (observedVideos.has(v)) return;
+        observedVideos.add(v);
+        io.observe(v);
+      });
+    };
+    observeVideos();
+    var mo = new MutationObserver(function () { observeVideos(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+    console.info('[Nobook] Performance optimization (DOM culling + video IntersectionObserver) active');
+  } catch (err) {
+    console.error('[Nobook] Performance optimization injection failed:', err);
+  }
+})();
+"""
 
 @Composable
 fun NobookWebView(
     url: String,
     settingsVM: SettingsViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val activity = LocalActivity.current
-    val resources = LocalResources.current
-
+    val lifecycleOwner = LocalLifecycleOwner.current
     val state = rememberSaveableWebViewState(url)
-    val navigator = rememberWebViewNavigator(
-        requestInterceptor = ExternalRequestInterceptor { externalUrl ->
-            val intent = Intent(Intent.ACTION_VIEW, externalUrl.toUri())
-            runCatching {
-                context.startActivity(intent)
-            }.onFailure {
-                Toast.makeText(
-                    context,
-                    resources.getString(R.string.not_supported),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    )
-
-    LaunchedEffect(navigator) {
-        val bundle = state.viewState
-        if (bundle == null) {
-            navigator.loadUrl(url)
-        }
-    }
-
-    // allow exiting while scrolling to top.
-    var exitScroll by remember { mutableStateOf(false) }
-    BackHandler {
-        if (exitScroll) {
-            activity?.finish()
-        } else {
-            navigator.evaluateJavaScript("backHandlerNB();") {
-                val backHandled = it.removeSurrounding("\"")
-                when (backHandled) {
-                    "false" -> {
-                        if (navigator.canGoBack) {
-                            navigator.navigateBack()
-                        } else {
-                            activity?.finish()
-                        }
-                    }
-                    "exit" -> activity?.finish()
-                    "scrolling" -> exitScroll = true
-                }
-            }
-        }
-    }
-
-    LaunchedEffect(exitScroll) {
-        if (exitScroll) {
-            delay(800)
-            exitScroll = false
-        }
-    }
-
-    val isDesktop by settingsVM.desktopLayout.collectAsState()
-    val isAutoRevert by settingsVM.isRevertDesktop.collectAsState()
-    val isAutoDesktop = rememberAutoDesktop()
-
-    LaunchedEffect(Unit) {
-        if (isAutoDesktop && !isDesktop) {
-            settingsVM.setRevertDesktop(true)
-            settingsVM.setDesktopLayout(true)
-        }
-        else if (!isAutoDesktop && isAutoRevert) {
-            settingsVM.setRevertDesktop(false)
-            settingsVM.setDesktopLayout(false)
-        }
-    }
-
-    var isLoading by rememberSaveable { mutableStateOf(true) }
-    val isError = state.errorsForCurrentRequest.lastOrNull()?.isFromMainFrame == true
-
-    val viewModel: MainViewModel = viewModel {
-        MainViewModel(
-            resources = resources,
-            settings = settingsVM
-        )
-    }
-
-    val themeColor by viewModel.themeColor
-    // Manual handling to fix visual & padding bug on settings dialog.
-    var isImmersiveMode by rememberSaveable { mutableStateOf(settingsVM.immersiveMode.value) }
-
-    fun setWindow(immersive: Boolean) {
-        val window = activity?.window ?: return
-        val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
-
-        if (immersive) {
-            windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-            windowInsetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        } else {
-            val isLight = ColorUtils.calculateLuminance(themeColor.toArgb()) > 0.5
-            windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-            windowInsetsController.isAppearanceLightStatusBars = isLight
-            windowInsetsController.isAppearanceLightNavigationBars = isLight
-        }
-        isImmersiveMode = immersive
-    }
-
-    LaunchedEffect(isImmersiveMode, themeColor.value) {
-        setWindow(isImmersiveMode)
-    }
-
-    val userScripts by viewModel.scripts
+    val navigator = rememberWebViewNavigator()
     val loadingState = state.loadingState
 
-    LaunchedEffect(loadingState, userScripts) {
+    LaunchedEffect(loadingState) {
         if (loadingState is LoadingState.Finished) {
-            userScripts?.let { scripts ->
-                navigator.evaluateJavaScript(scripts) {
-                    isLoading = false
-                }
-            }
+            navigator.evaluateJavaScript(ANTI_RELOAD_SCRIPT) {}
+            navigator.evaluateJavaScript(PERFORMANCE_OPTIMIZATION_SCRIPT) {}
         }
     }
 
-    if (isError && isLoading) {
-        NetworkErrorDialog { activity?.finish() }
-        return
-    }
-
-    var settingsToggle by rememberSaveable { mutableStateOf(false) }
-    if (settingsToggle) {
-        setWindow(false)
-        SettingsDialog(
-            themeColor = themeColor,
-            onDismiss = {
-                setWindow(settingsVM.immersiveMode.value)
-                settingsToggle = false
-            },
-            onReload = {
-                isLoading = true
-                viewModel.setThemeColor(Color.Transparent)
-                setWindow(settingsVM.immersiveMode.value)
-                viewModel.refresh(
-                    resources = resources,
-                    settings = settingsVM
-                )
-                navigator.reload()
+    DisposableEffect(lifecycleOwner, state) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    runCatching {
+                        state.nativeWebView.onPause()
+                        state.nativeWebView.pauseTimers()
+                    }
+                }
+                Lifecycle.Event.ON_RESUME -> {
+                    runCatching {
+                        state.nativeWebView.onResume()
+                        state.nativeWebView.resumeTimers()
+                    }
+                }
+                else -> Unit
             }
-        )
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-
-    if (isLoading) {
-        SplashLoading(
-            if (loadingState is LoadingState.Loading) {
-                loadingState.progress
-            } else {
-                0.8F
-            }
-        )
-    }
-
-
-    LaunchedEffect(isDesktop) {
-        val userAgent = if (isDesktop) DESKTOP_USER_AGENT else ""
-        state.nativeWebView.settings.userAgentString = userAgent
-    }
-
-    // needed to consume extra padding when keyboard is open
-    val barsInsets = WindowInsets.systemBars.asPaddingValues()
-    val imeHeight = rememberImeHeight()
 
     WebView(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(themeColor)
-            .then(
-                if (isImmersiveMode) {
-                    Modifier.padding(bottom = imeHeight)
-                } else {
-                    Modifier.padding(
-                        top = barsInsets.calculateTopPadding(),
-                        bottom = maxOf(barsInsets.calculateBottomPadding(), imeHeight)
-                    )
-                }
-            ),
+        modifier = Modifier.fillMaxSize(),
         state = state,
-        navigator = navigator,
-        platformWebViewParams = fileChooserWebViewParams(),
-        captureBackPresses = false,
-        onCreated = { webView ->
-
-            val cookieManager = CookieManager.getInstance()
-            cookieManager.setAcceptCookie(true)
-            cookieManager.setAcceptThirdPartyCookies(webView, true)
-            cookieManager.flush()
-
-            state.webSettings.apply {
-                isJavaScriptEnabled = true
-
-                androidWebSettings.apply {
-                    //isDebugInspectorInfoEnabled = true
-                    domStorageEnabled = true
-                    hideDefaultVideoPoster = true
-                    mediaPlaybackRequiresUserGesture = false
-                }
-            }
-
-            webView.apply {
-                addJavascriptInterface(
-                    NobookSettings { settingsToggle = true },
-                    "SettingsBridge"
-                )
-                addJavascriptInterface(
-                    ThemeChange { viewModel.setThemeColor(Color(it)) },
-                    "ThemeBridge"
-                )
-                addJavascriptInterface(
-                    DownloadBridge(context),
-                    "DownloadBridge"
-                )
-                addJavascriptInterface(
-                    ClipboardBridge(context),
-                    "ClipboardBridge"
-                )
-
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-                overScrollMode = View.OVER_SCROLL_NEVER
-                isVerticalScrollBarEnabled = false
-                isHorizontalScrollBarEnabled = false
-
-                settings.setSupportZoom(true)
-                settings.builtInZoomControls = true
-                settings.displayZoomControls = false
-            }
-        }
+        navigator = navigator
     )
 }

@@ -1,0 +1,159 @@
+name: CI Build Artifacts (Debug + Signed Release)
+
+# Complements create-release.yml. Builds debug APK on every push/PR, and on
+# tag push v*.*.* also builds + signs a release APK using apksigner with a
+# keystore stored in GitHub Secrets (never hardcoded in this file).
+#
+# Required repo secrets (Settings -> Secrets and variables -> Actions):
+#   KEYSTORE_BASE64    - base64 of your .keystore file
+#   KEYSTORE_PASSWORD  - keystore password
+#   KEY_ALIAS          - key alias (e.g. key0)
+#   KEY_PASSWORD       - key password (often same as keystore password)
+
+on:
+  push:
+    branches: [ "main", "feature/**" ]
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  debug-build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - run: chmod +x gradlew
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: List build outputs (debug helper)
+        run: find app/build/outputs -type f -name "*.apk" -print
+
+      - name: Locate debug APK
+        id: apk
+        run: |
+          APK=$(find app/build/outputs -type f -iname "*debug*.apk" | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "Khong tim thay APK debug nao trong app/build/outputs"
+            exit 1
+          fi
+          echo "Found: $APK"
+          echo "apk_path=$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nobook-debug-apk
+          path: ${{ steps.apk.outputs.apk_path }}
+          retention-days: 14
+
+  release-build-and-sign:
+    name: Build + Sign Release APK
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - run: chmod +x gradlew
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Build release APK (unsigned)
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: List release build outputs (debug helper)
+        run: find app/build/outputs -type f -name "*.apk" -print
+
+      - name: Locate unsigned release APK
+        id: unsigned
+        run: |
+          APK=$(find app/build/outputs -type f -iname "*release*.apk" | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "Khong tim thay APK release nao trong app/build/outputs"
+            exit 1
+          fi
+          echo "Found: $APK"
+          echo "unsigned_apk=$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Decode keystore from secret
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 -d > "${{ runner.temp }}/release.keystore"
+          ls -la "${{ runner.temp }}/release.keystore"
+
+      - name: Verify keystore integrity
+        run: |
+          keytool -list \
+            -keystore "${{ runner.temp }}/release.keystore" \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}" || {
+            echo "LOI: khong doc duoc keystore. Kiem tra lai secret KEYSTORE_BASE64"
+            echo "(phai la base64 THUAN, khong co -----BEGIN/END-----, khong xuong dong)"
+            echo "va secret KEYSTORE_PASSWORD / KEY_ALIAS co dung khong."
+            exit 1
+          }
+
+      - name: Locate apksigner in Android SDK
+        id: apksigner
+        run: |
+          APKSIGNER=$(find "$ANDROID_HOME" -name "apksigner" -type f 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "Khong tim thay apksigner trong ANDROID_HOME=$ANDROID_HOME"
+            exit 1
+          fi
+          echo "Found: $APKSIGNER"
+          echo "apksigner_path=$APKSIGNER" >> "$GITHUB_OUTPUT"
+
+      - name: Sign release APK with apksigner
+        run: |
+          "${{ steps.apksigner.outputs.apksigner_path }}" sign \
+            --ks "${{ runner.temp }}/release.keystore" \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
+            --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
+            --out app-release-signed.apk \
+            "${{ steps.unsigned.outputs.unsigned_apk }}"
+
+      - name: Upload signed release APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nobook-release-signed-apk
+          path: app-release-signed.apk
+          retention-days: 90
+
+      - name: Create GitHub Release with signed APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app-release-signed.apk
+          generate_release_notes: true
+          name: "Nobook ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
